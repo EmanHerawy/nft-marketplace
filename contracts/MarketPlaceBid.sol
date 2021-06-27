@@ -32,6 +32,23 @@ contract MarketPlaceBid  {
 
  /******************************************* read state functions go here ********************************************************* */
 
+function winnerBid(bytes32 listingId) view external returns (bytes32 bidId, address bidder, address nftAddress,uint256 tokenId,uint256 bidPrice,bool isPurchased ) {
+  bidId=bidToListing[listingId].bidId;
+  bidder=bidToListing[listingId].bidder;
+  nftAddress=listingBids[listingId][bidder].nftAddress;
+  tokenId=listingBids[listingId][bidder].tokenId;
+  bidPrice=listingBids[listingId][bidder].bidPrice;
+  isPurchased=listingBids[listingId][bidder].isPurchased;
+}
+function getAuctionBidDetails(bytes32 listingId,address bidder ) view external returns (bytes32 bidId,  address nftAddress,uint256 tokenId,uint256 bidPrice,bool isPurchased ) {
+    bidId=listingBids[listingId][bidder].bidId;
+   nftAddress=listingBids[listingId][bidder].nftAddress;
+  tokenId=listingBids[listingId][bidder].tokenId;
+  bidPrice=listingBids[listingId][bidder].bidPrice;
+  isPurchased=listingBids[listingId][bidder].isPurchased;
+}
+ /******************************************* change state functions go here ********************************************************* */
+
 // bid 
 function _bid(bytes32 bidId , bytes32 listingId, address tokenAddress,address bidder, uint256 tokenId, uint256 bidPrice) internal  returns(    bool){
             // where bid winner is the last bidder updated
