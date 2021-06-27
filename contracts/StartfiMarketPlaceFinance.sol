@@ -51,6 +51,10 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         fineAmount= listingPrice.mul(delistFeesPercentage).div(100 + delistFeesPercentage);    
         remaining =  _getListingQualAmount( listingPrice).sub(fineAmount);
     }
+      function _calcBidDisputeFees(uint256 qualifyAmount) view internal returns (uint256 fineAmount , uint256 remaining) {   
+        fineAmount= qualifyAmount.mul(bidPenaltyPercentage).div(100 + bidPenaltyPercentage);    
+        remaining = qualifyAmount.sub(fineAmount);
+    }
    function _getListingFinancialInfo(address contractAddress,uint256 tokenId, uint256 bidPrice)  view internal returns   (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) {
              fees = _calcFees(bidPrice);
       netPrice = bidPrice.sub(fees);
