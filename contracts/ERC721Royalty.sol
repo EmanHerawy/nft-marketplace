@@ -22,7 +22,7 @@ contract ERC721Royalty is IERC721Royalty {
        /**
     * 
     * @dev  set roylaity info
-    * @param _tokenURI: serized json object that has the following data ( category, name , desc , tages, ipfs hash)
+    * @param _tokenId: serized json object that has the following data ( category, name , desc , tages, ipfs hash)
     * @param issuer: NFt original issuer
     * @param share: eg. 25
     * @param separator: eg. 10 
