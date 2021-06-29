@@ -8,10 +8,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./interface/IERC721Royalty.sol";
 
 /**
- * @author Eman Herawy StartFi Team
- *@title base cmarket place contract
- * Note: This marketplace contract is collection based. It serves one ERC721 contract only
- * Payment tokens usually is the chain native coin's wrapped token, e.g. WETH, WBNB
+ * @author Eman Herawy, StartFi Team
+ *@title  MarketPlace Base
+ * desc contract to handle the main functions for any marketplace
  */
 contract MarketPlaceBase is  ERC721Holder {
     /******************************************* decalrations go here ********************************************************* */
@@ -29,6 +28,12 @@ contract MarketPlaceBase is  ERC721Holder {
     }
 
  /******************************************* read state functions go here ********************************************************* */
+     /**
+    * 
+    * @dev  interal function to check if any gevin contract has supportsInterface See {IERC165-supportsInterface}.
+    * @param contractAddress NFT contract address
+    * @return true if this NFT contract support royalty, false if not
+     */
  function _supportRoyalty(address contractAddress) view internal  returns (bool) {
        try IERC721(contractAddress).supportsInterface(RORALTY_INTERFACE) returns (bool isRoyaltySupported) {
             return isRoyaltySupported;
@@ -36,24 +41,41 @@ contract MarketPlaceBase is  ERC721Holder {
             return false;
         }
  }
+ /**
+    *@notice  only if this contract has royaltyInfo function 
+    *@dev  call the royaltyInfo function in nft contract
+    *@param contractAddress NFT contract address
+    *@param _tokenId token id
+    *@param _value  token price
+    *@return issuer original issuer address
+    *@return _royaltyAmount  the issuer total amount of tokens that he should recieve based on his share
+     */
  function _getRoyaltyInfo(address contractAddress, uint256 _tokenId, uint256 _value) view internal  returns (address issuer, uint256 _royaltyAmount) {
        (issuer, _royaltyAmount) =IERC721Royalty(contractAddress).royaltyInfo( _tokenId,   _value) ;
  }
+
     /**
-     * @return market place name
-     */
+       * @return market place name
+      */
     function marketPlaceName() external view returns (string memory) {
         return _marketPlaceName;
     }
+    
     /**
-     * @dev check if the account is the owner of this erc721 token
+    *@param contractAddress NFT contract address
+    *@param tokenId token id
+    * @return the owner of the gevin token id and address
      */
     function tokenOwner(address contractAddress, uint256 tokenId) internal view returns (address) {
        return IERC721(contractAddress).ownerOf(tokenId) ;
     }
 
     /**
+
      * @dev check if this contract has approved to transfer this erc721 token
+     *@param contractAddress NFT contract address
+     *@param tokenId token id
+     * @return true if this contract is apporved , false if not
      */
     function _isTokenApproved(address contractAddress, uint256 tokenId) internal view returns (bool) {
         try IERC721(contractAddress).getApproved(tokenId) returns (address tokenOperator) {
@@ -65,7 +87,11 @@ contract MarketPlaceBase is  ERC721Holder {
     }
 
     /**
-     * @dev check if this contract has approved to all of this owner's erc721 tokens
+     *@dev See {IERC721-isApprovedForAll}.
+     *@dev check if this contract has approved to all of this owner's erc721 tokens
+     *@param contractAddress NFT contract address
+     *@param owner token owner
+     *@return true if this contract is apporved , false if not
      */
     function _isAllTokenApproved(address contractAddress,address owner) internal view returns (bool) {
         return IERC721(contractAddress).isApprovedForAll(owner, address(this));
@@ -73,12 +99,25 @@ contract MarketPlaceBase is  ERC721Holder {
 
       /******************************************* state functions go here ********************************************************* */
 
-      /// @param _name  the new name to be stored 
+    
+    /**
+        * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.
+        *
+        * See {setApprovalForAll}
+     */
      function _changeMarketPlaceName(string memory _name)internal {
       _marketPlaceName=_name;  
      }
   
-    
+      /**
+        * @dev  Safely transfers `tokenId` token from `from` to `to`. by calling the base erc721 contract
+        *@param contractAddress NFT contract address
+        *@param tokenId token id
+        *@param from sender 
+        *@param to recipient
+        * @return true if it's done
+        * See {safeTransferFrom}
+     */
     function _safeNFTTransfer(address contractAddress, uint256 tokenId, address from, address to) internal returns (bool) {
        IERC721(contractAddress). safeTransferFrom( from,  to,  tokenId);
        return true;
