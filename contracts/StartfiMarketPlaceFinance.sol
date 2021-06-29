@@ -9,7 +9,7 @@ import "./MarketPlaceBase.sol";
 
 /**
  * @author Eman Herawy, StartFi Team
- *desc   contract to handel all financial work for the marketplace
+ *desc   contract to handle all financial work for the marketplace
  * @title Startfi Marketplace Finance
  */
 contract StartfiMarketPlaceFinance is MarketPlaceBase {
@@ -48,17 +48,39 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
     function _calcSum(uint256 a, uint256 b) pure internal returns (uint256 result) {
         result= a.add(b);        
     }
-    function _calcFees(uint256 bidPrice) view internal returns (uint256 fees) {
+    /**
+     @dev calculat the platform fees
+    *@param price  : item  price
+    *@return fees the value that the platform will get
+     */
+    function _calcFees(uint256 price) view internal returns (uint256 fees) {
 
-        fees= bidPrice.mul(_feeFraction).div(_feeBase );    
+        fees= price.mul(_feeFraction).div(_feeBase );    
     }
+    /**
+     @dev calculat the platform fine amount when seller delist before time
+    *@param listingPrice  : item listing price
+    *@return amount the value that the platform will get
+     */
     function _getListingQualAmount(uint256 listingPrice) view internal returns (uint256 amount) {
         amount= listingPrice.mul(listqualifyPercentage).div( listqualifyPercentageBase);    
     }
+/**
+     @dev calculat the platform fine amount when seller delist before time
+    *@param listingPrice  : item listing price
+    *@return fineAmount the value that the platform will get
+    *@return remaining the value remaing after subtracting the fine
+     */
     function _getDeListingQualAmount(uint256 listingPrice) view internal returns (uint256 fineAmount , uint256 remaining) {
         fineAmount= listingPrice.mul(delistFeesPercentage).div( delistFeesPercentageBase);    
         remaining =  _getListingQualAmount( listingPrice).sub(fineAmount);
     }
+      /**
+      @dev calculat the platform share when seller call disput
+    *@param qualifyAmount  : seller defind value to be staked in order to participate in a gevin auction
+    * @return fineAmount the value that the platform will get
+    * @return remaining the value that the auction woner will get
+     */
       function _calcBidDisputeFees(uint256 qualifyAmount) view internal returns (uint256 fineAmount , uint256 remaining) {   
         fineAmount= qualifyAmount.mul(bidPenaltyPercentage).div( bidPenaltyPercentageBase);    
         remaining = qualifyAmount.sub(fineAmount);
@@ -75,37 +97,83 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
           }
       
    }
+    /**
+    *@param user  : participant address
+    * @return the value of user reserves
+     */
     function getUserReserved(address user) external  view returns (uint256)  {
         return userReserves[user];
     }
-    /// @return the value of the state variable `_feeFraction`
-        function getServiceFee() external view returns (uint256) {
+     /**
+    *
+    * @return the value of the state variable `_feeFraction`
+     */
+         function getServiceFee() external view returns (uint256) {
         return _feeFraction;
     }
+     /**
+     * @dev :wrap function to get the total allowed number of tokens that this contract can transfer from the given account 
+
+    * @param owner: owner address
+    * @return allowed number of tokens that this contract can transfer from the owner account
+     */
     function _getAllowance(address owner) view internal returns (uint256 ) {
         return IERC20(_paymentToken).allowance( owner, address(this));
     }
-    function _getStakeAllowance(address user ,uint256 prevAmount) view internal returns (uint256 ) {
+      /**
+        * @dev this function calls StartFiStakes contract to get the total staked tokens for 'user' an substract the current reserves to get the total number of free tokens
+        * @param staker : participant address
+        * @return allowed number of tokens that this contract can transfer from the owner account
+      */
+    function _getStakeAllowance(address staker /*,uint256 prevAmount*/) view internal returns (uint256 ) {
         // user can bid multi time, we want to make sure we don't calc the old bid as sperated bid 
-        uint256 userActualReserved= userReserves[user].sub(prevAmount);
-        return IStartFiStakes(stakeContract).getReserves( user).sub(userActualReserved);
+        uint256 userActualReserved= userReserves[staker];//.sub(prevAmount);
+        return IStartFiStakes(stakeContract).getReserves( staker).sub(userActualReserved);
     }
-    function _deduct(address finePayer, address to, uint256 amount)  internal returns (bool ) {
-          return IStartFiStakes(stakeContract).deduct(finePayer, to, amount);
-    }
+  
 
       /******************************************* state functions go here ********************************************************* */
-
+     /**
+        * @notice  all conditions and checks are made prior to this function
+        * @dev this function calls StartFiStakes contract to subtract the user stakes and add that value to the 'to'
+        * @param finePayer : fine payer address
+        * @param to : participant address
+        * @param amount : value to be deducted from his stakes as a fine
+        * @return true if it's done
+      */
+  function _deduct(address finePayer, address to, uint256 amount)  internal returns (bool ) {
+          return IStartFiStakes(stakeContract).deduct(finePayer, to, amount);
+    }
     function _safeTokenTransfer(address to, uint256 amount) internal returns (bool) {
         return IERC20(_paymentToken). transfer( to,  amount);
     }
+        /**
+        * @dev  Safely transfers `amount` of token from `from` to `to`.
+        * @param from address representing the previous owner of the token
+        * @param to target address that will receive the tokens
+        * @param amount number of tokens to be transferred
+        * See {transferFrom}
+     */
     function _safeTokenTransferFrom(address from,address to, uint256 amount) internal returns (bool) {
         return IERC20(_paymentToken). transferFrom(from, to,  amount);
     }
+     /**
+        * @notice  all conditions and checks are made prior to this function
+        * @dev called to set user reserves
+        * @param user : participant address
+        * @param newReservedValue : value to be sored as user reserve
+      */
     function _setUserReserves(address user, uint256 newReservedValue) internal returns (bool) {
         userReserves[user]=newReservedValue;
         return true;
     }
+          /**
+        * @notice  all conditions and checks are made prior to this function
+        * @dev called to increase or decrease user reserves
+        * @param user : participant address
+        * @param newReserves : value to be added or substracted
+        * @param isAddition : true if we are adding the new value 
+     */
     function _updateUserReserves(address user, uint256 newReserves, bool isAddition) internal returns (uint256 _userReserves) {
         _userReserves=  isAddition? userReserves[user].add(newReserves): userReserves[user].sub(newReserves);
         userReserves[user]=_userReserves;
@@ -113,11 +181,11 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
     }
 
     /**
-    *
-    * @dev  the formula is (fees * 1000)/base 
-    * @param newFees  the new fees value to be stored 
-    * @param newBase  the new basefees value to be stored 
-    * @return percentage the value of the state variable `_feeFraction`
+    *   * @notice  all conditions and checks are made prior to this function
+        * @dev  the formula is (fees * 1000)/base 
+        * @param newFees  the new fees value to be stored 
+        * @param newBase  the new basefees value to be stored 
+        * @return percentage the value of the state variable `_feeFraction`
      */
      function changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
         require(newFees <= newBase, "Fee fraction exceeded base.");
@@ -128,33 +196,59 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         _feeBase = newBase;
      }
      
-    /// @param _token  the new name to be stored 
-     function _changeUtiltiyToken(address _token) internal {
+      /**
+        * @notice  all conditions and checks are made prior to this function
+        * @dev for later on upgrade , if we have
+        * @param _token : startfi new utility contract
+     */
+function _changeUtiltiyToken(address _token) internal {
       _paymentToken=_token;  
      }
-     function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, "Fee fraction exceeded base.");
-          percentage = (newFees. mul( 1000)) .div( newBase);
-        require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+/**
+    * @notice  all conditions and checks are made prior to this function
+    * @dev  the formula is (fees * 1000)/base 
+    * @param newFees  the new fees value to be stored 
+    * @param newBase  the new basefees value to be stored 
+    * @return percentage the value of the state variable `_feeFraction`
+*/
+function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
+            require(newFees <= newBase, "Fee fraction exceeded base.");
+            percentage = (newFees. mul( 1000)) .div( newBase);
+            require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
 
-        bidPenaltyPercentage =newFees;
-        bidPenaltyPercentageBase =newBase;
-}
+            bidPenaltyPercentage =newFees;
+            bidPenaltyPercentageBase =newBase;
+        }
+/**
+    * @notice  all conditions and checks are made prior to this function
+    * @dev  the formula is (fees * 1000)/base 
+    * @param newFees  the new fees value to be stored 
+    * @param newBase  the new basefees value to be stored 
+    * @return percentage the value of the state variable `_feeFraction`
+    */
+
 function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, "Fee fraction exceeded base.");
-          percentage = (newFees. mul( 1000)) .div( newBase);
-        require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+            require(newFees <= newBase, "Fee fraction exceeded base.");
+            percentage = (newFees. mul( 1000)) .div( newBase);
+            require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
 
-        delistFeesPercentage =newFees;
-        delistFeesPercentageBase =newBase;
- }
+            delistFeesPercentage =newFees;
+            delistFeesPercentageBase =newBase;
+        }
+  /**
+        * @notice  all conditions and checks are made prior to this function
+        * @dev  the formula is (fees * 1000)/base 
+        * @param newFees  the new fees value to be stored 
+        * @param newBase  the new basefees value to be stored 
+        * @return percentage the value of the state variable `_feeFraction`
+     */
 function _changeListqualifyAmount(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, "Fee fraction exceeded base.");
-          percentage = (newFees. mul( 1000)) .div( newBase);
-        require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+            require(newFees <= newBase, "Fee fraction exceeded base.");
+            percentage = (newFees. mul( 1000)) .div( newBase);
+            require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
 
-        listqualifyPercentage =newFees;
-        listqualifyPercentageBase =newBase;
-}
+            listqualifyPercentage =newFees;
+            listqualifyPercentageBase =newBase;
+        }
 
 } 

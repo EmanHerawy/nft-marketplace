@@ -8,9 +8,10 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title NFTKEY MarketPlace contract V1
- * Note: This marketplace contract is collection based. It serves one ERC721 contract only
- * Payment tokens usually is the chain native coin's wrapped token, e.g. WETH, WBNB
+ * @author Eman Herawy, StartFi Team
+ *@title StartFi MarketPlace
+ *desc  marketplace with all functions for item selling by either ceating auction or selling with fixed prices, the contract auto transfer orginal NFT issuer's shares   
+ * 
  */
 contract StartFiMarketPlace is  Ownable ,Pausable, MarketPlaceListing, MarketPlaceBid,StartfiMarketPlaceFinance {
   
@@ -18,7 +19,7 @@ contract StartFiMarketPlace is  Ownable ,Pausable, MarketPlaceListing, MarketPla
  
 
 // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved , 
-
+///
 event ListOnMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 listingPrice,uint256 releaseTime,uint256 qualifyAmount,   uint256 timestamp );
 event DeListOffMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 fineFees, uint256 remaining,uint256 releaseTime,  uint256 timestamp );
 
@@ -70,16 +71,23 @@ modifier isNotZero(uint256 val) {
   /******************************************* state functions go here ********************************************************* */
 
 // list
+     /**
+    * @dev  called by dapps to list new item 
+    * @param nftAddress nft contract address
+    * @param tokenId token id 
+    * @param listingPrice min price 
+     * @return listId listing id
+     */
     function listOnMarketplace( address nftAddress,
           uint256 tokenId,
-            uint256 listingPrice, uint256 qualifyAmount) external isNotZero(listingPrice) returns (bytes32 listId) {
+            uint256 listingPrice ) external isNotZero(listingPrice) returns (bytes32 listId) {
             uint256 releaseTime = _calcSum(block.timestamp,delistAfter);
             listId = keccak256(abi.encodePacked(nftAddress,tokenId,_msgSender(),releaseTime));
             // calc qualified ammount
             uint256 listQualifyAmount =_getListingQualAmount(listingPrice);
 
           // check that sender is qualified 
-          require(_getStakeAllowance(_msgSender(), 0)>= listQualifyAmount,"Not enough reserves");
+          require(_getStakeAllowance(_msgSender()/*, 0*/)>= listQualifyAmount,"Not enough reserves");
           require( _isTokenApproved(nftAddress,  tokenId) ,"Marketplace is not allowed to transfer your token");
 
             // transfer token to contract 
@@ -91,11 +99,22 @@ modifier isNotZero(uint256 val) {
             listings.push(listId);
             userListing[_msgSender()]=listings;
           // list 
-          require(_listOnMarketPlace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime,qualifyAmount) ,"Couldn't list the item");
-          emit ListOnMarketplace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime,qualifyAmount, block.timestamp);
+          require(_listOnMarketPlace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime) ,"Couldn't list the item");
+          emit ListOnMarketplace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime,listQualifyAmount, block.timestamp);
         
     }
 // create auction
+  /**
+    * @dev  called by dapps to create  new auction 
+    * @param nftAddress nft contract address
+    * @param tokenId token id 
+    * @param listingPrice min price 
+    * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid 
+    * @param sellForEnabled true if auction enable direct selling
+    * @param sellFor  price  to sell with if sellForEnabled=true
+    * @param duration  when auction ends
+    * @return listId listing id
+     */
     function createAuction( address nftAddress,
           uint256 tokenId,
             uint256 listingPrice,
@@ -123,6 +142,15 @@ modifier isNotZero(uint256 val) {
            emit CreateAuction( listId,nftAddress,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount,block.timestamp); 
         
     }
+      /**
+    * @dev called by dapps to bid on an auction
+    * 
+    * @param listingId listing id 
+    * @param tokenAddress nft contract address
+    * @param tokenId token id 
+    * @param bidPrice price 
+    * @return bidId bid id
+     */
     function bid(bytes32 listingId, address tokenAddress, uint256 tokenId, uint256 bidPrice) 
         external isOpenAuction(listingId) returns (bytes32 bidId){
          bidId = keccak256(abi.encodePacked(listingId,tokenAddress,_msgSender(),tokenId));
@@ -141,7 +169,7 @@ modifier isNotZero(uint256 val) {
        uint256 prevAmount= listingBids[listingId][_msgSender()].bidPrice;
        if(prevAmount==0){
                   // check that he has reserved
-         require(_getStakeAllowance(_msgSender(), 0)>= qualifyAmount,"Not enough reserves");
+         require(_getStakeAllowance(_msgSender()/*, 0*/)>= qualifyAmount,"Not enough reserves");
           bytes32 [] storage listings = userListing[_msgSender()];
             listings.push(listingId);
             userListing[_msgSender()]=listings;
@@ -157,6 +185,13 @@ modifier isNotZero(uint256 val) {
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
+    /**
+    * @dev called by bidder through dapps when bidder win an auction and wants to pay to get the NFT 
+    * 
+    * @param listingId listing id 
+    * @return contractAddress nft contract address
+    * @return tokenId token id 
+     */
     function fullfillBid(bytes32 listingId) 
         external canFullfillBid(listingId) returns (address contractAddress,uint256 tokenId){
          address winnerBidder= bidToListing[listingId].bidder;
@@ -192,17 +227,24 @@ modifier isNotZero(uint256 val) {
         emit FullfillBid(  bidToListing[listingId].bidId ,   listingId,   contractAddress, winnerBidder,  tokenId,  bidPrice,  issuer,  royaltyAmount,   fees,   netPrice ,block.timestamp );
     }
 // delist
+    /**
+    * @dev called by seller through dapps when s/he wants to remove this token from the marketplace   
+    * @notice auction can't be canceled , if seller delist time on sale on maretplace before time to delist, he will pay a fine
+    * @param listingId listing id 
+    * @return contractAddress nft contract address
+    * @return tokenId token id 
+     */
     function deList(bytes32 listingId) 
         external  returns ( address contractAddress,uint256 tokenId){
          ListingStatus status= _tokenListings[listingId].status;
          address owner= _tokenListings[listingId].buyer;
          address seller= _tokenListings[listingId].seller;
-           contractAddress= _tokenListings[listingId]. nftAddress;
+         contractAddress= _tokenListings[listingId]. nftAddress;
          uint256 releaseTime= _tokenListings[listingId]. releaseTime;
          uint256 listingPrice= _tokenListings[listingId]. listingPrice;
-           tokenId= _tokenListings[listingId]. tokenId;
-        require(owner==_msgSender(),"Caller is not the owner");
-        require(seller==address(0),"Already bought token");
+         tokenId= _tokenListings[listingId]. tokenId;
+         require(owner==_msgSender(),"Caller is not the owner");
+         require(seller==address(0),"Already bought token");
       uint256 timeToDelistAuction= _calcSum( releaseTime,3 days);
 
         // require(status==ListingStatus.OnMarket || status==ListingStatus.onAuction,"Already bought or canceled token");
@@ -235,6 +277,14 @@ modifier isNotZero(uint256 val) {
 
 
 // buynow
+ /**
+    * @dev called by buyer through dapps when s/he wants to buy a gevin NFT  token from the marketplace   
+    * @notice  if auction, the seller must enabe forSale. prices should be more than or equal the listing price
+    * @param listingId listing id 
+    * @param price gevin price
+    * @return contractAddress nft contract address
+    * @return tokenId token id 
+     */
     function buyNow(bytes32 listingId, uint256 price) 
         external  returns (address contractAddress,uint256 tokenId){
           bool sellForEnabled= _tokenListings[listingId].sellForEnabled;
@@ -268,11 +318,14 @@ modifier isNotZero(uint256 val) {
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
-// dispute aucation
-// after auction with winner bid 
-// bidder didn't call fullfile within 3 days of auction closing 
-// auction owner can call dispute to delist and punish the spam winner bidder
-// fine is share between the plateform and the auction owner
+
+ /**
+    * @dev called by seller through dapps when his/her auction is  not fullfilled after 3 days
+    *  @notice  after auction with winner bid . bidder didn't call fullfile within 3 days of auction closing  auction owner can call dispute to delist and punish the spam winner bidder fine is share between the plateform and the auction owner
+    * @param listingId listing id 
+    * @return contractAddress nft contract address
+    * @return tokenId token id 
+     */
     function disputeAuction(bytes32 listingId) 
         external  returns (address contractAddress,uint256 tokenId){
          address winnerBidder= bidToListing[listingId].bidder;
@@ -300,7 +353,14 @@ modifier isNotZero(uint256 val) {
 
     }
 
-    // not valid, we should calc the listing as well
+     /**
+    * @dev called by user through dapps when his/her wants to free his reserved tokens which are no longer in active auction or listing
+    *  @notice this function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
+  
+    * @return curentReserves user reserves after freeing the unused reservd
+
+     */
+
     function freeReserves() external returns (uint256 curentReserves) {
       // TODo: Check allternative for gas consumptions
       // iterate over the listng key map 
