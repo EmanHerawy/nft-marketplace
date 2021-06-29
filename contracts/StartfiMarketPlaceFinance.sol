@@ -7,16 +7,23 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./interface/IStartFiStakes.sol";
 import "./MarketPlaceBase.sol";
 
-
+/**
+ * @author Eman Herawy, StartFi Team
+ *desc   contract to handel all financial work for the marketplace
+ * @title Startfi Marketplace Finance
+ */
 contract StartfiMarketPlaceFinance is MarketPlaceBase {
  /******************************************* decalrations go here ********************************************************* */
     using SafeMath for uint256;
     address internal _paymentToken;
-    uint8 internal _feeFraction = 1;
-    uint8 internal _feeBase = 100;
+    uint256 internal _feeFraction = 1;
+    uint256 internal _feeBase = 100;
     uint256 bidPenaltyPercentage =1;
     uint256 public delistFeesPercentage=1;
     uint256 public listqualifyPercentage=1;
+    uint256 public bidPenaltyPercentageBase =100;
+    uint256 public delistFeesPercentageBase=100;
+    uint256 public listqualifyPercentageBase=100;
    mapping (address=>uint256) userReserves;
    mapping (address=>bytes32[]) userListing;
    address public stakeContract;
@@ -42,17 +49,18 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         result= a.add(b);        
     }
     function _calcFees(uint256 bidPrice) view internal returns (uint256 fees) {
-        fees= bidPrice.mul(_feeFraction).div(_feeBase + _feeFraction);    
+
+        fees= bidPrice.mul(_feeFraction).div(_feeBase );    
     }
     function _getListingQualAmount(uint256 listingPrice) view internal returns (uint256 amount) {
-        amount= listingPrice.mul(listqualifyPercentage).div(100 + listqualifyPercentage);    
+        amount= listingPrice.mul(listqualifyPercentage).div( listqualifyPercentageBase);    
     }
     function _getDeListingQualAmount(uint256 listingPrice) view internal returns (uint256 fineAmount , uint256 remaining) {
-        fineAmount= listingPrice.mul(delistFeesPercentage).div(100 + delistFeesPercentage);    
+        fineAmount= listingPrice.mul(delistFeesPercentage).div( delistFeesPercentageBase);    
         remaining =  _getListingQualAmount( listingPrice).sub(fineAmount);
     }
       function _calcBidDisputeFees(uint256 qualifyAmount) view internal returns (uint256 fineAmount , uint256 remaining) {   
-        fineAmount= qualifyAmount.mul(bidPenaltyPercentage).div(100 + bidPenaltyPercentage);    
+        fineAmount= qualifyAmount.mul(bidPenaltyPercentage).div( bidPenaltyPercentageBase);    
         remaining = qualifyAmount.sub(fineAmount);
     }
    function _getListingFinancialInfo(address contractAddress,uint256 tokenId, uint256 bidPrice)  view internal returns   (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) {
@@ -71,7 +79,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         return userReserves[user];
     }
     /// @return the value of the state variable `_feeFraction`
-        function getServiceFee() external view returns (uint8) {
+        function getServiceFee() external view returns (uint256) {
         return _feeFraction;
     }
     function _getAllowance(address owner) view internal returns (uint256 ) {
@@ -103,26 +111,50 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         userReserves[user]=_userReserves;
         return _userReserves;
     }
-    /// @param newFees  the new fees value to be stored 
-    /// @return the value of the state variable `_feeFraction`
-     function changeFees(uint8 newFees) internal returns (uint8) {
-         // fees is a value between 1-3 %
-         require(newFees>=1 && newFees<=3,"fees invalid range");
-         _feeFraction=newFees;
-         return _feeFraction;
+
+    /**
+    *
+    * @dev  the formula is (fees * 1000)/base 
+    * @param newFees  the new fees value to be stored 
+    * @param newBase  the new basefees value to be stored 
+    * @return percentage the value of the state variable `_feeFraction`
+     */
+     function changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
+        require(newFees <= newBase, "Fee fraction exceeded base.");
+          percentage = (newFees. mul( 1000)) .div( newBase);
+        require(percentage <= 30 && percentage < 10, "Percentage should be from 1-3 %");
+
+        _feeFraction = newFees;
+        _feeBase = newBase;
      }
+     
     /// @param _token  the new name to be stored 
      function _changeUtiltiyToken(address _token) internal {
       _paymentToken=_token;  
      }
-     function _changeBidPenaltyPercentage(uint256 newPercentage) internal {
- bidPenaltyPercentage =newPercentage;
+     function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
+        require(newFees <= newBase, "Fee fraction exceeded base.");
+          percentage = (newFees. mul( 1000)) .div( newBase);
+        require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+
+        bidPenaltyPercentage =newFees;
+        bidPenaltyPercentageBase =newBase;
 }
-function _changeDelistFeesPerentage(uint256 newPercentage) internal {
- delistFeesPercentage =newPercentage;
-}
-function _changeListqualifyAmount(uint256 newPercentage) internal {
- listqualifyPercentage =newPercentage;
+function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
+        require(newFees <= newBase, "Fee fraction exceeded base.");
+          percentage = (newFees. mul( 1000)) .div( newBase);
+        require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+
+        delistFeesPercentage =newFees;
+        delistFeesPercentageBase =newBase;
+ }
+function _changeListqualifyAmount(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
+        require(newFees <= newBase, "Fee fraction exceeded base.");
+          percentage = (newFees. mul( 1000)) .div( newBase);
+        require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+
+        listqualifyPercentage =newFees;
+        listqualifyPercentageBase =newBase;
 }
 
 } 
