@@ -41,7 +41,21 @@ contract MarketPlaceListing  {
    mapping(bytes32=>Listing) internal _tokenListings;
   // track the Listinger total amount of Listings
   // mapping (address=>uint256) private userTotalListings;
-
+  /******************************************* read state functions go here ********************************************************* */
+function getListingDetails(bytes32 listingId ) view external returns ( address nftAddress,        uint256 tokenId,uint256 listingPrice,uint256 endPrice,address seller,address buyer,bool bedEnabeled,bool sellForEnabled,uint256 releaseTime,uint256 qualifyAmount,uint256 sellFor,uint status ) {
+      nftAddress=_tokenListings[listingId].nftAddress ;
+      tokenId=_tokenListings[listingId].tokenId ;
+      listingPrice=_tokenListings[listingId].listingPrice ;
+      endPrice=_tokenListings[listingId]. endPrice;
+      seller=_tokenListings[listingId]. seller;
+      buyer=_tokenListings[listingId].buyer ;
+      bedEnabeled=_tokenListings[listingId].bedEnabeled ;
+      sellForEnabled=_tokenListings[listingId].sellForEnabled ;
+      releaseTime=_tokenListings[listingId]. releaseTime;
+      qualifyAmount=_tokenListings[listingId].qualifyAmount ;
+      sellFor=_tokenListings[listingId]. sellFor;
+      status=uint(_tokenListings[listingId]. status);
+}
 // list 
 function _listOnMarketPlace( 
         bytes32 listId,

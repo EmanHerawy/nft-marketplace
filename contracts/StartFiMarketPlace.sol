@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity >=0.8.0;
-pragma abicoder v2;
 import "./StartfiMarketPlaceFinance.sol";
- import "./MarketPlaceListing.sol";
+import "./MarketPlaceListing.sol";
 import "./MarketPlaceBid.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -17,6 +16,24 @@ contract StartFiMarketPlace is  Ownable ,Pausable, MarketPlaceListing, MarketPla
   
  /******************************************* decalrations go here ********************************************************* */
  
+
+// events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved , 
+
+event ListOnMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 listingPrice,uint256 releaseTime,uint256 qualifyAmount,   uint256 timestamp );
+event DeListOffMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 fineFees, uint256 remaining,uint256 releaseTime,  uint256 timestamp );
+
+event CreateAuction(   bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 listingPrice,bool sellForEnabled,uint256 sellFor,uint256 releaseTime,uint256 qualifyAmount,uint256 timestamp );
+
+event BidOnAuction(bytes32 bidId , bytes32 listingId, address tokenAddress,address bidder, uint256 tokenId, uint256 bidPrice,uint256 timestamp );
+ 
+ event FullfillBid(bytes32 bidId , bytes32 listingId, address tokenAddress,address bidder, uint256 tokenId, uint256 bidPrice,address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice ,uint256 timestamp );
+
+ event DisputeAuction(bytes32 bidId , bytes32 listingId, address tokenAddress,address bidder, uint256 tokenId  ,address buyer,uint256 qualifyAmount, uint256 remaining,uint256 finefees,uint256 timestamp );
+
+ event BuyNow(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 sellingPrice,address seller,bool isAucton,address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice,   uint256 timestamp );
+event UserReservesFree(address user, uint256 lastReserves,uint256 newReserves,uint256 timestamp );
+
+
 
 
  /******************************************* constructor goes here ********************************************************* */
@@ -53,7 +70,7 @@ modifier isNotZero(uint256 val) {
   /******************************************* state functions go here ********************************************************* */
 
 // list
-    function ListOnMarketplace( address nftAddress,
+    function listOnMarketplace( address nftAddress,
           uint256 tokenId,
             uint256 listingPrice, uint256 qualifyAmount) external isNotZero(listingPrice) returns (bytes32 listId) {
             uint256 releaseTime = _calcSum(block.timestamp,delistAfter);
@@ -75,7 +92,7 @@ modifier isNotZero(uint256 val) {
             userListing[_msgSender()]=listings;
           // list 
           require(_listOnMarketPlace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime,qualifyAmount) ,"Couldn't list the item");
-
+          emit ListOnMarketplace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime,qualifyAmount, block.timestamp);
         
     }
 // create auction
@@ -103,7 +120,7 @@ modifier isNotZero(uint256 val) {
             // create auction
 
           require(_creatAuction( listId,nftAddress,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount) ,"Couldn't list the item");
-
+           emit CreateAuction( listId,nftAddress,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount,block.timestamp); 
         
     }
     function bid(bytes32 listingId, address tokenAddress, uint256 tokenId, uint256 bidPrice) 
@@ -135,11 +152,12 @@ modifier isNotZero(uint256 val) {
        
          // bid 
          require(_bid( bidId, listingId,  tokenAddress, _msgSender(),   tokenId,   bidPrice),"Couldn't Bid");
+         emit BidOnAuction( bidId, listingId,  tokenAddress, _msgSender(),   tokenId,   bidPrice,block.timestamp);
      
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
-    function FullfillBid(bytes32 listingId) 
+    function fullfillBid(bytes32 listingId) 
         external canFullfillBid(listingId) returns (address contractAddress,uint256 tokenId){
          address winnerBidder= bidToListing[listingId].bidder;
          address buyer= _tokenListings[listingId].buyer;
@@ -152,7 +170,7 @@ modifier isNotZero(uint256 val) {
          require(_getAllowance(winnerBidder)>= bidPrice,"Marketplace is not allowed to withdraw the required amount of tokens");
         // transfer price 
     
-        (address issuer,uint royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( contractAddress,tokenId, bidPrice) ;
+        (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( contractAddress,tokenId, bidPrice) ;
       
        require(_safeTokenTransferFrom(owner(),buyer, fees),"Couldn't transfer token as fees");
        if(issuer!=address(0)){
@@ -171,6 +189,7 @@ modifier isNotZero(uint256 val) {
         _finalizeListing(listingId,winnerBidder, ListingStatus.Sold);
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
+        emit FullfillBid(  bidToListing[listingId].bidId ,   listingId,   contractAddress, winnerBidder,  tokenId,  bidPrice,  issuer,  royaltyAmount,   fees,   netPrice ,block.timestamp );
     }
 // delist
     function deList(bytes32 listingId) 
@@ -209,6 +228,7 @@ modifier isNotZero(uint256 val) {
         require( _updateUserReserves(_msgSender() ,remaining,false)>=0,"negative reserve is not allowed");
         // finish listing 
          _finalizeListing(listingId,address(0),ListingStatus.Canceled);
+         emit DeListOffMarketplace(listingId,  contractAddress,  owner,  tokenId,  fineAmount ,  remaining,  releaseTime,  block.timestamp );
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
@@ -227,7 +247,7 @@ modifier isNotZero(uint256 val) {
          require(_getAllowance(_msgSender())>= price,"Marketplace is not allowed to withdraw the required amount of tokens");
         // transfer price 
     
-        (address issuer,uint royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( contractAddress,tokenId, price) ;
+        (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( contractAddress,tokenId, price) ;
       
        require(_safeTokenTransferFrom(owner(),buyer, fees),"Couldn't transfer token as fees");
        if(issuer!=address(0)){
@@ -244,6 +264,7 @@ modifier isNotZero(uint256 val) {
 
         // finish listing 
         _finalizeListing(listingId,_msgSender(), ListingStatus.Sold);
+      emit BuyNow  (listingId,contractAddress,  buyer,  tokenId,  price,_msgSender(),sellForEnabled,  issuer,  royaltyAmount,   fees,   netPrice,   block. timestamp );
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
@@ -259,13 +280,15 @@ modifier isNotZero(uint256 val) {
            contractAddress= _tokenListings[listingId]. nftAddress;
            tokenId= _tokenListings[listingId]. tokenId;
            uint256 qualifyAmount =  _tokenListings[listingId].qualifyAmount;
-
-           uint256 timeToDispute= _calcSum(_tokenListings[listingId]. releaseTime,3 days);
+            uint256 timeToDispute= _calcSum(_tokenListings[listingId]. releaseTime,3 days);
          require(winnerBidder!=address(0) && timeToDispute>=block.timestamp,"No bids or still running auction");
        require(buyer==_msgSender(),"Caller is not the owner");
       require(!listingBids[listingId][winnerBidder].isPurchased,"Already purchased");
           // call staking contract to deduct 
-          // trnasfer token
+        (uint256 fineAmount ,uint256  remaining)= _calcBidDisputeFees(qualifyAmount);
+        require(_deduct(winnerBidder,getAdminWallet(), fineAmount),"couldn't deduct the fine for the admin wallet");
+        require(_deduct(winnerBidder, buyer, remaining),"couldn't deduct the fine for the admin wallet");
+           // trnasfer token
         require( _safeNFTTransfer(contractAddress,tokenId,address(this),buyer),"NFT token couldn't be transfered");
             require( _updateUserReserves(winnerBidder ,qualifyAmount,false)>=0,"negative reserve is not allowed");
 
@@ -273,12 +296,16 @@ modifier isNotZero(uint256 val) {
          _finalizeListing(listingId,address(0),ListingStatus.Canceled);
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
+         emit DisputeAuction(  bidToListing[listingId].bidId ,   listingId,  contractAddress ,winnerBidder,   tokenId,    buyer,  qualifyAmount, remaining,  fineAmount, block. timestamp );
+
     }
+
+    // not valid, we should calc the listing as well
     function freeReserves() external returns (uint256 curentReserves) {
       // TODo: Check allternative for gas consumptions
       // iterate over the listng key map 
       // if it's sold, canceled,  free if he is participating on this listing
-
+            uint256 lastReserves =userReserves[_msgSender()];
             bytes32 [] memory listings = userListing[_msgSender()];
             delete userListing[_msgSender()];
             bytes32 [] storage newListings = userListing[_msgSender()]  ;
@@ -286,15 +313,21 @@ modifier isNotZero(uint256 val) {
 
             // loop
         for (uint256 index = 0; index < listings.length; index++) {
-        if( _tokenListings[ listings[index]].status==ListingStatus.onAuction
-              ||  _tokenListings[ listings[index]].status==ListingStatus.OnMarket){
+        if( _tokenListings[ listings[index]].status==ListingStatus.onAuction){
               newListings.push(listings[index]);
               curentReserves = _calcSum(curentReserves,_tokenListings[ listings[index]].qualifyAmount);
+
+        }else if ( _tokenListings[ listings[index]].status==ListingStatus.OnMarket){
+                        newListings.push(listings[index]);
+                      uint256 listQualifyAmount =_getListingQualAmount(_tokenListings[ listings[index]].listingPrice);
+
+                     curentReserves = _calcSum(curentReserves,listQualifyAmount);
 
         }
         }       
       userListing[_msgSender()]=newListings;
       require( _setUserReserves(_msgSender() ,curentReserves),"set reserve faild");
+      emit UserReservesFree(_msgSender(),  lastReserves,curentReserves,block. timestamp );
 
     }
 
