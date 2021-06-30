@@ -1,4 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
+require('hardhat-docgen');
+
 const fs = require('fs');
 const privateKey = fs.readFileSync("privateKey.secret").toString().trim();
 const alchemyKey = fs.readFileSync("alchemyKey.secret").toString().trim();
@@ -20,18 +22,18 @@ task("accounts", "Prints the list of accounts", async () => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-  defaultNetwork: "ropsten",
+  // defaultNetwork: "ropsten",
   networks: {
     hardhat: {
     },
-    ropsten: {
-      url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyKey}`,
-      accounts: [privateKey],
-    },
-    rinkeby: {
-      url: "https://eth-mainnet.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",
-      accounts: [privateKey],
-    }
+    // ropsten: {
+    //   url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyKey}`,
+    //   accounts: [privateKey],
+    // },
+    // rinkeby: {
+    //   url: "https://eth-mainnet.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",
+    //   accounts: [privateKey],
+    // }
   },
   solidity: {
     version: "0.8.0",
@@ -50,6 +52,11 @@ module.exports = {
   // },
   mocha: {
     timeout: 20000
+  },
+  docgen: {
+    path: './docs',
+    clear: true,
+    runOnCompile: true,
   }
 }
 

@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 /**
  * @author Eman Herawy, StartFi Team
- *@title  Start FiToken
- * desc A Startfi Utiltiy token
+ *@title  Start FiToken.
+ * [ desc ] : A Startfi Utiltiy token
  */
 contract StartFiToken is ERC20PresetFixedSupply{
     constructor(string memory name,

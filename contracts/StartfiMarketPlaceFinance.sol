@@ -31,11 +31,11 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
 
   constructor(
                  string memory _name ,
-        address _paymentTokesnAddress
+        address _paymentContract
     )   MarketPlaceBase(_name){
          
        
-        _paymentToken = _paymentTokesnAddress;
+        _paymentToken = _paymentContract;
     }
 
 
@@ -85,12 +85,12 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         fineAmount= qualifyAmount.mul(bidPenaltyPercentage).div( bidPenaltyPercentageBase);    
         remaining = qualifyAmount.sub(fineAmount);
     }
-   function _getListingFinancialInfo(address contractAddress,uint256 tokenId, uint256 bidPrice)  view internal returns   (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) {
+   function _getListingFinancialInfo(address _NFTContract,uint256 tokenId, uint256 bidPrice)  view internal returns   (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) {
              fees = _calcFees(bidPrice);
       netPrice = bidPrice.sub(fees);
           // royalty check
-          if(_supportRoyalty(contractAddress)){
-               ( issuer, royaltyAmount) =_getRoyaltyInfo( contractAddress,  tokenId, bidPrice);
+          if(_supportRoyalty(_NFTContract)){
+               ( issuer, royaltyAmount) =_getRoyaltyInfo( _NFTContract,  tokenId, bidPrice);
                if(royaltyAmount>0 && issuer!=address(0)){
                    netPrice= netPrice.sub(royaltyAmount);
                }
