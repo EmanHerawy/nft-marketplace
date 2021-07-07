@@ -16,8 +16,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract StartFiMarketPlace is  Ownable ,Pausable, MarketPlaceListing, MarketPlaceBid,StartfiMarketPlaceFinance {
   
  /******************************************* decalrations go here ********************************************************* */
- 
-
+ // TODO: to be updated ( using value or percentage?? develop function to ready and update the value)
+uint256 minQualifyAmount =10;
 // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved , 
 ///
 event ListOnMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 listingPrice,uint256 releaseTime,uint256 qualifyAmount,   uint256 timestamp );
@@ -124,6 +124,7 @@ modifier isNotZero(uint256 val) {
             uint256 duration
             ) external isNotZero(listingPrice) returns (bytes32 listId) {
               require(duration>12 hours,"Auction should be live for more than 12 hours");
+              require(qualifyAmount>=minQualifyAmount,"Invalid Auction qualify Amount");
             uint256 releaseTime = _calcSum(block.timestamp,duration);
             listId = keccak256(abi.encodePacked(nftAddress,tokenId,_msgSender(),releaseTime));
             if(sellForEnabled){
@@ -220,6 +221,8 @@ modifier isNotZero(uint256 val) {
          // reserve nigative couldn't be at any case
         require( _updateUserReserves(winnerBidder,_tokenListings[listingId].qualifyAmount,false)>=0,"negative reserve is not allowed");
         listingBids[listingId][_msgSender()].isPurchased=true;
+        // TODO: add reputation points to both seller and buyer
+
         // finish listing 
         _finalizeListing(listingId,winnerBidder, ListingStatus.Sold);
         // if bid time is less than 15 min, increase by 15 min
@@ -314,6 +317,7 @@ modifier isNotZero(uint256 val) {
 
         // finish listing 
         _finalizeListing(listingId,_msgSender(), ListingStatus.Sold);
+        // TODO: add reputation points to both seller and buyer
       emit BuyNow  (listingId,contractAddress,  buyer,  tokenId,  price,_msgSender(),sellForEnabled,  issuer,  royaltyAmount,   fees,   netPrice,   block. timestamp );
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
