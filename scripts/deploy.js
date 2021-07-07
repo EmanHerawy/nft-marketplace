@@ -17,12 +17,49 @@ async function main() {
   const accounts = await ethers.getSigners();
    let name="StartFiToken",symbol="STFI",initialSupply,owner =accounts[0].address;
 console.log(owner,'owner');
+
+/*******************************get Artifacts ******************************* */ 
   const StartFiToken = await hre.ethers.getContractFactory("StartFiToken");
-  const greeter = await StartFiToken.deploy(name,symbol,owner);
+  const StartfiRoyaltyNFT = await hre.ethers.getContractFactory("StartfiRoyaltyNFT");
+  const StartfiStakes = await hre.ethers.getContractFactory("StartfiStakes");
+  const StartFiNFTPayment = await hre.ethers.getContractFactory("StartFiNFTPayment");
+  const StartfiMarketPlace = await hre.ethers.getContractFactory("StartFiMarketPlace");
 
-  await greeter.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+
+  const startFiToken = await StartFiToken.deploy(name,symbol,owner);
+  await startFiToken.deployed();
+  console.log("StartFiToken deployed to:", startFiToken.address);
+
+  const startFiNFT = await StartfiRoyaltyNFT.deploy(name,  symbol,   "http://ipfs.io");
+  await startFiNFT.deployed();
+
+  console.log("startFiNFT deployed to:", startFiNFT.address);
+
+  const startFiStakes = await StartfiStakes.deploy(startFiToken.address);
+  await startFiStakes.deployed();
+  console.log("startFiStakes deployed to:", startFiStakes.address);
+
+const startFiNFTPayment=  await StartFiNFTPayment.deploy(startFiNFT.address, startFiToken.address);
+await startFiNFTPayment.deployed();
+console.log("startFiNFTPayment deployed to:", startFiNFTPayment.address);
+
+
+const startfiMarketPlace=  await StartfiMarketPlace.deploy("Test ERC721",  startFiToken.address,startFiStakes.address);
+await startfiMarketPlace.deployed();
+console.log("startfiMarketPlace deployed to:", startfiMarketPlace.address);
+
+   // add to minter role 
+   await startFiNFT.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",startFiNFTPayment.address)
+       await startFiStakes.setMarketplace(startfiMarketPlace.address);
+ 
+        const isERC721 = await startFiNFT.supportsInterface("0x01ffc9a7");
+      console.log(isERC721,'isERC721 ');
+      const isERCRoyalty = await startFiNFT.supportsInterface("0x2a55205a");
+      console.log(isERCRoyalty,'isERCRoyalty');
+      
+ 
+  
 }
 
 // We recommend this pattern to be able to use async/await everywhere
