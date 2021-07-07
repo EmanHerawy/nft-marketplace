@@ -10,7 +10,7 @@ import "./ERC721MinterPauser.sol";
 /**
  * @author Eman Herawy, StartFi Team
  *@title  Startfi Royalty NFT
- * desc NFT contract with Royalty option
+ * [ desc ] : NFT contract with Royalty option
  * 
  */
 contract StartfiRoyaltyNFT is  ERC721Royalty , ERC721MinterPauser{

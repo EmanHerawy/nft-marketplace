@@ -20,10 +20,10 @@ contract StartFiMarketPlace is  Ownable ,Pausable, MarketPlaceListing, MarketPla
 
 // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved , 
 ///
-event ListOnMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 listingPrice,uint256 releaseTime,uint256 qualifyAmount,   uint256 timestamp );
-event DeListOffMarketplace(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 fineFees, uint256 remaining,uint256 releaseTime,  uint256 timestamp );
+event ListOnMarketplace(  bytes32 listId,address nFTContract,address buyer,uint256 tokenId,uint256 listingPrice,uint256 releaseTime,uint256 qualifyAmount,   uint256 timestamp );
+event DeListOffMarketplace(  bytes32 listId,address nFTContract,address buyer,uint256 tokenId,uint256 fineFees, uint256 remaining,uint256 releaseTime,  uint256 timestamp );
 
-event CreateAuction(   bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 listingPrice,bool sellForEnabled,uint256 sellFor,uint256 releaseTime,uint256 qualifyAmount,uint256 timestamp );
+event CreateAuction(   bytes32 listId,address nFTContract,address buyer,uint256 tokenId,uint256 listingPrice,bool sellForEnabled,uint256 sellFor,uint256 releaseTime,uint256 qualifyAmount,uint256 timestamp );
 
 event BidOnAuction(bytes32 bidId , bytes32 listingId, address tokenAddress,address bidder, uint256 tokenId, uint256 bidPrice,uint256 timestamp );
  
@@ -31,7 +31,7 @@ event BidOnAuction(bytes32 bidId , bytes32 listingId, address tokenAddress,addre
 
  event DisputeAuction(bytes32 bidId , bytes32 listingId, address tokenAddress,address bidder, uint256 tokenId  ,address buyer,uint256 qualifyAmount, uint256 remaining,uint256 finefees,uint256 timestamp );
 
- event BuyNow(  bytes32 listId,address nftAddress,address buyer,uint256 tokenId,uint256 sellingPrice,address seller,bool isAucton,address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice,   uint256 timestamp );
+ event BuyNow(  bytes32 listId,address nFTContract,address buyer,uint256 tokenId,uint256 sellingPrice,address seller,bool isAucton,address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice,   uint256 timestamp );
 event UserReservesFree(address user, uint256 lastReserves,uint256 newReserves,uint256 timestamp );
 
 
@@ -41,9 +41,9 @@ event UserReservesFree(address user, uint256 lastReserves,uint256 newReserves,ui
 
     constructor(
           string memory _marketPlaceName,
-          address _paymentTokesnAddress,
+          address _paymentContract,
           address _stakeContract
-    )   StartfiMarketPlaceFinance(_marketPlaceName,_paymentTokesnAddress){
+    )   StartfiMarketPlaceFinance(_marketPlaceName,_paymentContract){
        stakeContract=_stakeContract;
     }
 
@@ -73,25 +73,25 @@ modifier isNotZero(uint256 val) {
 // list
      /**
     * @dev  called by dapps to list new item 
-    * @param nftAddress nft contract address
+    * @param nFTContract nft contract address
     * @param tokenId token id 
     * @param listingPrice min price 
      * @return listId listing id
      */
-    function listOnMarketplace( address nftAddress,
+    function listOnMarketplace( address nFTContract,
           uint256 tokenId,
             uint256 listingPrice ) external isNotZero(listingPrice) returns (bytes32 listId) {
             uint256 releaseTime = _calcSum(block.timestamp,delistAfter);
-            listId = keccak256(abi.encodePacked(nftAddress,tokenId,_msgSender(),releaseTime));
+            listId = keccak256(abi.encodePacked(nFTContract,tokenId,_msgSender(),releaseTime));
             // calc qualified ammount
             uint256 listQualifyAmount =_getListingQualAmount(listingPrice);
 
           // check that sender is qualified 
           require(_getStakeAllowance(_msgSender()/*, 0*/)>= listQualifyAmount,"Not enough reserves");
-          require( _isTokenApproved(nftAddress,  tokenId) ,"Marketplace is not allowed to transfer your token");
+          require( _isTokenApproved(nFTContract,  tokenId) ,"Marketplace is not allowed to transfer your token");
 
             // transfer token to contract 
-          require( _safeNFTTransfer(nftAddress,tokenId,_msgSender(),address(this)),"NFT token couldn't be transfered");
+          require( _safeNFTTransfer(nFTContract,tokenId,_msgSender(),address(this)),"NFT token couldn't be transfered");
 
           // update reserved
             _updateUserReserves(_msgSender() ,listQualifyAmount,true);
@@ -99,14 +99,14 @@ modifier isNotZero(uint256 val) {
             listings.push(listId);
             userListing[_msgSender()]=listings;
           // list 
-          require(_listOnMarketPlace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime) ,"Couldn't list the item");
-          emit ListOnMarketplace( listId,nftAddress,_msgSender(),tokenId,listingPrice,releaseTime,listQualifyAmount, block.timestamp);
+          require(_listOnMarketPlace( listId,nFTContract,_msgSender(),tokenId,listingPrice,releaseTime) ,"Couldn't list the item");
+          emit ListOnMarketplace( listId,nFTContract,_msgSender(),tokenId,listingPrice,releaseTime,listQualifyAmount, block.timestamp);
         
     }
 // create auction
   /**
     * @dev  called by dapps to create  new auction 
-    * @param nftAddress nft contract address
+    * @param nFTContract nft contract address
     * @param tokenId token id 
     * @param listingPrice min price 
     * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid 
@@ -115,7 +115,7 @@ modifier isNotZero(uint256 val) {
     * @param duration  when auction ends
     * @return listId listing id
      */
-    function createAuction( address nftAddress,
+    function createAuction( address nFTContract,
           uint256 tokenId,
             uint256 listingPrice,
             uint256 qualifyAmount,
@@ -125,21 +125,21 @@ modifier isNotZero(uint256 val) {
             ) external isNotZero(listingPrice) returns (bytes32 listId) {
               require(duration>12 hours,"Auction should be live for more than 12 hours");
             uint256 releaseTime = _calcSum(block.timestamp,duration);
-            listId = keccak256(abi.encodePacked(nftAddress,tokenId,_msgSender(),releaseTime));
+            listId = keccak256(abi.encodePacked(nFTContract,tokenId,_msgSender(),releaseTime));
             if(sellForEnabled){
               require(sellFor>0,"Zero price is not allowed");
             }
           // check that sender is qualified 
-            require( _isTokenApproved(nftAddress,  tokenId) ,"Marketplace is not allowed to transfer your token");
+            require( _isTokenApproved(nFTContract,  tokenId) ,"Marketplace is not allowed to transfer your token");
 
             // transfer token to contract 
-          require( _safeNFTTransfer(nftAddress,tokenId,_msgSender(),address(this)),"NFT token couldn't be transfered");
+          require( _safeNFTTransfer(nFTContract,tokenId,_msgSender(),address(this)),"NFT token couldn't be transfered");
 
             // update reserved
             // create auction
 
-          require(_creatAuction( listId,nftAddress,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount) ,"Couldn't list the item");
-           emit CreateAuction( listId,nftAddress,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount,block.timestamp); 
+          require(_creatAuction( listId,nFTContract,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount) ,"Couldn't list the item");
+           emit CreateAuction( listId,nFTContract,_msgSender(),tokenId,listingPrice,   sellForEnabled,sellFor,releaseTime,qualifyAmount,block.timestamp); 
         
     }
       /**
@@ -189,14 +189,14 @@ modifier isNotZero(uint256 val) {
     * @dev called by bidder through dapps when bidder win an auction and wants to pay to get the NFT 
     * 
     * @param listingId listing id 
-    * @return contractAddress nft contract address
+    * @return _NFTContract nft contract address
     * @return tokenId token id 
      */
     function fullfillBid(bytes32 listingId) 
-        external canFullfillBid(listingId) returns (address contractAddress,uint256 tokenId){
+        external canFullfillBid(listingId) returns (address _NFTContract,uint256 tokenId){
          address winnerBidder= bidToListing[listingId].bidder;
          address buyer= _tokenListings[listingId].buyer;
-           contractAddress= _tokenListings[listingId]. nftAddress;
+           _NFTContract= _tokenListings[listingId]. nFTContract;
            tokenId= _tokenListings[listingId]. tokenId;
         require(winnerBidder==_msgSender(),"Caller is not the winner");
          // if it's new, the price will be 0 
@@ -205,7 +205,7 @@ modifier isNotZero(uint256 val) {
          require(_getAllowance(winnerBidder)>= bidPrice,"Marketplace is not allowed to withdraw the required amount of tokens");
         // transfer price 
     
-        (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( contractAddress,tokenId, bidPrice) ;
+        (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( _NFTContract,tokenId, bidPrice) ;
       
        require(_safeTokenTransferFrom(owner(),buyer, fees),"Couldn't transfer token as fees");
        if(issuer!=address(0)){
@@ -215,7 +215,7 @@ modifier isNotZero(uint256 val) {
         // token value could be zero ater taking the roylty share ??? need to ask?
         require(_safeTokenTransferFrom(winnerBidder,buyer, netPrice),"Couldn't transfer token to buyer");
           // trnasfer token
-        require( _safeNFTTransfer(contractAddress,tokenId,address(this), winnerBidder),"NFT token couldn't be transfered");
+        require( _safeNFTTransfer(_NFTContract,tokenId,address(this), winnerBidder),"NFT token couldn't be transfered");
          // update user reserves
          // reserve nigative couldn't be at any case
         require( _updateUserReserves(winnerBidder,_tokenListings[listingId].qualifyAmount,false)>=0,"negative reserve is not allowed");
@@ -224,22 +224,22 @@ modifier isNotZero(uint256 val) {
         _finalizeListing(listingId,winnerBidder, ListingStatus.Sold);
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
-        emit FullfillBid(  bidToListing[listingId].bidId ,   listingId,   contractAddress, winnerBidder,  tokenId,  bidPrice,  issuer,  royaltyAmount,   fees,   netPrice ,block.timestamp );
+        emit FullfillBid(  bidToListing[listingId].bidId ,   listingId,   _NFTContract, winnerBidder,  tokenId,  bidPrice,  issuer,  royaltyAmount,   fees,   netPrice ,block.timestamp );
     }
 // delist
     /**
     * @dev called by seller through dapps when s/he wants to remove this token from the marketplace   
     * @notice auction can't be canceled , if seller delist time on sale on maretplace before time to delist, he will pay a fine
     * @param listingId listing id 
-    * @return contractAddress nft contract address
+    * @return _NFTContract nft contract address
     * @return tokenId token id 
      */
     function deList(bytes32 listingId) 
-        external  returns ( address contractAddress,uint256 tokenId){
+        external  returns ( address _NFTContract,uint256 tokenId){
          ListingStatus status= _tokenListings[listingId].status;
          address owner= _tokenListings[listingId].buyer;
          address seller= _tokenListings[listingId].seller;
-         contractAddress= _tokenListings[listingId]. nftAddress;
+         _NFTContract= _tokenListings[listingId]. nFTContract;
          uint256 releaseTime= _tokenListings[listingId]. releaseTime;
          uint256 listingPrice= _tokenListings[listingId]. listingPrice;
          tokenId= _tokenListings[listingId]. tokenId;
@@ -264,13 +264,13 @@ modifier isNotZero(uint256 val) {
         }
 
         // trnasfer token
-        require( _safeNFTTransfer(contractAddress,tokenId,address(this), owner),"NFT token couldn't be transfered");
+        require( _safeNFTTransfer(_NFTContract,tokenId,address(this), owner),"NFT token couldn't be transfered");
          // update user reserves
          // reserve nigative couldn't be at any case
         require( _updateUserReserves(_msgSender() ,remaining,false)>=0,"negative reserve is not allowed");
         // finish listing 
          _finalizeListing(listingId,address(0),ListingStatus.Canceled);
-         emit DeListOffMarketplace(listingId,  contractAddress,  owner,  tokenId,  fineAmount ,  remaining,  releaseTime,  block.timestamp );
+         emit DeListOffMarketplace(listingId,  _NFTContract,  owner,  tokenId,  fineAmount ,  remaining,  releaseTime,  block.timestamp );
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
@@ -282,14 +282,14 @@ modifier isNotZero(uint256 val) {
     * @notice  if auction, the seller must enabe forSale. prices should be more than or equal the listing price
     * @param listingId listing id 
     * @param price gevin price
-    * @return contractAddress nft contract address
+    * @return _NFTContract nft contract address
     * @return tokenId token id 
      */
     function buyNow(bytes32 listingId, uint256 price) 
-        external  returns (address contractAddress,uint256 tokenId){
+        external  returns (address _NFTContract,uint256 tokenId){
           bool sellForEnabled= _tokenListings[listingId].sellForEnabled;
          address buyer= _tokenListings[listingId].buyer;
-           contractAddress= _tokenListings[listingId]. nftAddress;
+           _NFTContract= _tokenListings[listingId]. nFTContract;
            tokenId= _tokenListings[listingId]. tokenId;
          require(price>=_tokenListings[listingId]. listingPrice,"Invalid price");
         require(_tokenListings[listingId].status==ListingStatus.OnMarket || (_tokenListings[listingId].status==ListingStatus.onAuction && sellForEnabled==true && _tokenListings[listingId].releaseTime> block.timestamp ),"Token isnot for sale ");
@@ -297,7 +297,7 @@ modifier isNotZero(uint256 val) {
          require(_getAllowance(_msgSender())>= price,"Marketplace is not allowed to withdraw the required amount of tokens");
         // transfer price 
     
-        (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( contractAddress,tokenId, price) ;
+        (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) = _getListingFinancialInfo( _NFTContract,tokenId, price) ;
       
        require(_safeTokenTransferFrom(owner(),buyer, fees),"Couldn't transfer token as fees");
        if(issuer!=address(0)){
@@ -307,14 +307,14 @@ modifier isNotZero(uint256 val) {
         // token value could be zero ater taking the roylty share ??? need to ask?
         require(_safeTokenTransferFrom(_msgSender(),buyer, netPrice),"Couldn't transfer token to buyer");
           // trnasfer token
-        require( _safeNFTTransfer(contractAddress,tokenId,address(this), _msgSender()),"NFT token couldn't be transfered");
+        require( _safeNFTTransfer(_NFTContract,tokenId,address(this), _msgSender()),"NFT token couldn't be transfered");
            uint256 ListingQualAmount =  _getListingQualAmount( _tokenListings[listingId]. listingPrice);
 
             require( _updateUserReserves(buyer ,ListingQualAmount,false)>=0,"negative reserve is not allowed");
 
         // finish listing 
         _finalizeListing(listingId,_msgSender(), ListingStatus.Sold);
-      emit BuyNow  (listingId,contractAddress,  buyer,  tokenId,  price,_msgSender(),sellForEnabled,  issuer,  royaltyAmount,   fees,   netPrice,   block. timestamp );
+      emit BuyNow  (listingId,_NFTContract,  buyer,  tokenId,  price,_msgSender(),sellForEnabled,  issuer,  royaltyAmount,   fees,   netPrice,   block. timestamp );
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
@@ -323,14 +323,14 @@ modifier isNotZero(uint256 val) {
     * @dev called by seller through dapps when his/her auction is  not fullfilled after 3 days
     *  @notice  after auction with winner bid . bidder didn't call fullfile within 3 days of auction closing  auction owner can call dispute to delist and punish the spam winner bidder fine is share between the plateform and the auction owner
     * @param listingId listing id 
-    * @return contractAddress nft contract address
+    * @return _NFTContract nft contract address
     * @return tokenId token id 
      */
     function disputeAuction(bytes32 listingId) 
-        external  returns (address contractAddress,uint256 tokenId){
+        external  returns (address _NFTContract,uint256 tokenId){
          address winnerBidder= bidToListing[listingId].bidder;
          address buyer= _tokenListings[listingId].buyer;
-           contractAddress= _tokenListings[listingId]. nftAddress;
+           _NFTContract= _tokenListings[listingId]. nFTContract;
            tokenId= _tokenListings[listingId]. tokenId;
            uint256 qualifyAmount =  _tokenListings[listingId].qualifyAmount;
             uint256 timeToDispute= _calcSum(_tokenListings[listingId]. releaseTime,3 days);
@@ -342,14 +342,14 @@ modifier isNotZero(uint256 val) {
         require(_deduct(winnerBidder,getAdminWallet(), fineAmount),"couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, buyer, remaining),"couldn't deduct the fine for the admin wallet");
            // trnasfer token
-        require( _safeNFTTransfer(contractAddress,tokenId,address(this),buyer),"NFT token couldn't be transfered");
+        require( _safeNFTTransfer(_NFTContract,tokenId,address(this),buyer),"NFT token couldn't be transfered");
             require( _updateUserReserves(winnerBidder ,qualifyAmount,false)>=0,"negative reserve is not allowed");
 
         // finish listing 
          _finalizeListing(listingId,address(0),ListingStatus.Canceled);
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
-         emit DisputeAuction(  bidToListing[listingId].bidId ,   listingId,  contractAddress ,winnerBidder,   tokenId,    buyer,  qualifyAmount, remaining,  fineAmount, block. timestamp );
+         emit DisputeAuction(  bidToListing[listingId].bidId ,   listingId,  _NFTContract ,winnerBidder,   tokenId,    buyer,  qualifyAmount, remaining,  fineAmount, block. timestamp );
 
     }
 

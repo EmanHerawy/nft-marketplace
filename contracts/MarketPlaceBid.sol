@@ -5,7 +5,7 @@ pragma abicoder v2;
 /**
  * @author Eman Herawy, StartFi Team
  *@title  MarketPlace Bid
- * desc contract handles all the bid related functions for marketplace
+ * [ desc ] : contract handles all the bid related functions for marketplace
  */
 contract MarketPlaceBid  {
  
@@ -14,7 +14,7 @@ contract MarketPlaceBid  {
     // using EnumerableSet for EnumerableSet.AddressSet;
   struct Bid {
         bytes32 bidId;
-        address nftAddress;
+        address nFTContract;
         uint256 tokenId;
         uint256 bidPrice;
         bool isPurchased;
@@ -37,15 +37,15 @@ contract MarketPlaceBid  {
       * @param listingId listing id      
       * @return bidId bid id
       * @return bidder bidder address
-      * @return nftAddress  nft contract address
+      * @return nFTContract  nft contract address
       * @return tokenId nft token id
       * @return bidPrice bid price
       * @return isPurchased true if purchased
      */
-function winnerBid(bytes32 listingId) view external returns (bytes32 bidId, address bidder, address nftAddress,uint256 tokenId,uint256 bidPrice,bool isPurchased ) {
+function winnerBid(bytes32 listingId) view external returns (bytes32 bidId, address bidder, address nFTContract,uint256 tokenId,uint256 bidPrice,bool isPurchased ) {
   bidId=bidToListing[listingId].bidId;
   bidder=bidToListing[listingId].bidder;
-  nftAddress=listingBids[listingId][bidder].nftAddress;
+  nFTContract=listingBids[listingId][bidder].nFTContract;
   tokenId=listingBids[listingId][bidder].tokenId;
   bidPrice=listingBids[listingId][bidder].bidPrice;
   isPurchased=listingBids[listingId][bidder].isPurchased;
@@ -56,13 +56,13 @@ function winnerBid(bytes32 listingId) view external returns (bytes32 bidId, addr
       * @param listingId listing id      
       * @param bidder bidder address
       * @return bidId bid id
-      * @return nftAddress  nft contract address
+      * @return nFTContract  nft contract address
       * @return tokenId nft token id
       * @return bidPrice bid price
      */
-function getAuctionBidDetails(bytes32 listingId,address bidder ) view external returns (bytes32 bidId,  address nftAddress,uint256 tokenId,uint256 bidPrice,bool isPurchased ) {
+function getAuctionBidDetails(bytes32 listingId,address bidder ) view external returns (bytes32 bidId,  address nFTContract,uint256 tokenId,uint256 bidPrice,bool isPurchased ) {
     bidId=listingBids[listingId][bidder].bidId;
-   nftAddress=listingBids[listingId][bidder].nftAddress;
+   nFTContract=listingBids[listingId][bidder].nFTContract;
   tokenId=listingBids[listingId][bidder].tokenId;
   bidPrice=listingBids[listingId][bidder].bidPrice;
   isPurchased=listingBids[listingId][bidder].isPurchased;
