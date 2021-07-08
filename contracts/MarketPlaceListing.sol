@@ -6,7 +6,7 @@ pragma abicoder v2;
 /**
  * @author Eman Herawy, StartFi Team
  *@title  MarketPlace Listing
- * desc contract handle all item list in marketplace related function
+ * [ desc ] : contract handle all item list in marketplace related function
  */
 contract MarketPlaceListing  {
   // all fees are in perentage 
@@ -22,7 +22,7 @@ contract MarketPlaceListing  {
     // using EnumerableSet for EnumerableSet.UintSet;
     // using EnumerableSet for EnumerableSet.AddressSet;
   struct Listing {
-        address nftAddress;
+        address nFTContract;
         uint256 tokenId;
         uint256 listingPrice;
         uint256 endPrice;
@@ -61,7 +61,7 @@ contract MarketPlaceListing  {
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
      */
 function getListingDetails(bytes32 listingId ) view external returns ( address tokenAddress,        uint256 tokenId,uint256 listingPrice,uint256 endPrice,address seller,address buyer,bool bedEnabeled,bool sellForEnabled,uint256 releaseTime,uint256 qualifyAmount,uint256 sellFor,uint status ) {
-      tokenAddress=_tokenListings[listingId].nftAddress ;
+      tokenAddress=_tokenListings[listingId].nFTContract ;
       tokenId=_tokenListings[listingId].tokenId ;
       listingPrice=_tokenListings[listingId].listingPrice ;
       endPrice=_tokenListings[listingId]. endPrice;

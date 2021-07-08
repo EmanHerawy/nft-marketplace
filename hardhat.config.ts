@@ -1,0 +1,98 @@
+import {HardhatUserConfig} from 'hardhat/types';
+import '@nomiclabs/hardhat-waffle';
+import 'hardhat-deploy';
+import 'hardhat-deploy-ethers';
+import "hardhat-docgen";
+import "hardhat-gas-reporter";
+import "./tasks/accounts";
+
+const fs = require('fs');
+const privateKey = fs.readFileSync("privateKey.secret").toString().trim();
+const alchemyKey = fs.readFileSync("alchemyKey.secret").toString().trim();
+const config: HardhatUserConfig = {
+
+  namedAccounts: {
+    deployer: 0,
+  }, defaultNetwork: "hardhat",
+  networks: {
+    hardhat: {
+        saveDeployments: true,
+    },
+    
+testnet_aurora: {
+  url: 'https://testnet.aurora.dev',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 1313161555,
+  gasPrice: 120 * 1000000000
+},
+bsc_test: {
+  url: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 97,
+  gasPrice: 120 * 1000000000
+},
+bsc: {
+  url: 'https://bsc-dataseed1.binance.org',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 56,
+  gasPrice: 120 * 1000000000
+},
+testnet_matic: {
+  url: 'https://rpc-mumbai.matic.today',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 1313161555,
+  gasPrice: 120 * 1000000000
+},
+    ropsten: {
+      url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyKey}`,
+      saveDeployments: true,
+      accounts: [privateKey],
+    },
+    rinkeby: {
+      url: "https://eth-mainnet.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",
+      saveDeployments: true,
+      accounts: [privateKey],
+    }
+  },
+  solidity: {
+    version: "0.8.0",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
+  gasReporter: {
+    currency: 'USD',
+    gasPrice: 100,
+    enabled: process.env.REPORT_GAS ? true : false,
+    // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
+    maxMethodDiff: 10,
+  },
+  // paths: {
+  //   sources: "./contracts",
+  //   tests: "./test",
+  //   cache: "./cache",
+  //   artifacts: "./artifacts"
+  // },
+  paths: {
+    deploy: 'deploy',
+    deployments: 'deployments',
+    imports: 'imports'
+},
+  mocha: {
+    timeout: 20000
+  },
+  docgen: {
+    path: './docs',
+    clear: true,
+    runOnCompile: true,
+  }
+};
+export default config;
+

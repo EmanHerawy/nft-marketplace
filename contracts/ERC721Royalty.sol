@@ -6,7 +6,7 @@ import "./interface/IERC721Royalty.sol";
 /**
  * @author Eman Herawy, StartFi Team
  *@title  ERC721 Royalty
- * desc erc721 with reoylaty support interface
+ * [ desc ] : erc721 with reoylaty support interface
  */
 contract ERC721Royalty is IERC721Royalty {
     using SafeMath for uint256;
