@@ -251,7 +251,7 @@ modifier isNotZero(uint256 val) {
          uint256 listingPrice= _tokenListings[listingId]. listingPrice;
          tokenId= _tokenListings[listingId]. tokenId;
          require(owner==_msgSender(),"Caller is not the owner");
-         require(seller==address(0),"Already bought token");
+         require(buyer==address(0),"Already bought token");
       uint256 timeToDelistAuction= _calcSum( releaseTime,3 days);
 
         // require(status==ListingStatus.OnMarket || status==ListingStatus.onAuction,"Already bought or canceled token");
