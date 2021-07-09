@@ -2,6 +2,8 @@
 
 pragma solidity >=0.8.0;
 pragma abicoder v2;
+import "./interface/IStartFiReputation.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./interface/IStartFiStakes.sol";
@@ -27,15 +29,21 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
    mapping (address=>uint256) userReserves;
    mapping (address=>bytes32[]) userListing;
    address public stakeContract;
+   address reputationContract;
+
  /******************************************* constructor goes here ********************************************************* */
 
   constructor(
-                 string memory _name ,
-        address _paymentContract
+        string memory _name ,
+        address _paymentContract,
+        address _reputationContract
     )   MarketPlaceBase(_name){
          
        
         _paymentToken = _paymentContract;
+        reputationContract = _reputationContract;
+
+      
     }
 
 
@@ -144,6 +152,23 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
   function _deduct(address finePayer, address to, uint256 amount)  internal returns (bool ) {
           return IStartFiStakes(stakeContract).deduct(finePayer, to, amount);
     }
+        /**
+        * @notice  all conditions and checks are made prior to this function. math of point calcualtion is not done yet
+        * @dev this function calls StartFiReputation contract to mint reputation points for both seller and buyer
+        * @param seller : seller address
+        * @param buyer : buyer address
+        * @param amount : price
+        * @return buyerBalance : buyer current reputation balance
+        * @return sellerBalance : seller current reputation balance
+      */
+  function _addreputationPoints(address seller, address buyer, uint256 amount)  internal returns (uint256 buyerBalance, uint256 sellerBalance ) {
+         // calc how much pint for both of them ??
+         // TODO: math and logic for calc the point based on the amount
+         uint256 sellerPoints=amount.div(2);
+         uint256 buyerPoints=amount.div(2);
+          sellerBalance= IStartFiReputation(reputationContract).mintReputation(seller,sellerPoints );
+          buyerBalance= IStartFiReputation(reputationContract).mintReputation(buyer,buyerPoints );
+    }
     function _safeTokenTransfer(address to, uint256 amount) internal returns (bool) {
         return IERC20(_paymentToken). transfer( to,  amount);
     }
@@ -203,6 +228,14 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
      */
 function _changeUtiltiyToken(address _token) internal {
       _paymentToken=_token;  
+     }
+      /**
+        * @notice  all conditions and checks are made prior to this function
+        * @dev for later on upgrade , if we have
+        * @param _reputationContract : startfi new reputation contract
+     */
+function _changeReputationContract(address _reputationContract) internal {
+      reputationContract=_reputationContract;  
      }
 /**
     * @notice  all conditions and checks are made prior to this function
