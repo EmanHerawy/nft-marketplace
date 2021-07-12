@@ -114,7 +114,7 @@ describe("StartFi Marketplace", () => {
       "11",
       "true",
       "11",
-      "10000000000"
+      "10000000"
     );
     const bid = await startFiMarketplace.bid(
       formatBytes32String("0"),
