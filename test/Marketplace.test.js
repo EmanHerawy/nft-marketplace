@@ -12,7 +12,6 @@ const StartfiReputation = require("../artifacts/contracts/StartFiReputation.sol/
 use(solidity);
 
 describe("StartFi Marketplace", () => {
-  // let mockERC20
   let startfiToken, startFiRoyaltyNFT, startFiPaymentNFT, startFiMarketplace;
   let wallet;
   let name = "Startfi";
@@ -48,6 +47,10 @@ describe("StartFi Marketplace", () => {
     await startfiRoyaltyNFT.grantRole(
       "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
       startFiPaymentNFT.address
+    );
+    await startfiReputation.grantRole(
+      "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+      startFiMarketplace.address
     );
     await startfiToken.approve(startFiPaymentNFT.address, 10000000000000);
     await startfiToken.approve(startfiStakes.address, 10000000000000);
@@ -170,13 +173,48 @@ describe("StartFi Marketplace", () => {
       "BidOnAuction"
     );
   });
-  /*  it("Should list on marketplace", async () => {
-    const listOnMarketplace = await startFiMarketplace.listOnMarketplace(
+
+  it("Should deList item", async () => {
+    await startFiMarketplace.listOnMarketplace(
       startfiRoyaltyNFT.address,
-      "0",
-      "1"
+      1,
+      10
     );
-    const info = await startFiMarketplace.getListingDetails("0");
-    console.log("info 0", info);
-  }); */
+    const eventFilter = startFiMarketplace.filters.ListOnMarketplace(
+      null,
+      null
+    );
+    const events = await startFiMarketplace.queryFilter(eventFilter);
+    const listId = events[0].args[0];
+    await expect(startFiMarketplace.deList(listId)).to.emit(
+      startFiMarketplace,
+      "DeListOffMarketplace"
+    );
+  });
+  it("Should Buy Item Now", async () => {
+    await startFiMarketplace.listOnMarketplace(
+      startfiRoyaltyNFT.address,
+      1,
+      10
+    );
+    const eventFilter = startFiMarketplace.filters.ListOnMarketplace(
+      null,
+      null
+    );
+    const events = await startFiMarketplace.queryFilter(eventFilter);
+    const listId = events[0].args[0];
+    await expect(startFiMarketplace.buyNow(listId, 10)).to.emit(
+      startFiMarketplace,
+      "BuyNow"
+    );
+  });
+
+  it("Should Free Reserve", async () => {
+    await startfiStakes.deposit(wallet.address, 1000);
+    await expect(startFiMarketplace.freeReserves()).to.emit(
+      startFiMarketplace,
+      "UserReservesFree"
+    );
+  });
+
 });
