@@ -1,9 +1,7 @@
 const { expect, use } = require("chai");
 const { Contract, utils, Wallet, BigNumber } = require("ethers");
 const { deployContract, MockProvider, solidity } = require("ethereum-waffle");
-const { formatBytes32String } = require("ethers/lib/utils");
 
-// const IERC20 = require( "../artifacts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json")
 const StartFiToken = require("../artifacts/contracts/StartFiToken.sol/StartFiToken.json");
 const StartFiRoyaltyNFT = require("../artifacts/contracts/StartfiRoyaltyNFT.sol/StartfiRoyaltyNFT.json");
 const StartFiPaymentNFT = require("../artifacts/contracts/StartFiNFTPayment.sol/StartFiNFTPayment.json");
@@ -61,58 +59,117 @@ describe("StartFi Marketplace", () => {
   });
 
   it("Should list on marketplace", async () => {
-   // await startfiStakes.deposit(wallet.address,10000)
-    const listOnMarketplace_first = await startFiMarketplace.listOnMarketplace(startfiRoyaltyNFT.address, 0, 10);
-    console.log('listOnMarketplace_first listingId', listOnMarketplace_first)
-    const listOnMarketplace_second = await startFiMarketplace.listOnMarketplace(
+    await expect(
+      startFiMarketplace.listOnMarketplace(startfiRoyaltyNFT.address, 0, 10)
+    ).to.emit(startFiMarketplace, "ListOnMarketplace");
+  });
+  it("ListOnMarketplace: Not enough reserves", async () => {
+    await expect(
+      startFiMarketplace.listOnMarketplace(startfiRoyaltyNFT.address, 2, 1000)
+    ).to.be.revertedWith("Not enough reserves");
+  });
+  it("ListOnMarketplace: revert Marketplace is not allowed to transfer your token", async () => {
+    await expect(
+      startFiMarketplace.listOnMarketplace(startFiPaymentNFT.address, 0, 20)
+    ).to.be.revertedWith("Marketplace is not allowed to transfer your token");
+  });
+  it("Should create auction on marketplace", async () => {
+    await expect(
+      startFiMarketplace.createAuction(
+        startfiRoyaltyNFT.address,
+        0,
+        10,
+        11,
+        true,
+        11,
+        1000000000
+      )
+    ).to.emit(startFiMarketplace, "CreateAuction");
+  });
+  it("Auction: listing price should not equal zero", async () => {
+    await expect(
+      startFiMarketplace.createAuction(
+        startfiRoyaltyNFT.address,
+        0,
+        0,
+        11,
+        true,
+        2000,
+        1000000000
+      )
+    ).to.be.revertedWith("Zero Value is not allowed");
+  });
+  it("Auction: sell for price should not equal zero", async () => {
+    await expect(
+      startFiMarketplace.createAuction(
+        startfiRoyaltyNFT.address,
+        0,
+        10,
+        11,
+        true,
+        0,
+        1000000000
+      )
+    ).to.be.revertedWith("Zero price is not allowed");
+  });
+  it("Auction: Zero price is not allowed", async () => {
+    await expect(
+      startFiMarketplace.createAuction(
+        startfiRoyaltyNFT.address,
+        0,
+        10,
+        11,
+        true,
+        0,
+        1000000000
+      )
+    ).to.be.revertedWith("Zero price is not allowed");
+  });
+  it("Auction: Marketplace is not allowed to transfer your token", async () => {
+    await expect(
+      startFiMarketplace.createAuction(
+        startFiPaymentNFT.address,
+        0,
+        10,
+        11,
+        true,
+        11,
+        1000000000
+      )
+    ).to.be.revertedWith("Marketplace is not allowed to transfer your token");
+  });
+  it("Auction should live for more than 12 hours", async () => {
+    await expect(
+      startFiMarketplace.createAuction(
+        startfiRoyaltyNFT.address,
+        0,
+        10,
+        11,
+        true,
+        11,
+        10
+      )
+    ).to.be.revertedWith("Auction should be live for more than 12 hours");
+  });
+
+  it("Should bid item", async () => {
+    await startfiStakes.deposit(wallet.address, 1000);
+    await startFiMarketplace.listOnMarketplace(
       startfiRoyaltyNFT.address,
       1,
       10
     );
-    console.log("listOnMarketplace_second listingId", listOnMarketplace_second);
-    /* console.log("real value is", listOnMarketplace.value.toNumber());
-    console.log("0", formatBytes32String("0"));
-    console.log("1", formatBytes32String("1"));
-    console.log("100000", formatBytes32String("100000")); 
-
-    const info = await startFiMarketplace.getListingDetails(
-      "0x3000000000000000000000000000000000000000000000000000000000000000"
+    const eventFilter = startFiMarketplace.filters.ListOnMarketplace(
+      null,
+      null
     );
-    console.log("info 0", info);
-    /*const info_1 = await startFiMarketplace.getListingDetails(formatBytes32String("100000"));
-    console.log("info 1", info_1); */
-    // expect(info.tokenAddress).to.be.equal(wallet.address);*/
+    const events = await startFiMarketplace.queryFilter(eventFilter);
+    const listId = events[0].args[0];
+    await expect(startFiMarketplace.bid(listId, 1200)).to.emit(
+      startFiMarketplace,
+      "BidOnAuction"
+    );
   });
- /*  it("Should create auction on marketplace", async () => {
-    const createAuction = await startFiMarketplace.createAuction(
-      startfiRoyaltyNFT.address,
-      0,
-      10,
-      11,
-      true,
-      11,
-      1000000000
-    );
-    expect(createAuction.from).to.be.equal(wallet.address);
-  }); */
-  /*   it("Should bid item", async () => {
-    await startFiMarketplace.createAuction(
-      startfiRoyaltyNFT.address,
-      "0",
-      "10",
-      "11",
-      "true",
-      "11",
-      "10000000"
-    );
-    const bid = await startFiMarketplace.bid(
-      formatBytes32String("0"),
-      startfiStakes.address,
-      "0",
-      "1"
-    );
-    expect(bid.from).to.be.equal(wallet.address);
-  }); */
   /*  it("Should list on marketplace", async () => {
     const listOnMarketplace = await startFiMarketplace.listOnMarketplace(
       startfiRoyaltyNFT.address,
