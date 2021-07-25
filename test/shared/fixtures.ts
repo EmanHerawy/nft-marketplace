@@ -39,6 +39,11 @@ export async function tokenFixture( [wallet]: Wallet[],_: MockProvider,): Promis
   // add to minter role 
   await reputation.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6", NFT.address)
   await NFT.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6", payment.address)
+  // mint 4 tokens / 2 without royalty and 2 with royalty 
+  await NFT.mint(wallet.address,baseUri)
+  await NFT.mint(wallet.address,baseUri)
+  await NFT.mintWithRoyalty(wallet.address,baseUri,25,10)
+  await NFT.mintWithRoyalty(wallet.address,baseUri,25,10)
   await stakes.setMarketplace(marketPlace.address);
   return { token ,stakes,NFT, marketPlace,payment,reputation}
 }
