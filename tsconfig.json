@@ -5,9 +5,11 @@
       "strict": true,
       "esModuleInterop": true,
       "moduleResolution": "node",
+      "resolveJsonModule": true,
       "forceConsistentCasingInFileNames": true,
       "outDir": "dist"
     },
+    
     "include": [
       "hardhat.config.ts",
       "./deploy",
