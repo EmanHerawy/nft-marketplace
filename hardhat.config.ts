@@ -50,11 +50,11 @@ testnet_matic: {
   url: 'https://rpc-mumbai.matic.today',
   accounts: [privateKey],
   saveDeployments: true,
-  chainId: 1313161555,
+  chainId: 80001,
   gasPrice: 120 * 1000000000
 },
     ropsten: {
-      url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyKey}`,
+      url: `https://eth-ropsten.alchemyapi.io/v2/I2yG1s2IIlfmeO2FW3_FHWr_fm_4KLch`,
       saveDeployments: true,
       accounts: [privateKey],
     },
