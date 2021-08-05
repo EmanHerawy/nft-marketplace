@@ -52,11 +52,11 @@ event UserReservesFree(address user, uint256 lastReserves,uint256 newReserves,ui
   /******************************************* modifiers go here ********************************************************* */
 
     modifier isOpenAuction(bytes32 listingId) {
-        require(  _tokenListings[listingId].releaseTime> block.timestamp && _tokenListings[listingId].status!=ListingStatus.onAuction,"Auction is ended");
+        require(  _tokenListings[listingId].releaseTime> block.timestamp && _tokenListings[listingId].status==ListingStatus.onAuction,"Auction is ended");
         _;
     }
     modifier canFullfillBid(bytes32 listingId) {
-        require(  _tokenListings[listingId].releaseTime< block.timestamp && _tokenListings[listingId].status!=ListingStatus.onAuction,"Auction is ended");
+        require(  _tokenListings[listingId].releaseTime< block.timestamp && _tokenListings[listingId].status==ListingStatus.onAuction,"Auction is ended");
         _;
     }
     modifier isOpenForSale(bytes32 listingId) {
@@ -259,7 +259,7 @@ modifier isNotZero(uint256 val) {
         uint256 fineAmount ;
          uint256 remaining;
         // if realse time < now , pay 
-
+        if(status!=ListingStatus.onAuction){
         if(releaseTime<block.timestamp){
           // if it's not auction ? pay, 
          ( fineAmount ,  remaining)= _getDeListingQualAmount(listingPrice);
@@ -269,13 +269,16 @@ modifier isNotZero(uint256 val) {
         }else{
        remaining=  _getListingQualAmount( listingPrice);
         }
+          // update user reserves
+         // reserve nigative couldn't be at any case
+        require( _updateUserReserves(_msgSender() ,remaining,false)>=0,"negative reserve is not allowed");
+  
+        }
+       
 
         // trnasfer token
         require( _safeNFTTransfer(_NFTContract,tokenId,address(this), owner),"NFT token couldn't be transfered");
-         // update user reserves
-         // reserve nigative couldn't be at any case
-        require( _updateUserReserves(_msgSender() ,remaining,false)>=0,"negative reserve is not allowed");
-        // finish listing 
+             // finish listing 
          _finalizeListing(listingId,address(0),ListingStatus.Canceled);
          emit DeListOffMarketplace(listingId,  _NFTContract,  owner,  tokenId,  fineAmount ,  remaining,  releaseTime,  block.timestamp );
         // if bid time is less than 15 min, increase by 15 min
