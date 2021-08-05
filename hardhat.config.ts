@@ -18,6 +18,12 @@ const config: HardhatUserConfig = {
     hardhat: {
         saveDeployments: true,
     },
+    localhost: {
+      url: 'http://127.0.0.1:8545',
+      accounts: [privateKey],
+      chainId:1337,
+        saveDeployments: true,
+    },
     
 testnet_aurora: {
   url: 'https://testnet.aurora.dev',

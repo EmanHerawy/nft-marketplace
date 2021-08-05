@@ -150,13 +150,13 @@ modifier isNotZero(uint256 val) {
     * @dev called by dapps to bid on an auction
     * 
     * @param listingId listing id 
-    * @param tokenAddress nft contract address
-    * @param tokenId token id 
     * @param bidPrice price 
     * @return bidId bid id
      */
-    function bid(bytes32 listingId, address tokenAddress, uint256 tokenId, uint256 bidPrice) 
+    function bid(bytes32 listingId, uint256 bidPrice) 
         external isOpenAuction(listingId) returns (bytes32 bidId){
+           address tokenAddress = _tokenListings[listingId].nFTContract;
+           uint256 tokenId = _tokenListings[listingId].tokenId;
          bidId = keccak256(abi.encodePacked(listingId,tokenAddress,_msgSender(),tokenId));
          // bid should be more than than the mini and more than the last bid
         address lastbidder= bidToListing[listingId].bidder;
