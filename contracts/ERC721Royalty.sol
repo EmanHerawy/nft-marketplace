@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity >=0.8.0;
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./interface/IERC721Royalty.sol";
 /**
  * @author Eman Herawy, StartFi Team
@@ -9,7 +8,6 @@ import "./interface/IERC721Royalty.sol";
  * [ desc ] : erc721 with reoylaty support interface
  */
 contract ERC721Royalty is IERC721Royalty {
-    using SafeMath for uint256;
     mapping (uint256 => address) internal _issuer;
     mapping (uint256 => mapping (address=>Base) ) internal _issuerPercentage;
  
@@ -44,8 +42,7 @@ function royaltyInfo(uint256 _tokenId, uint256 _value) external view  override r
      issuer = _issuer[_tokenId];
     if(issuer!=address(0)){
      Base memory _base=_issuerPercentage[_tokenId][issuer];
-        _royaltyAmount = _value.mul(uint256 (_base.share)).div(uint256(_base.shareSeparator).mul(100));
-    }
+        _royaltyAmount = (_value * uint256(_base.share)) / (uint256(_base.shareSeparator)*100);    }
 }
 // 0x2a55205a
 // 0x2a55205a

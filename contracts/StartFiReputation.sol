@@ -2,7 +2,6 @@
 
 pragma solidity >=0.8.0;
 pragma experimental SMTChecker;
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 /**
@@ -11,7 +10,6 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
  * desc contract to mamange the reputation for startfi users
  */
 contract StartFiReputation  is Context, AccessControlEnumerable {
-    using SafeMath for uint256;
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     mapping (address=>uint256) private userReputation;
@@ -29,9 +27,9 @@ contract StartFiReputation  is Context, AccessControlEnumerable {
         * @return balance : "to" current reputation balance
       */
   function mintReputation(address to, uint256 amount)  external returns(uint256 balance) {
-              require(hasRole(MINTER_ROLE, _msgSender()), "StartFiReputation: must have minter role to mint");
-        balance=userReputation[to].add(amount);
-        _setReputation(to, balance);
+            require(hasRole(MINTER_ROLE, _msgSender()), "StartFiReputation: must have minter role to mint");
+            balance=userReputation[to] + amount;
+            _setReputation(to, balance);
   }
    /**
         * @dev this function is to burn reputation points for the "to"
@@ -44,7 +42,7 @@ contract StartFiReputation  is Context, AccessControlEnumerable {
   function burnReputation(address to, uint256 amount)  external returns(uint256 balance) {
         require(hasRole(BURNER_ROLE, _msgSender()), "StartFiReputation: must have burn role to burn reputation");
         require(userReputation[to]>=amount, "StartFiReputation: Not enought balance");
-        balance=userReputation[to].sub(amount);
+        balance=userReputation[to] - amount;
         _setReputation(to, balance);
   }
   function _setReputation(address to, uint256 amount) internal  {
