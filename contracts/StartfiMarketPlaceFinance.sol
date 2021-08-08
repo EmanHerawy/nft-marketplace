@@ -5,7 +5,6 @@ pragma abicoder v2;
 import "./interface/IStartFiReputation.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./interface/IStartFiStakes.sol";
 import "./MarketPlaceBase.sol";
 
@@ -16,7 +15,6 @@ import "./MarketPlaceBase.sol";
  */
 contract StartfiMarketPlaceFinance is MarketPlaceBase {
  /******************************************* decalrations go here ********************************************************* */
-    using SafeMath for uint256;
     address internal _paymentToken;
     uint256 internal _feeFraction = 1;
     uint256 internal _feeBase = 100;
@@ -54,7 +52,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
   /******************************************* read state functions go here ********************************************************* */
     
     function _calcSum(uint256 a, uint256 b) pure internal returns (uint256 result) {
-        result= a.add(b);        
+        result= a + b;        
     }
     /**
      @dev calculat the platform fees
@@ -63,7 +61,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
      */
     function _calcFees(uint256 price) view internal returns (uint256 fees) {
 
-        fees= price.mul(_feeFraction).div(_feeBase );    
+        fees= (price*_feeFraction)/_feeBase;    
     }
     /**
      @dev calculat the platform fine amount when seller delist before time
@@ -71,7 +69,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
     *@return amount the value that the platform will get
      */
     function _getListingQualAmount(uint256 listingPrice) view internal returns (uint256 amount) {
-        amount= listingPrice.mul(listqualifyPercentage).div( listqualifyPercentageBase);    
+        amount= (listingPrice*listqualifyPercentage)/ listqualifyPercentageBase;    
     }
 /**
      @dev calculat the platform fine amount when seller delist before time
@@ -80,8 +78,8 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
     *@return remaining the value remaing after subtracting the fine
      */
     function _getDeListingQualAmount(uint256 listingPrice) view internal returns (uint256 fineAmount , uint256 remaining) {
-        fineAmount= listingPrice.mul(delistFeesPercentage).div( delistFeesPercentageBase);    
-        remaining =  _getListingQualAmount( listingPrice).sub(fineAmount);
+        fineAmount= (listingPrice * delistFeesPercentage) / delistFeesPercentageBase;    
+        remaining =  _getListingQualAmount( listingPrice) - fineAmount;
     }
       /**
       @dev calculat the platform share when seller call disput
@@ -90,17 +88,17 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
     * @return remaining the value that the auction woner will get
      */
       function _calcBidDisputeFees(uint256 qualifyAmount) view internal returns (uint256 fineAmount , uint256 remaining) {   
-        fineAmount= qualifyAmount.mul(bidPenaltyPercentage).div( bidPenaltyPercentageBase);    
-        remaining = qualifyAmount.sub(fineAmount);
+        fineAmount= (qualifyAmount * bidPenaltyPercentage)/ bidPenaltyPercentageBase;    
+        remaining = qualifyAmount - fineAmount;
     }
    function _getListingFinancialInfo(address _NFTContract,uint256 tokenId, uint256 bidPrice)  view internal returns   (address issuer,uint256 royaltyAmount, uint256 fees, uint256 netPrice) {
              fees = _calcFees(bidPrice);
-      netPrice = bidPrice.sub(fees);
+      netPrice = bidPrice - fees;
           // royalty check
           if(_supportRoyalty(_NFTContract)){
                ( issuer, royaltyAmount) =_getRoyaltyInfo( _NFTContract,  tokenId, bidPrice);
                if(royaltyAmount>0 && issuer!=address(0)){
-                   netPrice= netPrice.sub(royaltyAmount);
+                   netPrice= netPrice - royaltyAmount;
                }
           }
       
@@ -136,7 +134,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
     function _getStakeAllowance(address staker /*,uint256 prevAmount*/) view internal returns (uint256 ) {
         // user can bid multi time, we want to make sure we don't calc the old bid as sperated bid 
         uint256 userActualReserved= userReserves[staker];//.sub(prevAmount);
-        return IStartFiStakes(stakeContract).getReserves( staker).sub(userActualReserved);
+        return IStartFiStakes(stakeContract).getReserves( staker) - userActualReserved;
     }
   
 
@@ -164,8 +162,8 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
   function _addreputationPoints(address seller, address buyer, uint256 amount)  internal returns (uint256 buyerBalance, uint256 sellerBalance ) {
          // calc how much pint for both of them ??
          // TODO: math and logic for calc the point based on the amount
-         uint256 sellerPoints=amount.div(2);
-         uint256 buyerPoints=amount.div(2);
+         uint256 sellerPoints=amount/2;
+         uint256 buyerPoints=amount/ 2;
           sellerBalance= IStartFiReputation(reputationContract).mintReputation(seller,sellerPoints );
           buyerBalance= IStartFiReputation(reputationContract).mintReputation(buyer,buyerPoints );
     }
@@ -200,7 +198,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         * @param isAddition : true if we are adding the new value 
      */
     function _updateUserReserves(address user, uint256 newReserves, bool isAddition) internal returns (uint256 _userReserves) {
-        _userReserves=  isAddition? userReserves[user].add(newReserves): userReserves[user].sub(newReserves);
+        _userReserves=  isAddition? userReserves[user] + newReserves : userReserves[user] - newReserves;
         userReserves[user]=_userReserves;
         return _userReserves;
     }
@@ -214,7 +212,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
      */
      function changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
         require(newFees <= newBase, "Fee fraction exceeded base.");
-          percentage = (newFees. mul( 1000)) .div( newBase);
+          percentage = (newFees * 1000) / newBase;
         require(percentage <= 30 && percentage < 10, "Percentage should be from 1-3 %");
 
         _feeFraction = newFees;
@@ -246,7 +244,7 @@ function _changeReputationContract(address _reputationContract) internal {
 */
 function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
             require(newFees <= newBase, "Fee fraction exceeded base.");
-            percentage = (newFees. mul( 1000)) .div( newBase);
+            percentage = (newFees * 1000)  /  newBase;
             require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
 
             bidPenaltyPercentage =newFees;
@@ -262,7 +260,7 @@ function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal 
 
 function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
             require(newFees <= newBase, "Fee fraction exceeded base.");
-            percentage = (newFees. mul( 1000)) .div( newBase);
+            percentage = (newFees *  1000) / newBase;
             require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
 
             delistFeesPercentage =newFees;
@@ -277,7 +275,7 @@ function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal r
      */
 function _changeListqualifyAmount(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
             require(newFees <= newBase, "Fee fraction exceeded base.");
-            percentage = (newFees. mul( 1000)) .div( newBase);
+            percentage = (newFees * 1000) / newBase;
             require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
 
             listqualifyPercentage =newFees;
