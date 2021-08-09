@@ -5,7 +5,6 @@ pragma solidity >=0.8.0;
 import "./interface/IStartFiStakes.sol";
 import "./interface/IStartFiMarketplace.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /**
  * @author Eman Herawy, StartFi Team
@@ -16,7 +15,6 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract StartfiStakes is Ownable, IStartFiStakes {
     /******************************************* decalrations go here ********************************************************* */
-    using SafeMath for uint256;
     mapping (address=>uint256) stakerReserved;
     address marketplace;
     address stfiToken;
@@ -43,8 +41,7 @@ contract StartfiStakes is Ownable, IStartFiStakes {
 function deposit(address user,uint256 amount) external  {
     require(_getAllowance(_msgSender())>=amount,"Invalid amount");
     _safeTokenTransferFrom(_msgSender(),address(this),amount);
-     stakerReserved[user]= stakerReserved[user].add(amount);
-
+     stakerReserved[user]= stakerReserved[user] + amount;
 }
 function setMarketplace(address _marketplace) external onlyOwner  {
     marketplace=_marketplace;
@@ -59,20 +56,17 @@ function setMarketplace(address _marketplace) external onlyOwner  {
 function withdraw(uint256 amount)  external {
     // TODO:check marketplace user reserves 
     uint256 reserves = IStartFiMarketplace(marketplace).getUserReserved(_msgSender());
-    uint256 allowance = stakerReserved[_msgSender()].sub(reserves);
+    uint256 allowance = stakerReserved[_msgSender()] - reserves;
     require( allowance<=amount,"Invalid amount");
     _safeTokenTransfer(_msgSender(),amount);
-     stakerReserved[_msgSender()]= stakerReserved[_msgSender()].sub(amount);
-
+     stakerReserved[_msgSender()]= stakerReserved[_msgSender()] - amount;
 }
 // punish
 function deduct(address finePayer, address to, uint256 amount) external override onlyMarketplace returns (bool) {
            require( stakerReserved[finePayer]<=amount,"Invalid amount");
-         stakerReserved[finePayer]= stakerReserved[finePayer].sub(amount);
-              stakerReserved[to]= stakerReserved[to].add(amount);
+         stakerReserved[finePayer]= stakerReserved[finePayer] - amount;
+              stakerReserved[to]= stakerReserved[to] + amount;
               return true;
-
-
 }
 //getpoolinfo 
  function getReserves(address owner) external override view returns ( uint256){
