@@ -213,7 +213,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
      function changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
         require(newFees <= newBase, "Fee fraction exceeded base.");
           percentage = (newFees * 1000) / newBase;
-        require(percentage <= 30 && percentage < 10, "Percentage should be from 1-3 %");
+        require(percentage <= 30 && percentage >= 10, "Percentage should be from 1-3 %");
 
         _feeFraction = newFees;
         _feeBase = newBase;
@@ -245,7 +245,7 @@ function _changeReputationContract(address _reputationContract) internal {
 function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
             require(newFees <= newBase, "Fee fraction exceeded base.");
             percentage = (newFees * 1000)  /  newBase;
-            require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+            require(percentage <= 40 && percentage >= 10, "Percentage should be from 1-4 %");
 
             bidPenaltyPercentage =newFees;
             bidPenaltyPercentageBase =newBase;
@@ -261,7 +261,7 @@ function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal 
 function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
             require(newFees <= newBase, "Fee fraction exceeded base.");
             percentage = (newFees *  1000) / newBase;
-            require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+            require(percentage <= 40 && percentage>= 10, "Percentage should be from 1-4 %");
 
             delistFeesPercentage =newFees;
             delistFeesPercentageBase =newBase;
@@ -276,7 +276,7 @@ function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal r
 function _changeListqualifyAmount(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
             require(newFees <= newBase, "Fee fraction exceeded base.");
             percentage = (newFees * 1000) / newBase;
-            require(percentage <= 40 && percentage < 10, "Percentage should be from 1-4 %");
+            require(percentage <= 40 && percentage >= 10, "Percentage should be from 1-4 %");
 
             listqualifyPercentage =newFees;
             listqualifyPercentageBase =newBase;
