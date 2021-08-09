@@ -8,12 +8,13 @@ import { ecsign } from 'ethereumjs-util'
  const {
  
   keccak256,
+  hexlify,
   defaultAbiCoder,
   toUtf8Bytes,
   solidityPack
 } = utils
 
-import { expandTo18Decimals, getApprovalDigest } from './shared/utilities'
+import { expandTo18Decimals, getApprovalDigest,getTransferFromDigest } from './shared/utilities'
 
 import ERC20 from '../artifacts/contracts/StartFiToken.sol/StartFiToken.json'
 
@@ -22,7 +23,8 @@ const name = "StartFiToken";
 const symbol = "STFI";
 const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = expandTo18Decimals(10)
-
+// chainId on testing is 0
+const chainId=0;
 describe('StartFiToken', () => {
   const provider = new MockProvider()
   const [wallet, other] = provider.getWallets()
@@ -33,7 +35,7 @@ describe('StartFiToken', () => {
   })
 
   it('name, symbol, decimals, totalSupply, balanceOf, DOMAIN_SEPARATOR, PERMIT_TYPEHASH', async () => {
-    const name = await token.name()
+    const name = await token.name()    
     expect(name).to.eq('StartFiToken')
     expect(await token.symbol()).to.eq('STFI')
     expect(await token.decimals()).to.eq(18)
@@ -49,7 +51,7 @@ describe('StartFiToken', () => {
             ),
             keccak256(toUtf8Bytes(name)),
             keccak256(toUtf8Bytes('1')),
-            1,
+            chainId,
             token.address
           ]
         )
@@ -100,5 +102,41 @@ describe('StartFiToken', () => {
     expect(await token.balanceOf(other.address)).to.eq(TEST_AMOUNT)
   })
 
- 
+  it('permit', async () => {
+    const nonce = await token.nonces(wallet.address)  
+    const deadline = MaxUint256
+    const digest = await getApprovalDigest(
+      token,
+      { owner: wallet.address, spender: other.address, value: TEST_AMOUNT },
+      nonce,
+      deadline
+    )
+
+    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
+
+    await expect(token.permit(wallet.address, other.address, TEST_AMOUNT, deadline, v, hexlify(r), hexlify(s)))
+      .to.emit(token, 'Approval')
+      .withArgs(wallet.address, other.address, TEST_AMOUNT)
+    expect(await token.allowance(wallet.address, other.address)).to.eq(TEST_AMOUNT)
+    expect(await token.nonces(wallet.address)).to.eq(BigNumber.from(nonce+1))
+  })
+  it('transferWithPermit', async () => {
+    const nonce = await token.nonces(wallet.address)  
+    const deadline = MaxUint256
+    const digest = await getTransferFromDigest(
+      token,
+      { owner: wallet.address, spender: other.address, value: TEST_AMOUNT },
+      nonce,
+      deadline
+    )
+
+    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
+
+    await expect(token.transferWithPermit(wallet.address, other.address, TEST_AMOUNT, deadline, v, hexlify(r), hexlify(s)))
+      .to.emit(token, 'Transfer')
+      .withArgs(wallet.address, other.address, TEST_AMOUNT)
+      expect(await token.balanceOf(wallet.address)).to.eq(TOTAL_SUPPLY.sub(TEST_AMOUNT))
+      expect(await token.balanceOf(other.address)).to.eq(TEST_AMOUNT)
+      expect(await token.nonces(wallet.address)).to.eq(BigNumber.from(nonce+1))
+  })
 })
