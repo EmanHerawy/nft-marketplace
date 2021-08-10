@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity >=0.8.0;
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./interface/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
  import "./interface/IERC721RoyaltyMinter.sol";
 /**
@@ -63,6 +63,27 @@ function MintNFTWithRoyalty(address to, string memory _tokenURI,uint8 share,uint
  return  IERC721RoyaltyMinter(_NFTToken). mintWithRoyalty(to, _tokenURI, share,base);
 }
  /**
+    * @notice  caller should sing a message to premit the contract to transfer the fees .
+    * @dev : tokens are transfered directly to the admin wallet . Called by the token issuer .
+    * @param to: NFT issuer.
+    * @param _tokenURI: serialized json object that has the following data ( category, name , desc , tages, ipfs hash).
+    * @param share: eg. 25.
+    * @param base: eg. 10 .
+    * @param deadline:  must be timestamp in future .
+    * @param v needed to recover the public key
+    * @param r : normal output of an ECDSA signature
+    * @param s: normal output of an ECDSA signature
+    * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+    * @return token id .
+     */
+function MintNFTWithRoyaltyPremit(address to, string memory _tokenURI,uint8 share,uint8 base, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns(uint256){
+   
+    IERC20(_paymentToken). permit(_msgSender(), address (this), _fees,  deadline,  v,  r,  s);
+    require(_getAllowance(_msgSender())>=_fees,"Not enough fees paid");
+    IERC20(_paymentToken). transferFrom(_msgSender(),owner(),  _fees);
+    return  IERC721RoyaltyMinter(_NFTToken). mintWithRoyalty(to, _tokenURI, share,base);
+}
+ /**
     * @notice  caller should approve the contract to transfer the fees first.
     * @dev : tokens are transfered directly to the admin wallet. Called by the token issuer .
     * @param to: NFT issuer.
@@ -70,6 +91,24 @@ function MintNFTWithRoyalty(address to, string memory _tokenURI,uint8 share,uint
     * @return token id .
      */
 function MintNFTWithoutRoyalty(address to, string memory _tokenURI) external returns(uint256){
+    require(_getAllowance(_msgSender())>=_fees,"Not enough fees paid");
+    IERC20(_paymentToken). transferFrom(_msgSender(),owner(),  _fees);
+ return  IERC721RoyaltyMinter(_NFTToken). mint(to, _tokenURI);
+}
+ /**
+    * @notice  caller should approve the contract to transfer the fees first.
+    * @dev : tokens are transfered directly to the admin wallet. Called by the token issuer .
+    * @param to: NFT issuer.
+    * @param _tokenURI: serialized json object that has the following data ( category, name , desc , tages, ipfs hash).
+    * @param deadline:  must be timestamp in future .
+    * @param v needed to recover the public key
+    * @param r : normal output of an ECDSA signature
+    * @param s: normal output of an ECDSA signature
+    * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+   * @return token id .
+     */
+function MintNFTWithoutRoyaltyPremit(address to, string memory _tokenURI, uint256 deadline, uint8 v, bytes32 r, bytes32 s) external returns(uint256){
+    IERC20(_paymentToken). permit(_msgSender(), address (this), _fees,  deadline,  v,  r,  s);
     require(_getAllowance(_msgSender())>=_fees,"Not enough fees paid");
     IERC20(_paymentToken). transferFrom(_msgSender(),owner(),  _fees);
  return  IERC721RoyaltyMinter(_NFTToken). mint(to, _tokenURI);
