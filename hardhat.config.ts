@@ -92,7 +92,7 @@ testnet_matic: {
     imports: 'imports'
 },
   mocha: {
-    timeout: 20000
+    timeout: 200000000
   },
   docgen: {
     path: './docs',
