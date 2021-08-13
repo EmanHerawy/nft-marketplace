@@ -10,10 +10,10 @@ import "./interface/IERC20.sol";
 
 /**
  * @author Eman Herawy, StartFi Team
- *@title StartFiTokenDistrbution
+ *@title StartFiTokenDistribution
  * 
  */
-contract StartFiTokenDistrbution is  Ownable ,Pausable,ReentrancyGuard {
+contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
   
   /******************************************* decalrations go here ********************************************************* */
  	uint256 constant public decimals = 1 ether;
