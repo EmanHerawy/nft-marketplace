@@ -17,11 +17,17 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
   
   /******************************************* decalrations go here ********************************************************* */
 	
-	address[2] public tokenOwners ; /* Tracks distributions mapping (iterable) */ 
+	address[8] public  tokenOwners =[0xAA4e7Ab6dccc1b673036B6FF78fe8af3402801c6,
+			 0x438A078871C6e24663381CDcC7E85C42a0BD5a92,
+			 0x0140d69F99531C10Da3094b5E5Ca758FA0F31579,
+			 0x5deBAB9052E18f9E54eCECdD93Ee713d0ED64CBd,
+			 0x907CB9388f6C78D1179b82A2F6Cc2aB4Ef1534E7,
+			 0xcDC0b435861d452a0165dD939a8a31932055B08B,
+			 0x492eC1E39724Dfc7F4d2b42083BCeb339eBaf18f,
+			 0x801b877ECD8ef397F8560CbFAABd1C910BC8230E]; /* Tracks distributions mapping (iterable) */ 
 	uint256 public TGEDate = 0; /* Date From where the distribution starts (TGE) */
 	
-	uint256 constant public month = 30 days;
-	uint256 constant public year = 365 days;
+
 	uint256 public lastDateDistribution = 0;
   
 	
@@ -44,85 +50,134 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
  /******************************************* constructor goes here ********************************************************* */
 
  	constructor(address _erc20, uint256 _time,address _owner){
+		require(_erc20!=address(0)&& _owner!=address(0),"Zero addresses are not allowed");
 		erc20=_erc20;
 		TGEDate =	_time<block.timestamp?block.timestamp:_time;
 		transferOwnership(_owner);
-		// /* Seed */
-		// setInitialDistribution(0xc97, 3000000, 0 /* No Lock */);
-		// setInitialDistribution(0xc97, 1500000, 1 * month); /* After 1 Month */
-		// setInitialDistribution(0xc97, 1500000, 2 * month); /* After 2 Months */
-		// setInitialDistribution(0xc97, 1500000, 3 * month); /* After 3 Months */
-		// setInitialDistribution(0xc97, 1500000, 4 * month); /* After 4 Months */
-		// setInitialDistribution(0xc97, 1500000, 5 * month); /* After 5 Months */
-		// setInitialDistribution(0xc97, 1500000, 6 * month); /* After 6 Months */
-		// setInitialDistribution(0xc97, 1500000, 7 * month); /* After 7 Months */
-		// setInitialDistribution(0xc97, 1500000, 8 * month); /* After 8 Months */
-		// setInitialDistribution(0xc97, 1500000, 9 * month); /* After 9 Months */
-		// setInitialDistribution(0xc97, 1500000, 10 * month); /* After 10 Months */
+			uint256  month = 30 days;
+	uint256  year = 365 days;
 
-		// /* Private Sale */
-		// setInitialDistribution(0xc1, 6875000, 0 /* No Lock */);
-		// setInitialDistribution(0xc1, 6875000, 1 * month); /* After 1 Month */
-		// setInitialDistribution(0xc1, 6875000, 2 * month); /* After 2 Months */
-		// setInitialDistribution(0xc1, 6875000, 3 * month); /* After 3 Months */
-		// setInitialDistribution(0xc1, 6875000, 4 * month); /* After 4 Months */
-		// setInitialDistribution(0xc1, 6875000, 5 * month); /* After 5 Months */
-		// setInitialDistribution(0xc1, 6875000, 6 * month); /* After 6 Months */
-		// setInitialDistribution(0xc1, 6875000, 7 * month); /* After 7 Months */
-		// setInitialDistribution(0xc1, 6875000, 8 * month); /* After 8 Months */
-		// setInitialDistribution(0xc1, 6875000, 9 * month); /* After 9 Months */
-		// setInitialDistribution(0xc1, 6875000, 10 * month); /* After 10 Months */
-
-		// /* Team & Advisors */
-		// setInitialDistribution(0x5d, 2500000, year);
-		// setInitialDistribution(0x5d, 2500000, year.add(3 * month)); /* After 3 Month */
-		// setInitialDistribution(0x5d, 2500000, year.add(6 * month)); /* After 6 Month */
-		// setInitialDistribution(0x5d, 2500000, year.add(9 * month)); /* After 9 Month */
-
-		// /* Network Growth Growth */
-		// setInitialDistribution(0x36, 3000000, 0 /* No Lock */);
-		// setInitialDistribution(0x36, 1000000, 1 * month); /* After 1 Month */
-		// setInitialDistribution(0x36, 1000000, 2 * month); /* After 2 Months */
-		// setInitialDistribution(0x36, 1000000, 3 * month); /* After 3 Months */
-		// setInitialDistribution(0x36, 1000000, 4 * month); /* After 4 Months */
-		// setInitialDistribution(0x36, 1000000, 5 * month); /* After 5 Months */
-		// setInitialDistribution(0x36, 1000000, 6 * month); /* After 6 Months */
-		// setInitialDistribution(0x36, 1000000, 7 * month); /* After 7 Months */
-		// setInitialDistribution(0x36, 1000000, 8 * month); /* After 8 Months */
-		// setInitialDistribution(0x36, 1000000, 9 * month); /* After 9 Months */
-		// setInitialDistribution(0x36, 1000000, 10 * month); /* After 10 Months */
-		// setInitialDistribution(0x36, 1000000, 11 * month); /* After 11 Months */
-		// setInitialDistribution(0x36, 1000000, 12 * month); /* After 12 Months */
-
-		// /* Liquidity Fund */
-		// setInitialDistribution(0xDD, 5000000, 0 /* No Lock */);
-		// setInitialDistribution(0xDD, 2000000, 1 * month); /* After 1 Month */
-		// setInitialDistribution(0xDD, 2000000, 2 * month); /* After 2 Months */
-		// setInitialDistribution(0xDD, 2000000, 3 * month); /* After 3 Months */
-		// setInitialDistribution(0xDD, 2000000, 4 * month); /* After 4 Months */
-		// setInitialDistribution(0xDD, 2000000, 5 * month); /* After 5 Months */
-		// setInitialDistribution(0xDD, 1500000, 6 * month); /* After 6 Months */
-		// setInitialDistribution(0xDD, 1000000, 7 * month); /* After 7 Months */
-		// setInitialDistribution(0xDD, 1000000, 8 * month); /* After 8 Months */
-		// setInitialDistribution(0xDD, 1000000, 9 * month); /* After 9 Months */
-		// setInitialDistribution(0xDD, 1000000, 10 * month); /* After 10 Months */
-		// setInitialDistribution(0xDD, 1000000, 11 * month); /* After 11 Months */
-		// setInitialDistribution(0xDD, 1000000, 12 * month); /* After 12 Months */
-
-		// /* Foundational Reserve Fund */
-		// setInitialDistribution(0x20, 2500000, year);
-		// setInitialDistribution(0x20, 2500000, year.add(3 * month)); /* After 3 Month */
-		// setInitialDistribution(0x20, 2500000, year.add(6 * month)); /* After 6 Month */
-		// setInitialDistribution(0x20, 2500000, year.add(9 * month)); /* After 9 Month */
+			address seedAccount =tokenOwners[0];
+			address privateSaleAccount =tokenOwners[1];
+			address treasuryFundAccount =tokenOwners[2];
+			address liquidityAccount =tokenOwners[3];
+			address communityPartnerAccount =tokenOwners[4];
+			address rewardAccount =tokenOwners[5];
+			address teamAccount =tokenOwners[6];
+			address advisorAccount =tokenOwners[7];
 		
-		// test 
-		//tokenOwners.push(_address);
-		_setInitialDistribution(msg.sender, 10, 0 /* No Lock */);
-		_setInitialDistribution(_owner, 10, 0 /* No Lock */);
-		_setInitialDistribution(msg.sender, 50, 10 * month); /* After 1 Month */
-		_setInitialDistribution(_owner, 100, 10 * month); /* After 1 Month */
-		tokenOwners[0]=msg.sender;
-		tokenOwners[1]=_owner;
+/* Seed */
+
+_setInitialDistribution(seedAccount, 1500000, 0 /* No Lock */);
+_setInitialDistribution(seedAccount, 850000, 1 * month); /* After 1 Month */
+_setInitialDistribution(seedAccount, 850000, 2 * month); /* After 2 Months */
+_setInitialDistribution(seedAccount, 850000, 3 * month); /* After 3 Months */
+_setInitialDistribution(seedAccount, 850000, 4 * month); /* After 4 Months */
+_setInitialDistribution(seedAccount, 850000, 5 * month); /* After 5 Months */
+_setInitialDistribution(seedAccount, 850000, 6 * month); /* After 6 Months */
+_setInitialDistribution(seedAccount, 850000, 7 * month); /* After 7 Months */
+_setInitialDistribution(seedAccount, 850000, 8 * month); /* After 8 Months */
+_setInitialDistribution(seedAccount, 850000, 9 * month); /* After 9 Months */
+_setInitialDistribution(seedAccount, 850000, 10 * month); /* After 10 Months */
+
+/* Private Sale */
+_setInitialDistribution(privateSaleAccount, 2000000, 0 /* No Lock */);
+_setInitialDistribution(privateSaleAccount, 800000, 1 * month); /* After 1 Month */
+_setInitialDistribution(privateSaleAccount, 800000, 2 * month); /* After 2 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 3 * month); /* After 3 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 4 * month); /* After 4 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 5 * month); /* After 5 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 6 * month); /* After 6 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 7 * month); /* After 7 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 8 * month); /* After 8 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 9 * month); /* After 9 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 10 * month); /* After 10 Months */
+
+/* Treasury Reserve Fund */
+_setInitialDistribution(treasuryFundAccount, 2500000, 2 * year); /* After Two Years */
+_setInitialDistribution(treasuryFundAccount, 2500000, 2 * year+(3 * month)); /* After 3 Month */
+_setInitialDistribution(treasuryFundAccount, 2500000, 2 * year+(6 * month)); /* After 6 Month */
+_setInitialDistribution(treasuryFundAccount, 2500000, 2 * year+(9 * month)); /* After 9 Month */
+
+/* Liquidity Fund */
+_setInitialDistribution(liquidityAccount, 1000000, 0 /* No Lock */);
+_setInitialDistribution(liquidityAccount, 600000, 1 * month); /* After 1 Month */
+_setInitialDistribution(liquidityAccount, 600000, 2 * month); /* After 2 Months */
+_setInitialDistribution(liquidityAccount, 600000, 3 * month); /* After 3 Months */
+_setInitialDistribution(liquidityAccount, 600000, 4 * month); /* After 4 Months */
+_setInitialDistribution(liquidityAccount, 600000, 5 * month); /* After 5 Months */
+_setInitialDistribution(liquidityAccount, 600000, 6 * month); /* After 6 Months */
+_setInitialDistribution(liquidityAccount, 600000, 7 * month); /* After 7 Months */
+_setInitialDistribution(liquidityAccount, 600000, 8 * month); /* After 8 Months */
+_setInitialDistribution(liquidityAccount, 600000, 9 * month); /* After 9 Months */
+_setInitialDistribution(liquidityAccount, 600000, 10 * month); /* After 10 Months */
+
+/* Community and Partnerships */
+_setInitialDistribution(communityPartnerAccount, 1000000, 1 * month); /* After 1 Month */
+_setInitialDistribution(communityPartnerAccount, 1000000, 2 * month); /* After 2 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 3 * month); /* After 3 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 4 * month); /* After 4 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 5 * month); /* After 5 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 6 * month); /* After 6 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 7 * month); /* After 7 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 8 * month); /* After 8 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 9 * month); /* After 9 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 10 * month); /* After 10 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 11 * month); /* After 11 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 12 * month); /* After 12 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 13 * month); /* After 13 Month */
+_setInitialDistribution(communityPartnerAccount, 1000000, 14 * month); /* After 14 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 15 * month); /* After 15 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 16 * month); /* After 16 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 17 * month); /* After 17 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 18 * month); /* After 18 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 19 * month); /* After 19 Months */
+_setInitialDistribution(communityPartnerAccount, 1000000, 20 * month); /* After 20 Months */
+
+/* Rewards & Loyalty */
+_setInitialDistribution(rewardAccount, 1000000, 0 ); /* No Lock */
+_setInitialDistribution(rewardAccount, 1000000, 7 * month); /* After 7 Months */
+_setInitialDistribution(rewardAccount, 1000000, 8 * month); /* After 8 Months */
+_setInitialDistribution(rewardAccount, 1000000, 9 * month); /* After 9 Months */
+_setInitialDistribution(rewardAccount, 1000000, 10 * month); /* After 10 Months */
+_setInitialDistribution(rewardAccount, 1000000, 11 * month); /* After 11 Months */
+_setInitialDistribution(rewardAccount, 1000000, 12 * month); /* After 12 Months */
+_setInitialDistribution(rewardAccount, 1000000, 13 * month); /* After 13 Months */
+_setInitialDistribution(rewardAccount, 1000000, 14 * month); /* After 14 Months */
+_setInitialDistribution(rewardAccount, 1000000, 15 * month); /* After 15 Months */
+_setInitialDistribution(rewardAccount, 1000000, 16 * month); /* After 16 Months */
+_setInitialDistribution(rewardAccount, 1000000, 17 * month); /* After 17 Month */
+_setInitialDistribution(rewardAccount, 1000000, 18 * month); /* After 18 Months */
+_setInitialDistribution(rewardAccount, 1000000, 19 * month); /* After 19 Months */
+_setInitialDistribution(rewardAccount, 1000000, 20 * month); /* After 20 Months */
+_setInitialDistribution(rewardAccount, 1000000, 21 * month); /* After 21 Months */
+_setInitialDistribution(rewardAccount, 1000000, 22 * month); /* After 22 Months */
+_setInitialDistribution(rewardAccount, 1000000, 23 * month); /* After 23 Months */
+_setInitialDistribution(rewardAccount, 1000000, 24 * month); /* After 24 Months */
+_setInitialDistribution(rewardAccount, 1000000, 25 * month); /* After 25 Months */
+_setInitialDistribution(rewardAccount, 1000000, 26 * month); /* After 26 Months */
+_setInitialDistribution(rewardAccount, 1000000, 27 * month); /* After 27 Months */
+_setInitialDistribution(rewardAccount, 1000000, 28 * month); /* After 28 Months */
+_setInitialDistribution(rewardAccount, 1000000, 29 * month); /* After 29 Months */
+_setInitialDistribution(rewardAccount, 1000000, 30 * month); /* After 30 Months */
+
+/* Team */
+_setInitialDistribution(teamAccount, 2000000, 6 * month); /* After 6 Months */
+_setInitialDistribution(teamAccount, 2000000, 9 * month); /* After 9 Months */
+_setInitialDistribution(teamAccount, 2000000, 12 * month); /* After 12 Months */
+_setInitialDistribution(teamAccount, 2000000, 15 * month); /* After 15 Months */
+_setInitialDistribution(teamAccount, 2000000, 18 * month); /* After 18 Months */
+
+/* Advisors */
+_setInitialDistribution(advisorAccount, 1000000, 3 * month); /* After 3 Months */
+_setInitialDistribution(advisorAccount, 1000000, 6 * month); /* After 6 Months */
+_setInitialDistribution(advisorAccount, 1000000, 9 * month); /* After 9 Months */
+_setInitialDistribution(advisorAccount, 1000000, 12 * month); /* After 12 Months */
+_setInitialDistribution(advisorAccount, 1000000, 15 * month); /* After 15 Months */
+_setInitialDistribution(advisorAccount, 1000000, 18 * month); /* After 18 Months */
+_setInitialDistribution(advisorAccount, 1000000, 21 * month); /* After 21 Months */
+
+		
 	}
 
   /******************************************* modifiers go here ********************************************************* */
@@ -137,7 +192,7 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
 
   /******************************************* read state functions go here ********************************************************* */
 
-function getBeneficiaryPoolLength(address beneficary) view public returns (uint256 arrayLneght) {
+function getBeneficiaryPoolLength(address beneficary) view external returns (uint256 arrayLneght) {
 	return _distributions[beneficary].length;
 }
 function getBeneficiaryPoolInfo(address beneficary, uint256 index) view external returns (	uint256 amountAllocated,
@@ -162,7 +217,7 @@ function getBeneficiaryPoolInfo(address beneficary, uint256 index) view external
      *
      * - the caller must be the owner.
      */
-    function pause() public virtual onlyOwner whenNotPaused {
+    function pause() external virtual onlyOwner whenNotPaused {
         _pause();
     }
 
@@ -175,7 +230,7 @@ function getBeneficiaryPoolInfo(address beneficary, uint256 index) view external
      *
      * - the caller must be the owner.
      */
-    function unpause() public virtual onlyOwner whenPaused {
+    function unpause() external virtual onlyOwner whenPaused {
         _unpause();
     }
 	/**

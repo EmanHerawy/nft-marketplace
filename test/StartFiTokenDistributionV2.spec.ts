@@ -5,11 +5,29 @@ import { Contract } from 'ethers'
 import { solidity, MockProvider, createFixtureLoader,deployContract } from 'ethereum-waffle'
 import { tokenFixture } from './shared/fixtures'
 import StartFiTokenDistribution from '../artifacts/contracts/StartFiTokenDistributionV2.sol/StartFiTokenDistributionV2.json'
+import { expandTo18Decimals } from './shared/utilities'
 
 chai.use(solidity)
 let startfiToken: Contract
 let tokenDistrbution: Contract
-let TEST_AMOUNT=5000000;
+let TEST_AMOUNT= expandTo18Decimals(10000);
+ 
+const  tokenOwners =["0xAA4e7Ab6dccc1b673036B6FF78fe8af3402801c6",
+  "0x438A078871C6e24663381CDcC7E85C42a0BD5a92",
+  "0x0140d69F99531C10Da3094b5E5Ca758FA0F31579",
+  "0x5deBAB9052E18f9E54eCECdD93Ee713d0ED64CBd",
+  "0x907CB9388f6C78D1179b82A2F6Cc2aB4Ef1534E7",
+  "0xcDC0b435861d452a0165dD939a8a31932055B08B",
+  "0x492eC1E39724Dfc7F4d2b42083BCeb339eBaf18f",
+  "0x801b877ECD8ef397F8560CbFAABd1C910BC8230E"]
+  const seedAccount =tokenOwners[0];
+  const privateSaleAccount =tokenOwners[1];
+  const treasuryFundAccount =tokenOwners[2];
+  const liquidityAccount =tokenOwners[3];
+  const communityPartnerAccount =tokenOwners[4];
+  const rewardAccount =tokenOwners[5];
+  const teamAccount =tokenOwners[6];
+  const advisorAccount =tokenOwners[7];
 describe('StartFi Token Distribution V 2', () => {
   const provider = new MockProvider()
   const [wallet, other] = provider.getWallets()
@@ -36,12 +54,19 @@ it('erc20, paused, owner, tokenOwners', async () => {
   expect(erc20).to.eq(startfiToken.address)
   expect(await tokenDistrbution.paused()).to.eq(false)
   expect(await tokenDistrbution.owner()).to.eq(wallet.address)
-  expect(await tokenDistrbution.tokenOwners(0)).to.eq(wallet.address)
-  expect(await tokenDistrbution.getBeneficiaryPoolLength(wallet.address)).to.eq(4)
-
+  expect(await tokenDistrbution.tokenOwners(0)).to.eq(seedAccount)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(seedAccount)).to.eq(11)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(privateSaleAccount)).to.eq(11)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(treasuryFundAccount)).to.eq(4)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(liquidityAccount)).to.eq(11)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(communityPartnerAccount)).to.eq(20)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(rewardAccount)).to.eq(25)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(teamAccount)).to.eq(5)
+  expect(await tokenDistrbution.getBeneficiaryPoolLength(advisorAccount)).to.eq(7)
+ 
   
-  const DistributionStep = await tokenDistrbution.getBeneficiaryPoolInfo(wallet.address,0)
-  console.log(DistributionStep,'DistributionStep');
+  // const DistributionStep = await tokenDistrbution.getBeneficiaryPoolInfo(seedAccount,0)
+  // console.log(DistributionStep,'DistributionStep');
 
 
   expect(await startfiToken.balanceOf(tokenDistrbution.address)).to.eq(TEST_AMOUNT)
