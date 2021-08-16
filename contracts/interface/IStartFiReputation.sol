@@ -7,11 +7,10 @@ pragma solidity 0.8.7;
  *@title  Startfi Reputation contract
  * desc contract to mamange the reputation for startfi users
  */
-interface IStartFiReputation   {
+interface IStartFiReputation {
+    function mintReputation(address to, uint256 amount) external returns (uint256 balance);
 
+    function burnReputation(address to, uint256 amount) external returns (uint256 balance);
 
-  function mintReputation(address to, uint256 amount)  external returns(uint256 balance) ;
-  function burnReputation(address to, uint256 amount)  external returns(uint256 balance) ;
-
- function getUserReputation(address user) view external returns (uint256 balance) ;
+    function getUserReputation(address user) external view returns (uint256 balance);
 }
