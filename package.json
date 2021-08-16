@@ -20,6 +20,7 @@
     "solc": "0.5.16"
   },
   "dependencies": {
+    "@nomiclabs/hardhat-etherscan": "^2.1.4",
     "@openzeppelin/contracts": "^4.1.0",
     "@types/node": "^16.0.0",
     "chai-ethers": "0.0.1",

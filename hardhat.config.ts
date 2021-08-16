@@ -5,6 +5,7 @@ import 'hardhat-deploy-ethers';
 import "hardhat-docgen";
 import "hardhat-gas-reporter";
 import "./tasks/accounts";
+import "@nomiclabs/hardhat-etherscan";
 
 const fs = require('fs');
 const privateKey = fs.readFileSync("privateKey.secret").toString().trim();
@@ -53,13 +54,22 @@ testnet_matic: {
   chainId: 80001,
   gasPrice: 120 * 1000000000
 },
-    ropsten: {
-      url: `https://eth-ropsten.alchemyapi.io/v2/I2yG1s2IIlfmeO2FW3_FHWr_fm_4KLch`,
+ 
+      ropsten: {
+        url: `https://eth-ropsten.alchemyapi.io/v2/${alchemyKey}`,
+        saveDeployments: true,
+        accounts: [privateKey],
+      },
+      mainnet: {
+        url: `https://eth-mainnet.alchemyapi.io/v2/${alchemyKey}`,
       saveDeployments: true,
       accounts: [privateKey],
+      loggingEnabled:true,
+      throwOnTransactionFailures:true
+
     },
     rinkeby: {
-      url: "https://eth-mainnet.alchemyapi.io/v2/123abc123abc123abc123abc123abcde",
+      url: `https://eth-rinkeby.alchemyapi.io/v2/${alchemyKey}`,
       saveDeployments: true,
       accounts: [privateKey],
     }
@@ -155,6 +165,11 @@ testnet_matic: {
     enabled: process.env.REPORT_GAS ? true : false,
     // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     maxMethodDiff: 10,
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: "your key"
   },
   // paths: {
   //   sources: "./contracts",

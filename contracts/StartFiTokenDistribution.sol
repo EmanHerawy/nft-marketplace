@@ -17,7 +17,7 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
   
   /******************************************* decalrations go here ********************************************************* */
 	
-	address[8] public  tokenOwners =[0xAA4e7Ab6dccc1b673036B6FF78fe8af3402801c6,
+		address[8] public  tokenOwners =[0xAA4e7Ab6dccc1b673036B6FF78fe8af3402801c6,
 			 0x438A078871C6e24663381CDcC7E85C42a0BD5a92,
 			 0x0140d69F99531C10Da3094b5E5Ca758FA0F31579,
 			 0x5deBAB9052E18f9E54eCECdD93Ee713d0ED64CBd,
@@ -25,11 +25,7 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
 			 0xcDC0b435861d452a0165dD939a8a31932055B08B,
 			 0x492eC1E39724Dfc7F4d2b42083BCeb339eBaf18f,
 			 0x801b877ECD8ef397F8560CbFAABd1C910BC8230E]; /* Tracks distributions mapping (iterable) */ 
-	uint256 public TGEDate = 0; /* Date From where the distribution starts (TGE) */
-	
-
-	uint256 public lastDateDistribution = 0;
-  
+	uint256 public TGEDate = 0; /* Date From where the distribution starts (TGE) */  
 	
 	mapping(address => DistributionStep[]) private _distributions; /* Distribution object */
 	
@@ -37,9 +33,8 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
 
 	struct DistributionStep {
 		uint256 amountAllocated;
-		uint256 currentAllocated;
-		uint256 unlockDay;
-		uint256 amountSent;
+ 		uint256 unlockTime;
+		bool sent;
 	}
 
 // events 
@@ -50,7 +45,8 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
  /******************************************* constructor goes here ********************************************************* */
 
  	constructor(address _erc20, uint256 _time,address _owner){
-		require(_erc20!=address(0)&& _owner!=address(0),"Zero addresses are not allowed");
+			require(_erc20!=address(0)&& _owner!=address(0),"Zero addresses are not allowed");
+
 		erc20=_erc20;
 		TGEDate =	_time<block.timestamp?block.timestamp:_time;
 		transferOwnership(_owner);
@@ -65,13 +61,11 @@ contract StartFiTokenDistribution is  Ownable ,Pausable,ReentrancyGuard {
 			address rewardAccount =tokenOwners[5];
 			address teamAccount =tokenOwners[6];
 			address advisorAccount =tokenOwners[7];
-		
+
 /* Seed */
 
 _setInitialDistribution(seedAccount, 1500000, 0 /* No Lock */);
-_setInitialDistribution(seedAccount, 850000, 1 * month); /* After 1 Month */
-_setInitialDistribution(seedAccount, 850000, 2 * month); /* After 2 Months */
-_setInitialDistribution(seedAccount, 850000, 3 * month); /* After 3 Months */
+_setInitialDistribution(seedAccount, 850000, 3 * month); /* After 3 Month */
 _setInitialDistribution(seedAccount, 850000, 4 * month); /* After 4 Months */
 _setInitialDistribution(seedAccount, 850000, 5 * month); /* After 5 Months */
 _setInitialDistribution(seedAccount, 850000, 6 * month); /* After 6 Months */
@@ -79,12 +73,12 @@ _setInitialDistribution(seedAccount, 850000, 7 * month); /* After 7 Months */
 _setInitialDistribution(seedAccount, 850000, 8 * month); /* After 8 Months */
 _setInitialDistribution(seedAccount, 850000, 9 * month); /* After 9 Months */
 _setInitialDistribution(seedAccount, 850000, 10 * month); /* After 10 Months */
+_setInitialDistribution(seedAccount, 850000, 11 * month); /* After 11 Months */
+_setInitialDistribution(seedAccount, 850000, 12 * month); /* After 12 Months */
 
 /* Private Sale */
 _setInitialDistribution(privateSaleAccount, 2000000, 0 /* No Lock */);
-_setInitialDistribution(privateSaleAccount, 800000, 1 * month); /* After 1 Month */
-_setInitialDistribution(privateSaleAccount, 800000, 2 * month); /* After 2 Months */
-_setInitialDistribution(privateSaleAccount, 800000, 3 * month); /* After 3 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 3 * month); /* After 3 Month */
 _setInitialDistribution(privateSaleAccount, 800000, 4 * month); /* After 4 Months */
 _setInitialDistribution(privateSaleAccount, 800000, 5 * month); /* After 5 Months */
 _setInitialDistribution(privateSaleAccount, 800000, 6 * month); /* After 6 Months */
@@ -92,6 +86,8 @@ _setInitialDistribution(privateSaleAccount, 800000, 7 * month); /* After 7 Month
 _setInitialDistribution(privateSaleAccount, 800000, 8 * month); /* After 8 Months */
 _setInitialDistribution(privateSaleAccount, 800000, 9 * month); /* After 9 Months */
 _setInitialDistribution(privateSaleAccount, 800000, 10 * month); /* After 10 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 11 * month); /* After 11 Months */
+_setInitialDistribution(privateSaleAccount, 800000, 12 * month); /* After 12 Months */
 
 /* Treasury Reserve Fund */
 _setInitialDistribution(treasuryFundAccount, 2500000, 2 * year); /* After Two Years */
@@ -101,16 +97,9 @@ _setInitialDistribution(treasuryFundAccount, 2500000, 2 * year+(9 * month)); /* 
 
 /* Liquidity Fund */
 _setInitialDistribution(liquidityAccount, 1000000, 0 /* No Lock */);
-_setInitialDistribution(liquidityAccount, 600000, 1 * month); /* After 1 Month */
-_setInitialDistribution(liquidityAccount, 600000, 2 * month); /* After 2 Months */
-_setInitialDistribution(liquidityAccount, 600000, 3 * month); /* After 3 Months */
-_setInitialDistribution(liquidityAccount, 600000, 4 * month); /* After 4 Months */
-_setInitialDistribution(liquidityAccount, 600000, 5 * month); /* After 5 Months */
-_setInitialDistribution(liquidityAccount, 600000, 6 * month); /* After 6 Months */
-_setInitialDistribution(liquidityAccount, 600000, 7 * month); /* After 7 Months */
-_setInitialDistribution(liquidityAccount, 600000, 8 * month); /* After 8 Months */
-_setInitialDistribution(liquidityAccount, 600000, 9 * month); /* After 9 Months */
-_setInitialDistribution(liquidityAccount, 600000, 10 * month); /* After 10 Months */
+_setInitialDistribution(liquidityAccount, 2000000, 1 * month); /* After 1 Month */
+_setInitialDistribution(liquidityAccount, 2000000, 2 * month); /* After 2 Months */
+_setInitialDistribution(liquidityAccount, 2000000, 3 * month); /* After 3 Months */
 
 /* Community and Partnerships */
 _setInitialDistribution(communityPartnerAccount, 1000000, 1 * month); /* After 1 Month */
@@ -176,8 +165,8 @@ _setInitialDistribution(advisorAccount, 1000000, 12 * month); /* After 12 Months
 _setInitialDistribution(advisorAccount, 1000000, 15 * month); /* After 15 Months */
 _setInitialDistribution(advisorAccount, 1000000, 18 * month); /* After 18 Months */
 _setInitialDistribution(advisorAccount, 1000000, 21 * month); /* After 21 Months */
+	
 
-		
 	}
 
   /******************************************* modifiers go here ********************************************************* */
@@ -192,17 +181,15 @@ _setInitialDistribution(advisorAccount, 1000000, 21 * month); /* After 21 Months
 
   /******************************************* read state functions go here ********************************************************* */
 
-function getBeneficiaryPoolLength(address beneficary) view external returns (uint256 arrayLneght) {
+function getBeneficiaryPoolLength(address beneficary) view public returns (uint256 arrayLneght) {
 	return _distributions[beneficary].length;
 }
 function getBeneficiaryPoolInfo(address beneficary, uint256 index) view external returns (	uint256 amountAllocated,
-		uint256 currentAllocated,
-		uint256 unlockDay,
-		uint256 amountSent) {
+	    uint256 unlockTime,
+		bool sent) {
 			amountAllocated= _distributions[beneficary][index]. amountAllocated;
-			currentAllocated=_distributions[beneficary][index].  currentAllocated;
-			unlockDay= _distributions[beneficary][index]. unlockDay;
-			amountSent= _distributions[beneficary][index].amountSent;
+			unlockTime= _distributions[beneficary][index]. unlockTime;
+			sent= _distributions[beneficary][index].sent;
 }
   /******************************************* state functions go here ********************************************************* */
 
@@ -241,23 +228,17 @@ function getBeneficiaryPoolInfo(address beneficary, uint256 index) view external
 	
 		/* TGE has not started */
 		require(block.timestamp > TGEDate, "TGE still has not started");
-		/* Test that the call be only done once per day */
-		require(block.timestamp - lastDateDistribution > 1 days , "Can only be called once a day");
-		lastDateDistribution = block.timestamp;
+	
 		/* Go thru all tokenOwners */
 		for(uint i = 0; i < tokenOwners.length; i++) {
 			/* Get Address Distribution */
 			DistributionStep[] memory d = _distributions[tokenOwners[i]];
 			/* Go thru all distributions array */
 			for(uint j = 0; j < d.length; j++){
-				if( (block.timestamp-TGEDate > d[j].unlockDay) /* Verify if unlockDay has passed */
-					&& (d[j].currentAllocated > 0) /* Verify if currentAllocated > 0, so that address has tokens to be sent still */
-				){
-					uint256 sendingAmount;
-					sendingAmount = d[j].currentAllocated;
-					_distributions[tokenOwners[i]][j].currentAllocated = _distributions[tokenOwners[i]][j].currentAllocated-sendingAmount;
-					_distributions[tokenOwners[i]][j].amountSent = _distributions[tokenOwners[i]][j].amountSent+sendingAmount;
-					require(IERC20(erc20).transfer(tokenOwners[i], sendingAmount));
+				if(!d[j].sent && d[j].unlockTime< block.timestamp) 
+              {
+					_distributions[tokenOwners[i]][j].sent = true;
+					require(IERC20(erc20).transfer(tokenOwners[i],_distributions[tokenOwners[i]][j]. amountAllocated));
 				}
 			}
 		}   
@@ -266,7 +247,7 @@ function getBeneficiaryPoolInfo(address beneficary, uint256 index) view external
 	function _setInitialDistribution(address _address, uint256 _tokenAmount, uint256 _unlockDays) private  {
 	
 		/* Create DistributionStep Object */
-		DistributionStep memory distributionStep = DistributionStep(_tokenAmount , _tokenAmount , _unlockDays, 0);
+		DistributionStep memory distributionStep = DistributionStep(_tokenAmount*1 ether , block.timestamp+ _unlockDays, false);
 		/* Attach */
 		_distributions[_address].push(distributionStep);
 
