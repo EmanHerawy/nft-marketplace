@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.7;
-import './StartfiMarketPlaceFinance.sol';
+import './StartfiMarketPlaceAdmin.sol';
 import './MarketPlaceListing.sol';
 import './MarketPlaceBid.sol';
-import '@openzeppelin/contracts/security/Pausable.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
+
 
 /**
  * @author Eman Herawy, StartFi Team
@@ -13,7 +12,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
  *desc  marketplace with all functions for item selling by either ceating auction or selling with fixed prices, the contract auto transfer orginal NFT issuer's shares
  *
  */
-contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlaceBid, StartfiMarketPlaceFinance {
+contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarketPlaceAdmin {
     /******************************************* decalrations go here ********************************************************* */
     // TODO: to be updated ( using value or percentage?? develop function to ready and update the value)
     uint256 minQualifyAmount = 10;
@@ -113,8 +112,9 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
         string memory _marketPlaceName,
         address _paymentContract,
         address _stakeContract,
-        address _reputationContract
-    ) StartfiMarketPlaceFinance(_marketPlaceName, _paymentContract, _reputationContract) {
+        address _reputationContract,
+        address adminWallet
+    ) StartfiMarketPlaceAdmin(adminWallet,_marketPlaceName, _paymentContract, _reputationContract) {
         stakeContract = _stakeContract;
     }
 
@@ -429,7 +429,7 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
                 (fineAmount, remaining) = _getDeListingQualAmount(listingPrice);
                 //TODO: deduct the fine from his stake contract
 
-                require(_deduct(_owner, getAdminWallet(), fineAmount), "couldn't deduct the fine");
+                require(_deduct(_owner, owner(), fineAmount), "couldn't deduct the fine");
             } else {
                 remaining = _getListingQualAmount(listingPrice);
             }
@@ -548,7 +548,7 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
         require(!listingBids[listingId][winnerBidder].isPurchased, 'Already purchased');
         // call staking contract to deduct
         (uint256 fineAmount, uint256 remaining) = _calcBidDisputeFees(qualifyAmount);
-        require(_deduct(winnerBidder, getAdminWallet(), fineAmount), "couldn't deduct the fine for the admin wallet");
+        require(_deduct(winnerBidder, owner(), fineAmount), "couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
         // trnasfer token
         require(_safeNFTTransfer(_NFTContract, tokenId, address(this), seller), "NFT token couldn't be transfered");
@@ -606,8 +606,8 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
         emit UserReservesFree(_msgSender(), lastReserves, curentReserves, block.timestamp);
     }
 
-    // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
-    function getAdminWallet() private view returns (address) {
-        return owner();
-    }
+    // // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
+    // function getAdminWallet() private view returns (address) {
+    //     return owner();
+    // }
 }

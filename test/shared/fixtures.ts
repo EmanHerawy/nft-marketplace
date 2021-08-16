@@ -36,7 +36,7 @@ export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address
+    reputation.address,wallet.address
   ])
 
   // add to minter role

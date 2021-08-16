@@ -249,7 +249,7 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
      * @param newBase  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
      */
-    function changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
+    function _changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
         require(newFees <= newBase, 'Fee fraction exceeded base.');
         percentage = (newFees * 1000) / newBase;
         require(percentage <= 30 && percentage >= 10, 'Percentage should be from 1-3 %');
