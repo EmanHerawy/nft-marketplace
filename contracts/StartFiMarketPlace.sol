@@ -405,12 +405,12 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
     function deList(bytes32 listingId) external returns (address _NFTContract, uint256 tokenId) {
         ListingStatus status = _tokenListings[listingId].status;
         address buyer = _tokenListings[listingId].buyer;
-        address owner = _tokenListings[listingId].seller;
+        address _owner = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
         uint256 releaseTime = _tokenListings[listingId].releaseTime;
         uint256 listingPrice = _tokenListings[listingId].listingPrice;
         tokenId = _tokenListings[listingId].tokenId;
-        require(owner == _msgSender(), 'Caller is not the owner');
+        require(_owner == _msgSender(), 'Caller is not the owner');
         require(buyer == address(0), 'Already bought token');
         uint256 timeToDelistAuction = _calcSum(releaseTime, 3 days);
 
@@ -429,7 +429,7 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
                 (fineAmount, remaining) = _getDeListingQualAmount(listingPrice);
                 //TODO: deduct the fine from his stake contract
 
-                require(_deduct(owner, getAdminWallet(), fineAmount), "couldn't deduct the fine");
+                require(_deduct(_owner, getAdminWallet(), fineAmount), "couldn't deduct the fine");
             } else {
                 remaining = _getListingQualAmount(listingPrice);
             }
@@ -439,13 +439,13 @@ contract StartFiMarketPlace is Ownable, Pausable, MarketPlaceListing, MarketPlac
         }
 
         // trnasfer token
-        require(_safeNFTTransfer(_NFTContract, tokenId, address(this), owner), "NFT token couldn't be transfered");
+        require(_safeNFTTransfer(_NFTContract, tokenId, address(this), _owner), "NFT token couldn't be transfered");
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
         emit DeListOffMarketplace(
             listingId,
             _NFTContract,
-            owner,
+            _owner,
             tokenId,
             fineAmount,
             remaining,
