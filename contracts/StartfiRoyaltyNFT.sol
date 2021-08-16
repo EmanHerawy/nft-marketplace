@@ -1,38 +1,48 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity >=0.8.0;
- import "@openzeppelin/contracts/utils/Counters.sol";
+import '@openzeppelin/contracts/utils/Counters.sol';
 
-import "./ERC721MinterPauser.sol";
+import './ERC721MinterPauser.sol';
 
- import "./ERC721Royalty.sol";
+import './ERC721Royalty.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
  *@title  Startfi Royalty NFT
  * [ desc ] : NFT contract with Royalty option
- * 
+ *
  */
-contract StartfiRoyaltyNFT is  ERC721Royalty , ERC721MinterPauser{
-         using Counters for Counters.Counter;
+contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser {
+    using Counters for Counters.Counter;
 
-     Counters.Counter private _tokenIdTracker;
+    Counters.Counter private _tokenIdTracker;
 
-    constructor(string memory name, string memory symbol, string memory baseTokenURI) ERC721MinterPauser (   name,  symbol,   baseTokenURI){}
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory baseTokenURI
+    ) ERC721MinterPauser(name, symbol, baseTokenURI) {}
+
     /**
-    * @notice  mint new NFT with roylty support, soldidty doesn't support decimal, so if we want to add 2.5 % share we need to pass 25 as share and 10 as base 
-    * @dev  calller should be in minter role
-    * @param to: NFT issuer
-    * @param _tokenURI: serized json object that has the following data ( category, name , desc , tages, ipfs hash)
-    * @param share: eg. 25
-    * @param separator: eg. 10 
-    * @return token id 
+     * @notice  mint new NFT with roylty support, soldidty doesn't support decimal, so if we want to add 2.5 % share we need to pass 25 as share and 10 as base
+     * @dev  calller should be in minter role
+     * @param to: NFT issuer
+     * @param _tokenURI: serized json object that has the following data ( category, name , desc , tages, ipfs hash)
+     * @param share: eg. 25
+     * @param separator: eg. 10
+     * @return token id
      */
-    function mintWithRoyalty(address to, string memory _tokenURI,uint8 share,uint8 separator) external virtual returns(uint256){
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
+    function mintWithRoyalty(
+        address to,
+        string memory _tokenURI,
+        uint8 share,
+        uint8 separator
+    ) external virtual returns (uint256) {
+        require(hasRole(MINTER_ROLE, _msgSender()), 'ERC721PresetMinterPauserAutoId: must have minter role to mint');
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
-        _supportRoyalty(_tokenIdTracker.current(),  to,   share,  separator);
+        _supportRoyalty(_tokenIdTracker.current(), to, share, separator);
         _mint(to, _tokenIdTracker.current());
         _setTokenURI(_tokenIdTracker.current(), _tokenURI);
         _tokenIdTracker.increment();
@@ -50,8 +60,8 @@ contract StartfiRoyaltyNFT is  ERC721Royalty , ERC721MinterPauser{
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-        function mint(address to, string memory _tokenURI) public virtual returns(uint256) {
-        require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
+    function mint(address to, string memory _tokenURI) public virtual returns (uint256) {
+        require(hasRole(MINTER_ROLE, _msgSender()), 'ERC721PresetMinterPauserAutoId: must have minter role to mint');
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
@@ -61,12 +71,11 @@ contract StartfiRoyaltyNFT is  ERC721Royalty , ERC721MinterPauser{
         return _tokenIdTracker.current();
     }
 
-
-// 0x2a55205a
-     /**
+    // 0x2a55205a
+    /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override( ERC721MinterPauser) returns (bool) {
-        return  interfaceId == supportsRoyalty()||super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721MinterPauser) returns (bool) {
+        return interfaceId == supportsRoyalty() || super.supportsInterface(interfaceId);
     }
 }
