@@ -4,7 +4,8 @@ pragma solidity 0.8.7;
 pragma abicoder v2;
 import './interface/IStartFiReputation.sol';
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import './interface/IERC20.sol';
+import './interface/IERC721Premit.sol';
 import './interface/IStartFiStakes.sol';
 import './MarketPlaceBase.sol';
 
@@ -116,7 +117,15 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
             }
         }
     }
+function _premitNFT(address _NFTContract, address target, uint256 tokenId,   uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s) internal returns (bool){
+      if (_supportPremit(_NFTContract)) {
+              return     IERC721Premit(_paymentToken).permit(target, address(this), tokenId, deadline, v, r, s);
 
+        }else{return false;}
+}
     /**
      *@param user  : participant address
      * @return the value of user reserves
@@ -242,6 +251,15 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
         return _userReserves;
     }
 
+   function _permit(address target,     
+   uint256 price,
+   uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s) internal  returns (bool) {
+          IERC20(_paymentToken).permit(target, address(this), price, deadline, v, r, s);
+    return true;
+    }
     /**
      *   * @notice  all conditions and checks are made prior to this function
      * @dev  the formula is (fees * 1000)/base

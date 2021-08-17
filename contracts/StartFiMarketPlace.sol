@@ -161,7 +161,7 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice
-    ) external isNotZero(listingPrice) returns (bytes32 listId) {
+    ) public isNotZero(listingPrice) returns (bytes32 listId) {
         uint256 releaseTime = _calcSum(block.timestamp, delistAfter);
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
         // calc qualified ammount
@@ -203,7 +203,39 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
             block.timestamp
         );
     }
-
+  // list
+    /**
+     * @dev  called by dapps to list new item
+     * @param nFTContract nft contract address
+     * @param tokenId token id
+     * @param listingPrice min price
+      * @param deadline:  must be timestamp in future .
+     * @param v needed to recover the public key
+     * @param r : normal output of an ECDSA signature
+     * @param s: normal output of an ECDSA signature
+     * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+  
+     * @return listId listing id
+     */
+    function listOnMarketplaceWithPremit(
+        address nFTContract,
+        uint256 tokenId,
+        uint256 listingPrice, 
+         uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external  returns (bytes32 listId){
+           require(_premitNFT( nFTContract,  _msgSender(),  tokenId,     deadline,
+          v,
+          r,
+          s),'invalid signature');
+        listId=listOnMarketplace(
+          nFTContract,
+          tokenId,
+          listingPrice
+    );
+    }
     // create auction
     /**
      * @dev  called by dapps to create  new auction
@@ -224,7 +256,7 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         bool sellForEnabled,
         uint256 sellFor,
         uint256 duration
-    ) external isNotZero(listingPrice) returns (bytes32 listId) {
+    ) public isNotZero(listingPrice) returns (bytes32 listId) {
         require(duration > 12 hours, 'Auction should be live for more than 12 hours');
         require(qualifyAmount >= minQualifyAmount, 'Invalid Auction qualify Amount');
 
@@ -272,7 +304,50 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
             block.timestamp
         );
     }
-
+    /**
+     * @dev  called by dapps to create  new auction
+     * @param nFTContract nft contract address
+     * @param tokenId token id
+     * @param listingPrice min price
+     * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
+     * @param sellForEnabled true if auction enable direct selling
+     * @param sellFor  price  to sell with if sellForEnabled=true
+     * @param duration  when auction ends
+     * @param deadline:  must be timestamp in future .
+     * @param v needed to recover the public key
+     * @param r : normal output of an ECDSA signature
+     * @param s: normal output of an ECDSA signature
+     * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+  
+     * @return listId listing id
+     */
+    function createAuctionWithPremit(
+        address nFTContract,
+        uint256 tokenId,
+        uint256 listingPrice,
+        uint256 qualifyAmount,
+        bool sellForEnabled,
+        uint256 sellFor,
+        uint256 duration, 
+         uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external  returns (bytes32 listId) {
+    require(_premitNFT( nFTContract,  _msgSender(),  tokenId,     deadline,
+          v,
+          r,
+          s),'invalid signature');
+listId=  createAuction(
+          nFTContract,
+          tokenId,
+          listingPrice,
+          qualifyAmount,
+          sellForEnabled,
+          sellFor,
+          duration
+    );
+    }
     /**
      * @dev called by dapps to bid on an auction
      *
@@ -329,10 +404,10 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
      * @return tokenId token id
      */
     function fullfillBid(bytes32 listingId)
-        external
+        public
         canFullfillBid(listingId)
         returns (address _NFTContract, uint256 tokenId)
-    {
+     {
         address winnerBidder = bidToListing[listingId].bidder;
         address seller = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
@@ -392,9 +467,41 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
             netPrice,
             block.timestamp
         );
-    }
+     }
 
-    // delist
+   
+   
+   
+   
+   
+    /**
+     * @dev called by bidder through dapps when bidder win an auction and wants to pay to get the NFT
+     *
+     * @param listingId listing id
+     * @param deadline:  must be timestamp in future .
+     * @param v needed to recover the public key
+     * @param r : normal output of an ECDSA signature
+     * @param s: normal output of an ECDSA signature
+     * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+       * @param listingId listing id
+     * @return _NFTContract nft contract address
+     * @return tokenId token id
+
+     */
+    function fullfillBidWithPremit(bytes32 listingId, 
+         uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s)
+        external  returns (address _NFTContract, uint256 tokenId){
+            require(  _permit(_msgSender(),  listingBids[listingId][_msgSender()].bidPrice, deadline, v, r, s),'StartFi: Invalid signature');
+
+
+            return fullfillBid(  listingId);
+         
+        }
+ // delist
+   
     /**
      * @dev called by seller through dapps when s/he wants to remove this token from the marketplace
      * @notice auction can't be canceled , if seller delist time on sale on maretplace before time to delist, he will pay a fine
@@ -465,7 +572,7 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
      * @return _NFTContract nft contract address
      * @return tokenId token id
      */
-    function buyNow(bytes32 listingId, uint256 price) external returns (address _NFTContract, uint256 tokenId) {
+    function buyNow(bytes32 listingId, uint256 price) public returns (address _NFTContract, uint256 tokenId) {
         bool sellForEnabled = _tokenListings[listingId].sellForEnabled;
         address seller = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
@@ -528,7 +635,29 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
+  // buynow
+    /**
+     * @dev called by buyer through dapps when s/he wants to buy a gevin NFT  token from the marketplace
+     * @notice  if auction, the seller must enabe forSale. prices should be more than or equal the listing price
+     * @param listingId listing id
+     * @param price gevin price
+     * @param deadline:  must be timestamp in future .
+     * @param v needed to recover the public key
+     * @param r : normal output of an ECDSA signature
+     * @param s: normal output of an ECDSA signature
+     * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+  
+ 
+     */
+    function buyNowWithPremit(bytes32 listingId, uint256 price,
+         uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s) external {
 
+            require(  _permit(_msgSender(),  price, deadline, v, r, s),'StartFi: Invalid signature');
+             buyNow( listingId,  price);
+        }
     /**
      * @dev called by seller through dapps when his/her auction is  not fullfilled after 3 days
      *  @notice  after auction with winner bid . bidder didn't call fullfile within 3 days of auction closing  auction owner can call dispute to delist and punish the spam winner bidder fine is share between the plateform and the auction owner

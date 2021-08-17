@@ -5,7 +5,7 @@ pragma abicoder v2;
 
 import '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol';
 import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
-import './interface/IERC721Royalty.sol';
+ import './interface/IERC721Royalty.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
@@ -17,6 +17,7 @@ contract MarketPlaceBase is ERC721Holder {
 
     string private _marketPlaceName;
     bytes4 RORALTY_INTERFACE = 0x2a55205a;
+    bytes4 PREMIT_INTERFACE = 0x2a55205a;
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -34,6 +35,19 @@ contract MarketPlaceBase is ERC721Holder {
     function _supportRoyalty(address _NFTContract) internal view returns (bool) {
         try IERC721(_NFTContract).supportsInterface(RORALTY_INTERFACE) returns (bool isRoyaltySupported) {
             return isRoyaltySupported;
+        } catch {
+            return false;
+        }
+    }
+    /**
+     *
+     * @dev  interal function to check if any gevin contract has supportsInterface See {IERC165-supportsInterface}.
+     * @param _NFTContract NFT contract address
+     * @return true if this NFT contract support royalty, false if not
+     */
+    function _supportPremit(address _NFTContract) internal view returns (bool) {
+        try IERC721(_NFTContract).supportsInterface(PREMIT_INTERFACE) returns (bool isPremitSupported) {
+            return isPremitSupported;
         } catch {
             return false;
         }
