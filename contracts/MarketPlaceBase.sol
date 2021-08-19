@@ -16,8 +16,8 @@ contract MarketPlaceBase is ERC721Holder {
     /******************************************* decalrations go here ********************************************************* */
 
     string private _marketPlaceName;
-    bytes4 RORALTY_INTERFACE = 0x2a55205a;
-    bytes4 PREMIT_INTERFACE = 0x2a55205a;
+    bytes4 constant RORALTY_INTERFACE = 0x2a55205a;
+    bytes4 constant PREMIT_INTERFACE = 0x2a55205a;
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -77,14 +77,14 @@ contract MarketPlaceBase is ERC721Holder {
         return _marketPlaceName;
     }
 
-    /**
-     *@param _NFTContract NFT contract address
-     *@param tokenId token id
-     * @return the owner of the gevin token id and address
-     */
-    function tokenOwner(address _NFTContract, uint256 tokenId) internal view returns (address) {
-        return IERC721(_NFTContract).ownerOf(tokenId);
-    }
+    // /**
+    //  *@param _NFTContract NFT contract address
+    //  *@param tokenId token id
+    //  * @return the owner of the gevin token id and address
+    //  */
+    // function tokenOwner(address _NFTContract, uint256 tokenId) internal view returns (address) {
+    //     return IERC721(_NFTContract).ownerOf(tokenId);
+    // }
 
     /**
 
@@ -101,16 +101,16 @@ contract MarketPlaceBase is ERC721Holder {
         }
     }
 
-    /**
-     *@dev See {IERC721-isApprovedForAll}.
-     *@dev check if this contract has approved to all of this owner's erc721 tokens
-     *@param _NFTContract NFT contract address
-     *@param owner token owner
-     *@return true if this contract is apporved , false if not
-     */
-    function _isAllTokenApproved(address _NFTContract, address owner) internal view returns (bool) {
-        return IERC721(_NFTContract).isApprovedForAll(owner, address(this));
-    }
+    // /**
+    //  *@dev See {IERC721-isApprovedForAll}.
+    //  *@dev check if this contract has approved to all of this owner's erc721 tokens
+    //  *@param _NFTContract NFT contract address
+    //  *@param owner token owner
+    //  *@return true if this contract is apporved , false if not
+    //  */
+    // function _isAllTokenApproved(address _NFTContract, address owner) internal view returns (bool) {
+    //     return IERC721(_NFTContract).isApprovedForAll(owner, address(this));
+    // }
 
     /******************************************* state functions go here ********************************************************* */
 

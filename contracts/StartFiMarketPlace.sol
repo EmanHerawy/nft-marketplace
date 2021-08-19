@@ -4,6 +4,7 @@ pragma solidity 0.8.7;
 import './StartfiMarketPlaceAdmin.sol';
 import './MarketPlaceListing.sol';
 import './MarketPlaceBid.sol';
+import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 
 /**
@@ -12,7 +13,7 @@ import './MarketPlaceBid.sol';
  *desc  marketplace with all functions for item selling by either ceating auction or selling with fixed prices, the contract auto transfer orginal NFT issuer's shares
  *
  */
-contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarketPlaceAdmin {
+contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarketPlaceAdmin ,ReentrancyGuard{
     /******************************************* decalrations go here ********************************************************* */
     // TODO: to be updated ( using value or percentage?? develop function to ready and update the value)
     uint256 minQualifyAmount = 10;
@@ -161,7 +162,7 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice
-    ) public isNotZero(listingPrice) returns (bytes32 listId) {
+         ) public isNotZero(listingPrice) returns (bytes32 listId) {
         uint256 releaseTime = _calcSum(block.timestamp, delistAfter);
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
         // calc qualified ammount
@@ -177,10 +178,8 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
         // transfer token to contract
-        require(
-            _safeNFTTransfer(nFTContract, tokenId, _msgSender(), address(this)),
-            "NFT token couldn't be transfered"
-        );
+   
+        require(_excuteTransfer(_msgSender(),   nFTContract,   tokenId, address(this),address (0), 0, 0,0, false), "NFT token couldn't be transfered");
 
         // update reserved
         _updateUserReserves(_msgSender(), listQualifyAmount, true);
@@ -225,7 +224,7 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external  returns (bytes32 listId){
+          ) external  returns (bytes32 listId){
            require(_premitNFT( nFTContract,  _msgSender(),  tokenId,     deadline,
           v,
           r,
@@ -256,7 +255,7 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         bool sellForEnabled,
         uint256 sellFor,
         uint256 duration
-    ) public isNotZero(listingPrice) returns (bytes32 listId) {
+         ) public isNotZero(listingPrice) returns (bytes32 listId) {
         require(duration > 12 hours, 'Auction should be live for more than 12 hours');
         require(qualifyAmount >= minQualifyAmount, 'Invalid Auction qualify Amount');
 
@@ -269,10 +268,8 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
         // transfer token to contract
-        require(
-            _safeNFTTransfer(nFTContract, tokenId, _msgSender(), address(this)),
-            "NFT token couldn't be transfered"
-        );
+    
+        require(_excuteTransfer(_msgSender(),   nFTContract,   tokenId, address(this),address (0), 0, 0,0, false), "NFT token couldn't be transfered");
 
         // update reserved
         // create auction
@@ -333,12 +330,12 @@ contract StartFiMarketPlace is  MarketPlaceListing, MarketPlaceBid, StartfiMarke
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external  returns (bytes32 listId) {
-    require(_premitNFT( nFTContract,  _msgSender(),  tokenId,     deadline,
+        ) external  returns (bytes32 listId) {
+        require(_premitNFT( nFTContract,  _msgSender(),  tokenId,     deadline,
           v,
           r,
           s),'invalid signature');
-listId=  createAuction(
+        listId=  createAuction(
           nFTContract,
           tokenId,
           listingPrice,
@@ -346,8 +343,8 @@ listId=  createAuction(
           sellForEnabled,
           sellFor,
           duration
-    );
-    }
+        );
+        }
     /**
      * @dev called by dapps to bid on an auction
      *
@@ -427,31 +424,23 @@ listId=  createAuction(
             tokenId,
             bidPrice
         );
+         listingBids[listingId][_msgSender()].isPurchased = true;
+        _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
+        require( _excuteTransfer(_msgSender(),  _NFTContract,  tokenId,   seller, issuer,  royaltyAmount,  fees,  netPrice, true),'StartFi: could not excute transfer');
 
-        require(_safeTokenTransferFrom(winnerBidder, owner(), fees), "Couldn't transfer token as fees");
-        if (issuer != address(0)) {
-            require(_safeTokenTransferFrom(winnerBidder, issuer, royaltyAmount), "Couldn't transfer token to issuer");
-        }
-
-        // token value could be zero ater taking the roylty share ??? need to ask?
-        require(_safeTokenTransferFrom(winnerBidder, seller, netPrice), "Couldn't transfer token to buyer");
-        // trnasfer token
-        require(
-            _safeNFTTransfer(_NFTContract, tokenId, address(this), winnerBidder),
-            "NFT token couldn't be transfered"
-        );
+       
         // update user reserves
         // reserve nigative couldn't be at any case
         require(
             _updateUserReserves(winnerBidder, _tokenListings[listingId].qualifyAmount, false) >= 0,
             'negative reserve is not allowed'
         );
-        listingBids[listingId][_msgSender()].isPurchased = true;
+       
+
         // TODO: add reputation points to both seller and buyer
         _addreputationPoints(seller, winnerBidder, bidPrice);
 
-        // finish listing
-        _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
+        
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
         emit FullfillBid(
@@ -472,7 +461,34 @@ listId=  createAuction(
    
    
    
+       function _excuteTransfer(address buyer, address _NFTContract, uint256 tokenId,  address seller,address issuer, uint256 royaltyAmount, uint256 fees, uint256 netPrice, bool isDualDir) internal nonReentrant returns (bool) {
+        // transfer price
+
+   if(isDualDir){
+
    
+
+        require(_safeTokenTransferFrom(buyer, owner(), fees), "Couldn't transfer token as fees");
+        if (issuer != address(0)) {
+            require(_safeTokenTransferFrom(buyer, issuer, royaltyAmount), "Couldn't transfer token to issuer");
+        }
+
+        // token value could be zero ater taking the roylty share ??? need to ask?
+        require(_safeTokenTransferFrom(buyer, seller, netPrice), "Couldn't transfer token to seller");
+        // trnasfer token
+        require(
+            _safeNFTTransfer(_NFTContract, tokenId, address(this), buyer),
+            "NFT token couldn't be transfered"
+        );
+        return true;
+    } else{
+   require(
+            _safeNFTTransfer(_NFTContract, tokenId, seller,buyer),
+            "NFT token couldn't be transfered"
+        );
+        return true;
+    }
+    }
    
     /**
      * @dev called by bidder through dapps when bidder win an auction and wants to pay to get the NFT
@@ -546,7 +562,8 @@ listId=  createAuction(
         }
 
         // trnasfer token
-        require(_safeNFTTransfer(_NFTContract, tokenId, address(this), _owner), "NFT token couldn't be transfered");
+         
+        require(_excuteTransfer(address(this),   _NFTContract,   tokenId, _owner,address (0), 0, 0,0, false), "NFT token couldn't be transfered");
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
         emit DeListOffMarketplace(
@@ -597,19 +614,8 @@ listId=  createAuction(
             tokenId,
             price
         );
-
-        require(_safeTokenTransferFrom(_msgSender(), owner(), fees), "Couldn't transfer token as fees");
-        if (issuer != address(0)) {
-            require(_safeTokenTransferFrom(_msgSender(), issuer, royaltyAmount), "Couldn't transfer token to issuer");
-        }
-
-        // token value could be zero ater taking the roylty share ??? need to ask?
-        require(_safeTokenTransferFrom(_msgSender(), seller, netPrice), "Couldn't transfer token to seller");
-        // trnasfer token
-        require(
-            _safeNFTTransfer(_NFTContract, tokenId, address(this), _msgSender()),
-            "NFT token couldn't be transfered"
-        );
+        require( _excuteTransfer(_msgSender(),  _NFTContract,  tokenId,   seller, issuer,  royaltyAmount,  fees,  netPrice, true),'StartFi: could not excute transfer');
+    
         uint256 ListingQualAmount = _getListingQualAmount(_tokenListings[listingId].listingPrice);
 
         require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
@@ -680,7 +686,8 @@ listId=  createAuction(
         require(_deduct(winnerBidder, owner(), fineAmount), "couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
         // trnasfer token
-        require(_safeNFTTransfer(_NFTContract, tokenId, address(this), seller), "NFT token couldn't be transfered");
+        require(_excuteTransfer(address(this),   _NFTContract,   tokenId, seller,address (0), 0, 0,0, false), "NFT token couldn't be transfered");
+
         require(_updateUserReserves(winnerBidder, qualifyAmount, false) >= 0, 'negative reserve is not allowed');
 
         // finish listing
@@ -734,7 +741,15 @@ listId=  createAuction(
         require(_setUserReserves(_msgSender(), curentReserves), 'set reserve faild');
         emit UserReservesFree(_msgSender(), lastReserves, curentReserves, block.timestamp);
     }
-
+    
+   /**
+     * @dev only called by `owner` to change the name and `whenPaused` 
+     *@param duration duration 
+     *  
+     */
+    function  changeDelistAfter(uint256 duration)  external onlyOwner whenPaused {
+        _changeDelistAfter( duration) ;
+    }
     // // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
     // function getAdminWallet() private view returns (address) {
     //     return owner();

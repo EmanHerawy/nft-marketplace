@@ -204,10 +204,7 @@ function _premitNFT(address _NFTContract, address target, uint256 tokenId,   uin
         buyerBalance = IStartFiReputation(reputationContract).mintReputation(buyer, buyerPoints);
     }
 
-    function _safeTokenTransfer(address to, uint256 amount) internal returns (bool) {
-        return IERC20(_paymentToken).transfer(to, amount);
-    }
-
+ 
     /**
      * @dev  Safely transfers `amount` of token from `from` to `to`.
      * @param from address representing the previous owner of the token

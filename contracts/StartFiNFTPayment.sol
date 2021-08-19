@@ -62,14 +62,14 @@ contract StartFiNFTPayment is Ownable {
      * @param base: eg. 10 .
      * @return token id .
      */
-    function MintNFTWithRoyalty(
+    function mintNFTWithRoyalty(
         address to,
         string memory _tokenURI,
         uint8 share,
         uint8 base
     ) external returns (uint256) {
         require(_getAllowance(_msgSender()) >= _fees, 'Not enough fees paid');
-        IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees);
+       require( IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees),'StartFiNFTPayment : coud not transfer');
         return IERC721RoyaltyMinter(_NFTToken).mintWithRoyalty(to, _tokenURI, share, base);
     }
 
@@ -87,7 +87,7 @@ contract StartFiNFTPayment is Ownable {
      * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
      * @return token id .
      */
-    function MintNFTWithRoyaltyPremit(
+    function mintNFTWithRoyaltyPremit(
         address to,
         string memory _tokenURI,
         uint8 share,
@@ -99,7 +99,7 @@ contract StartFiNFTPayment is Ownable {
     ) external returns (uint256) {
         IERC20(_paymentToken).permit(_msgSender(), address(this), _fees, deadline, v, r, s);
         require(_getAllowance(_msgSender()) >= _fees, 'Not enough fees paid');
-        IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees);
+       require( IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees),'StartFiNFTPayment : coud not transfer');
         return IERC721RoyaltyMinter(_NFTToken).mintWithRoyalty(to, _tokenURI, share, base);
     }
 
@@ -110,9 +110,9 @@ contract StartFiNFTPayment is Ownable {
      * @param _tokenURI: serialized json object that has the following data ( category, name , desc , tages, ipfs hash).
      * @return token id .
      */
-    function MintNFTWithoutRoyalty(address to, string memory _tokenURI) external returns (uint256) {
+    function mintNFTWithoutRoyalty(address to, string memory _tokenURI) external returns (uint256) {
         require(_getAllowance(_msgSender()) >= _fees, 'Not enough fees paid');
-        IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees);
+       require( IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees),'StartFiNFTPayment : coud not transfer');
         return IERC721RoyaltyMinter(_NFTToken).mint(to, _tokenURI);
     }
 
@@ -128,7 +128,7 @@ contract StartFiNFTPayment is Ownable {
      * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
      * @return token id .
      */
-    function MintNFTWithoutRoyaltyPremit(
+    function mintNFTWithoutRoyaltyPremit(
         address to,
         string memory _tokenURI,
         uint256 deadline,
@@ -138,7 +138,7 @@ contract StartFiNFTPayment is Ownable {
     ) external returns (uint256) {
         IERC20(_paymentToken).permit(_msgSender(), address(this), _fees, deadline, v, r, s);
         require(_getAllowance(_msgSender()) >= _fees, 'Not enough fees paid');
-        IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees);
+       require( IERC20(_paymentToken).transferFrom(_msgSender(), owner(), _fees),'StartFiNFTPayment : coud not transfer');
         return IERC721RoyaltyMinter(_NFTToken).mint(to, _tokenURI);
     }
 

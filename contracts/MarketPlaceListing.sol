@@ -187,15 +187,15 @@ contract MarketPlaceListing {
         }
     }
 
-    /**
-     *  @notice  all conditions and checks are made prior to this function
-     * @dev  delist an item by mark status as canceled
-     * @param listingId listing id
-     *
-     */
-    function _deList(bytes32 listingId) internal {
-        _tokenListings[listingId].status = ListingStatus.Canceled;
-    }
+    // /**
+    //  *  @notice  all conditions and checks are made prior to this function
+    //  * @dev  delist an item by mark status as canceled
+    //  * @param listingId listing id
+    //  *
+    //  */
+    // function _deList(bytes32 listingId) internal {
+    //     _tokenListings[listingId].status = ListingStatus.Canceled;
+    // }
 
     /**
      *  @notice  all conditions and checks are made prior to this function
