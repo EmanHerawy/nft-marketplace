@@ -122,7 +122,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         uint8 share,
         uint8 separator
     ) external virtual returns (uint256) {
-        require(hasRole(MINTER_ROLE, _msgSender()), 'ERC721PresetMinterPauserAutoId: must have minter role to mint');
+        // require(hasRole(MINTER_ROLE, _msgSender()), 'ERC721PresetMinterPauserAutoId: must have minter role to mint');
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         _supportRoyalty(_tokenIdTracker.current(), to, share, separator);
@@ -144,7 +144,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
      * - the caller must have the `MINTER_ROLE`.
      */
     function mint(address to, string memory _tokenURI) public virtual returns (uint256) {
-        require(hasRole(MINTER_ROLE, _msgSender()), 'ERC721PresetMinterPauserAutoId: must have minter role to mint');
+        // require(hasRole(MINTER_ROLE, _msgSender()), 'ERC721PresetMinterPauserAutoId: must have minter role to mint');
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.

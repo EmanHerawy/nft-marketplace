@@ -12,7 +12,6 @@ import { tokenFixture } from './shared/fixtures'
 chai.use(solidity)
 let token: Contract
 let NFT: Contract
-let payment: Contract
 let marketPlace: Contract
 let reputation: Contract
 let stakes: Contract
@@ -27,7 +26,6 @@ describe('StartFi Reputation', () => {
     const fixture = await loadFixture(tokenFixture)
     token = fixture.token
     NFT = fixture.NFT
-    payment = fixture.payment
     marketPlace = fixture.marketPlace
     reputation = fixture.reputation
     stakes = fixture.stakes

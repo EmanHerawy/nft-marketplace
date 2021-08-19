@@ -5,7 +5,6 @@ import { expandTo18Decimals } from './utilities'
 
 import ERC20 from '../../artifacts/contracts/StartFiToken.sol/StartFiToken.json'
 import StartFiRoyaltyNFT from '../../artifacts/contracts/StartfiRoyaltyNFT.sol/StartfiRoyaltyNFT.json'
-import StartFiPaymentNFT from '../../artifacts/contracts/StartFiNFTPayment.sol/StartFiNFTPayment.json'
 import StartFiMarketPlace from '../../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 import StartfiStakes from '../../artifacts/contracts/StartfiStakes.sol/StartfiStakes.json'
 import StartfiReputation from '../../artifacts/contracts/StartFiReputation.sol/StartFiReputation.json'
@@ -13,7 +12,6 @@ const { Web3Provider } = providers
 interface ContractsFixture {
   token: Contract
   NFT: Contract
-  payment: Contract
   marketPlace: Contract
   reputation: Contract
   stakes: Contract
@@ -29,8 +27,7 @@ export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise
   const token = await deployContract(wallet, ERC20, [name, symbol, wallet.address])
   const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol, baseUri])
   const stakes = await deployContract(wallet, StartfiStakes, [NFT.address])
-  const payment = await deployContract(wallet, StartFiPaymentNFT, [NFT.address, token.address])
-  const reputation = await deployContract(wallet, StartfiReputation)
+   const reputation = await deployContract(wallet, StartfiReputation)
 
   const marketPlace = await deployContract(wallet, StartFiMarketPlace, [
     'StartFi Market',
@@ -49,7 +46,7 @@ export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise
   await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
   await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
   await stakes.setMarketplace(marketPlace.address)
-  return { token, stakes, NFT, marketPlace, payment, reputation }
+  return { token, stakes, NFT, marketPlace,  reputation }
 }
 
 interface PairFixture extends ContractsFixture {

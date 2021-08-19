@@ -16,8 +16,7 @@ const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = expandTo18Decimals(10)
 let token: Contract
 let NFT: Contract
-let payment: Contract
-let marketPlace: Contract
+ let marketPlace: Contract
 let reputation: Contract
 let stakes: Contract
 let tokenId=1;
@@ -31,8 +30,7 @@ describe('StartFi marketPlace', () => {
     const fixture = await loadFixture(tokenFixture)
     token=fixture.token;
     NFT=fixture.NFT;
-    payment=fixture.payment;
-    marketPlace=fixture.marketPlace;
+     marketPlace=fixture.marketPlace;
     reputation=fixture.reputation;
     stakes=fixture.stakes;
   })

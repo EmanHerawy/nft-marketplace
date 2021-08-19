@@ -13,8 +13,7 @@ chai.use(solidity)
 describe('Staking STFI', () => {
   let token: Contract
   let NFT: Contract
-  let payment: Contract
-  let marketPlace: Contract
+   let marketPlace: Contract
   let reputation: Contract
   let stakes: Contract
   const provider = new MockProvider()
@@ -25,8 +24,7 @@ describe('Staking STFI', () => {
     const fixture = await loadFixture(tokenFixture)
     token = fixture.token
     NFT = fixture.NFT
-    payment = fixture.payment
-    marketPlace = fixture.marketPlace
+     marketPlace = fixture.marketPlace
     reputation = fixture.reputation
     stakes = fixture.stakes
     await token.approve(stakes.address, 10000000000000)
