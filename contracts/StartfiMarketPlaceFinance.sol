@@ -17,9 +17,9 @@ import './MarketPlaceBase.sol';
 contract StartfiMarketPlaceFinance is MarketPlaceBase {
     /******************************************* decalrations go here ********************************************************* */
     address internal _paymentToken;
-    uint256 internal _feeFraction = 1;
-    uint256 internal _feeBase = 100;
-    uint256 bidPenaltyPercentage = 1;
+    uint256 internal _feeFraction = 25; // 2.5% fees 
+    uint256 internal _feeBase = 1000;
+    uint256 bidPenaltyPercentage = 1; // 1 %
     uint256 public delistFeesPercentage = 1;
     uint256 public listqualifyPercentage = 1;
     uint256 public bidPenaltyPercentageBase = 100;
@@ -188,21 +188,16 @@ function _premitNFT(address _NFTContract, address target, uint256 tokenId,   uin
      * @param seller : seller address
      * @param buyer : buyer address
      * @param amount : price
-     * @return buyerBalance : buyer current reputation balance
-     * @return sellerBalance : seller current reputation balance
-     */
+      */
     function _addreputationPoints(
         address seller,
         address buyer,
         uint256 amount
-    ) internal returns (uint256 buyerBalance, uint256 sellerBalance) {
+    ) internal returns (bool) {
         // calc how much pint for both of them ??
-        // TODO: math and logic for calc the point based on the amount
-        uint256 sellerPoints = amount / 2;
-        uint256 buyerPoints = amount / 2;
-        sellerBalance = IStartFiReputation(reputationContract).mintReputation(seller, sellerPoints);
-        buyerBalance = IStartFiReputation(reputationContract).mintReputation(buyer, buyerPoints);
-    }
+        // logic and math is defind in the contract 
+        return IStartFiReputation(reputationContract).calcAndMintintReputation(buyer,seller, amount);
+     }
 
  
     /**
