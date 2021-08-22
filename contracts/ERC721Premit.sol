@@ -23,7 +23,7 @@ abstract contract ERC721Premit is IERC721Premit {
 constructor (string memory name) {
       uint256 chainId;
         assembly {
-            chainId := chainId
+            chainId := chainid()
         }
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(
