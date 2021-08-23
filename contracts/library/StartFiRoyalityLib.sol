@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.7;
- import '../interface/IERC721Royalty.sol';
- import '@openzeppelin/contracts/utils/introspection/IERC165.sol';
+import '../interface/IERC721Royalty.sol';
+import '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 
 library StartFiRoyalityLib {
-        bytes4 constant RORALTY_INTERFACE = 0x2a55205a;
+    bytes4 constant RORALTY_INTERFACE = 0x2a55205a;
 
-       /**
+    /**
      *@notice  only if this contract has royaltyInfo function
      *@dev  call the royaltyInfo function in nft contract
      *@param _NFTContract NFT contract address
@@ -24,7 +24,7 @@ library StartFiRoyalityLib {
         (issuer, _royaltyAmount) = IERC721Royalty(_NFTContract).royaltyInfo(_tokenId, _value);
     }
 
-       /**
+    /**
      *
      * @dev  interal function to check if any gevin contract has supportsInterface See {IERC165-supportsInterface}.
      * @param _NFTContract NFT contract address

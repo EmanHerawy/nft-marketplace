@@ -10,9 +10,9 @@ import './library/StartfiSignatureLib.sol';
  * [ desc ] : erc721 with reoylaty support interface
  */
 abstract contract ERC721Premit is IERC721Premit {
-     bytes32 public DOMAIN_SEPARATOR;
+    bytes32 public DOMAIN_SEPARATOR;
 
-     /// @dev Records current ERC2612 nonce for account. This value must be included whenever signature is generated for {permit}.
+    /// @dev Records current ERC2612 nonce for account. This value must be included whenever signature is generated for {permit}.
     /// Every successful call to {permit} increases account's nonce by one. This prevents signature from being used multiple times.
     mapping(address => uint256) public nonces;
     bytes32 public constant PERMIT_TYPEHASH =
@@ -20,8 +20,8 @@ abstract contract ERC721Premit is IERC721Premit {
     bytes32 public constant TRANSFER_TYPEHASH =
         keccak256('Transfer(address owner,address to,uint256 tokenId,uint256 nonce,uint256 deadline)');
 
-constructor (string memory name) {
-      uint256 chainId;
+    constructor(string memory name) {
+        uint256 chainId;
         assembly {
             chainId := chainid()
         }
@@ -34,8 +34,7 @@ constructor (string memory name) {
                 address(this)
             )
         );
-}
-
+    }
 
     /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartfiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
@@ -55,7 +54,7 @@ constructor (string memory name) {
         bytes32 r,
         bytes32 s
     ) internal returns (bool) {
-         require(block.timestamp <= deadline, 'StartFi: Expired permit');
+        require(block.timestamp <= deadline, 'StartFi: Expired permit');
 
         bytes32 hashStruct = keccak256(
             abi.encode(PERMIT_TYPEHASH, target, spender, tokenId, nonces[target]++, deadline)
@@ -65,7 +64,7 @@ constructor (string memory name) {
             StartfiSignatureLib.verifyEIP712(target, hashStruct, v, r, s, DOMAIN_SEPARATOR) ||
                 StartfiSignatureLib.verifyPersonalSign(target, hashStruct, v, r, s, DOMAIN_SEPARATOR)
         );
-         require(spender != address(0) || spender != address(this));
+        require(spender != address(0) || spender != address(this));
         return true;
     }
 
@@ -88,7 +87,7 @@ constructor (string memory name) {
         bytes32 r,
         bytes32 s
     ) internal returns (bool) {
-              require(block.timestamp <= deadline, 'StartFi: Expired permit');
+        require(block.timestamp <= deadline, 'StartFi: Expired permit');
 
         bytes32 hashStruct = keccak256(abi.encode(TRANSFER_TYPEHASH, target, to, tokenId, nonces[target]++, deadline));
 
@@ -98,9 +97,10 @@ constructor (string memory name) {
         );
 
         require(to != address(0) || to != address(this));
-       
+
         return true;
     }
+
     // 0x2a55205a
     // 0x2a55205a
     /**

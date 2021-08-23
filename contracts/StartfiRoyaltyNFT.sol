@@ -23,9 +23,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         string memory name,
         string memory symbol,
         string memory baseTokenURI
-    ) ERC721MinterPauser(name, symbol, baseTokenURI)  ERC721Premit(name){
-     
-    }
+    ) ERC721MinterPauser(name, symbol, baseTokenURI) ERC721Premit(name) {}
 
     /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartfiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
@@ -44,16 +42,8 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external override returns (bool){
-        require(_permitCheck(
-          target,
-          spender,
-          tokenId,
-          deadline,
-          v,
-          r,
-          s
-    ),'StartFi NFT: Invalid signature');
+    ) external override returns (bool) {
+        require(_permitCheck(target, spender, tokenId, deadline, v, r, s), 'StartFi NFT: Invalid signature');
 
         address owner = ERC721.ownerOf(tokenId);
         require(spender != owner, 'ERC721: approval to current owner');
@@ -64,7 +54,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         );
 
         _approve(spender, tokenId);
-        
+
         return true;
     }
 
@@ -87,16 +77,8 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         bytes32 r,
         bytes32 s
     ) external returns (bool) {
-        require(_transferWithPermitCheck(
-          target,
-          to,
-          tokenId,
-          deadline,
-          v,
-          r,
-          s
-    ),'StartFi NFT: Invalid signature');
-    address owner = ERC721.ownerOf(tokenId);
+        require(_transferWithPermitCheck(target, to, tokenId, deadline, v, r, s), 'StartFi NFT: Invalid signature');
+        address owner = ERC721.ownerOf(tokenId);
         require(to != owner, 'ERC721: approval to current owner');
 
         require(
@@ -159,10 +141,17 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721MinterPauser) returns (bool) {
-        return interfaceId == supportsRoyalty()||interfaceId == supportsPremit() || super.supportsInterface(interfaceId);
+        return
+            interfaceId == supportsRoyalty() || interfaceId == supportsPremit() || super.supportsInterface(interfaceId);
     }
-// adding nonReentrant guard , https://www.paradigm.xyz/2021/08/the-dangers-of-surprising-code/
-       function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal override nonReentrant{
-      super._safeTransfer(  from,   to,   tokenId,     _data);
+
+    // adding nonReentrant guard , https://www.paradigm.xyz/2021/08/the-dangers-of-surprising-code/
+    function _safeTransfer(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) internal override nonReentrant {
+        super._safeTransfer(from, to, tokenId, _data);
     }
 }

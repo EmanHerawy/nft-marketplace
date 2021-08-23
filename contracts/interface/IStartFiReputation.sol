@@ -9,7 +9,12 @@ pragma solidity 0.8.7;
  */
 interface IStartFiReputation {
     function mintReputation(address to, uint256 amount) external returns (uint256 balance);
-    function calcAndMintintReputation(address buyer, address seller, uint256 totalAmount) external returns (bool);
+
+    function calcAndMintintReputation(
+        address buyer,
+        address seller,
+        uint256 totalAmount
+    ) external returns (bool);
 
     function burnReputation(address to, uint256 amount) external returns (uint256 balance);
 

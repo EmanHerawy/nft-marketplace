@@ -10,5 +10,5 @@ interface IERC721Premit {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external  returns (bool);
+    ) external returns (bool);
 }
