@@ -1,7 +1,9 @@
 {
   "name": "hardhat-project",
   "scripts": {
-    "prettier": "prettier --write 'contracts/**/*.sol'"
+    "prettier": "prettier  --write 'contracts/**/*.sol' ",
+    "prepare": "husky install"
+
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.10",
@@ -35,7 +37,7 @@
   },
   "husky": {
     "hooks": {
-         "pre-commit": "prettier --write 'contracts/**/*.sol' && git add -A ."
+         "pre-commit": "prettier --write 'contracts/**/*.sol'"
     }
   }
 }
