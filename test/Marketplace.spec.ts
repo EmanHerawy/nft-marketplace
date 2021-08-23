@@ -1,63 +1,76 @@
 import chai, { expect } from 'chai'
 import { Contract, constants, utils } from 'ethers'
-const { MaxUint256 } = constants;
+import { ecsign } from 'ethereumjs-util'
+
+const { MaxUint256 } = constants
 // BigNumber.from
 // import { bigNumberify, hexlify, keccak256, defaultAbiCoder, toUtf8Bytes } from 'ethers/utils'
-import { solidity, MockProvider, deployContract,createFixtureLoader } from 'ethereum-waffle'
- 
-import { expandTo18Decimals, getApprovalDigest } from './shared/utilities'
+import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
+
+import { expandTo18Decimals, getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
 
 import { tokenFixture } from './shared/fixtures'
+import { hexlify } from 'ethers/lib/utils'
 
 chai.use(solidity)
-const name = "StartFiToken";
-const symbol = "STFI";
+const name = 'StartFiToken'
+const symbol = 'STFI'
 const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = expandTo18Decimals(10)
 let token: Contract
 let NFT: Contract
- let marketPlace: Contract
+let marketPlace: Contract
 let reputation: Contract
 let stakes: Contract
-let tokenId=1;
+let tokenId = 1
 describe('StartFi marketPlace', () => {
   const provider = new MockProvider()
   const [wallet, other] = provider.getWallets()
-  const loadFixture = createFixtureLoader( [wallet])
+  const loadFixture = createFixtureLoader([wallet])
 
   let token: Contract
   before(async () => {
     const fixture = await loadFixture(tokenFixture)
-    token=fixture.token;
-    NFT=fixture.NFT;
-     marketPlace=fixture.marketPlace;
-    reputation=fixture.reputation;
-    stakes=fixture.stakes;
+    token = fixture.token
+    NFT = fixture.NFT
+    marketPlace = fixture.marketPlace
+    reputation = fixture.reputation
+    stakes = fixture.stakes
   })
 
-  it("list on marketplace should not be allowed if marketplace is not approved", async () => {
-    await expect(
-      marketPlace.listOnMarketplace(NFT.address, tokenId, 10)
-    ).to.be.revertedWith("Marketplace is not allowed to transfer your token");
-  });
+  it('list on marketplace should not be allowed if marketplace is not approved', async () => {
+    await expect(marketPlace.listOnMarketplace(NFT.address, tokenId, 10)).to.be.revertedWith(
+      'Marketplace is not allowed to transfer your token'
+    )
+  })
   it('approve', async () => {
     await expect(NFT.approve(marketPlace.address, tokenId))
       .to.emit(NFT, 'Approval')
       .withArgs(wallet.address, marketPlace.address, tokenId)
     expect(await NFT.getApproved(tokenId)).to.eq(marketPlace.address)
   })
-  it("ListOnMarketplace: Not enough reserves", async () => {
+  it('ListOnMarketplace: Not enough reserves', async () => {
+    await expect(marketPlace.listOnMarketplace(NFT.address, tokenId, 1000)).to.be.revertedWith('Not enough reserves')
+  })
+  it('Should list on marketplace', async () => {
+    await expect(marketPlace.listOnMarketplace(NFT.address, tokenId, 10)).to.emit(marketPlace, 'ListOnMarketplace')
+  })
+  it('Should list on marketplace:permit', async () => {
+    const nonce = await NFT.nonces(wallet.address)
+    const deadline = MaxUint256
+    const digest = await getApprovalNftDigest(
+      NFT,
+      { owner: wallet.address, spender: other.address, tokenId },
+      nonce,
+      deadline
+    )
+    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
+
     await expect(
-      marketPlace.listOnMarketplace(NFT.address, tokenId, 1000)
-    ).to.be.revertedWith("Not enough reserves");
-  });
-  it("Should list on marketplace", async () => {
-    await expect(
-      marketPlace.listOnMarketplace(NFT.address, tokenId, 10)
-    ).to.emit(marketPlace, "ListOnMarketplace")//.withArgs(wallet.address, marketPlace.address, tokenId)
-    expect(await NFT.ownerOf(tokenId)).to.eq(marketPlace.address)
-  });
- 
+      marketPlace.listOnMarketplaceWithPermit(NFT.address, tokenId, 10, deadline, v, hexlify(r), hexlify(s))
+    ).to.emit(marketPlace, 'ListOnMarketplace')
+  })
+
   // it("ListOnMarketplace: revert Marketplace is not allowed to transfer your token", async () => {
   //   await expect(
   //     marketPlace.listOnMarketplace(payment.address, 0, 20)
