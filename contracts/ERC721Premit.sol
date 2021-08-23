@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.7;
 import './interface/IERC721Premit.sol';
-import './StartfiSignatureLib.sol';
+import './library/StartfiSignatureLib.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
