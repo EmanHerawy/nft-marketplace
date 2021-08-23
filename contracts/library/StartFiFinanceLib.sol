@@ -48,7 +48,7 @@ library StartFiFinanceLib {
     * @return fineAmount the value that the platform will get
     * @return remaining the value that the auction woner will get
      */
-    function _calcBidDisputeFees(uint256 qualifyAmount,uint256 bidPenaltyPercentage,uint256 bidPenaltyPercentageBase) internal view returns (uint256 fineAmount, uint256 remaining) {
+    function _calcBidDisputeFees(uint256 qualifyAmount,uint256 bidPenaltyPercentage,uint256 bidPenaltyPercentageBase) internal pure returns (uint256 fineAmount, uint256 remaining) {
         fineAmount = (qualifyAmount * bidPenaltyPercentage) / bidPenaltyPercentageBase;
         remaining = qualifyAmount - fineAmount;
     }

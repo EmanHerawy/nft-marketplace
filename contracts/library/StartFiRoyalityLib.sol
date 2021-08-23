@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.7;
  import '../interface/IERC721Royalty.sol';
+ import '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 
 library StartFiRoyalityLib {
         bytes4 constant RORALTY_INTERFACE = 0x2a55205a;
@@ -30,7 +31,7 @@ library StartFiRoyalityLib {
      * @return true if this NFT contract support royalty, false if not
      */
     function _supportRoyalty(address _NFTContract) internal view returns (bool) {
-        try IERC721Royalty(_NFTContract).supportsInterface(RORALTY_INTERFACE) returns (bool isRoyaltySupported) {
+        try IERC165(_NFTContract).supportsInterface(RORALTY_INTERFACE) returns (bool isRoyaltySupported) {
             return isRoyaltySupported;
         } catch {
             return false;
