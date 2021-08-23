@@ -17,7 +17,7 @@ import './MarketPlaceBase.sol';
 contract StartfiMarketPlaceFinance is MarketPlaceBase {
     /******************************************* decalrations go here ********************************************************* */
     address internal _paymentToken;
-    uint256 internal _feeFraction = 25; // 2.5% fees 
+    uint256 internal _feeFraction = 25; // 2.5% fees
     uint256 internal _feeBase = 1000;
     uint256 bidPenaltyPercentage = 1; // 1 %
     uint256 public delistFeesPercentage = 1;
@@ -45,87 +45,22 @@ contract StartfiMarketPlaceFinance is MarketPlaceBase {
 
     /******************************************* read state functions go here ********************************************************* */
 
-    function _calcSum(uint256 a, uint256 b) internal pure returns (uint256 result) {
-        result = a + b;
-    }
-
-    /**
-     @dev calculat the platform fees
-    *@param price  : item  price
-    *@return fees the value that the platform will get
-     */
-    function _calcFees(uint256 price) internal view returns (uint256 fees) {
-        fees = (price * _feeFraction) / _feeBase;
-    }
-
-    /**
-     @dev calculat the platform fine amount when seller delist before time
-    *@param listingPrice  : item listing price
-    *@return amount the value that the platform will get
-     */
-    function _getListingQualAmount(uint256 listingPrice) internal view returns (uint256 amount) {
-        amount = (listingPrice * listqualifyPercentage) / listqualifyPercentageBase;
-    }
-
-    /**
-     @dev calculat the platform fine amount when seller delist before time
-    *@param listingPrice  : item listing price
-    *@return fineAmount the value that the platform will get
-    *@return remaining the value remaing after subtracting the fine
-     */
-    function _getDeListingQualAmount(uint256 listingPrice)
-        internal
-        view
-        returns (uint256 fineAmount, uint256 remaining)
-    {
-        fineAmount = (listingPrice * delistFeesPercentage) / delistFeesPercentageBase;
-        remaining = _getListingQualAmount(listingPrice) - fineAmount;
-    }
-
-    /**
-      @dev calculat the platform share when seller call disput
-    *@param qualifyAmount  : seller defind value to be staked in order to participate in a gevin auction
-    * @return fineAmount the value that the platform will get
-    * @return remaining the value that the auction woner will get
-     */
-    function _calcBidDisputeFees(uint256 qualifyAmount) internal view returns (uint256 fineAmount, uint256 remaining) {
-        fineAmount = (qualifyAmount * bidPenaltyPercentage) / bidPenaltyPercentageBase;
-        remaining = qualifyAmount - fineAmount;
-    }
-
-    function _getListingFinancialInfo(
+    function _premitNFT(
         address _NFTContract,
+        address target,
         uint256 tokenId,
-        uint256 bidPrice
-    )
-        internal
-        view
-        returns (
-            address issuer,
-            uint256 royaltyAmount,
-            uint256 fees,
-            uint256 netPrice
-        )
-    {
-        fees = _calcFees(bidPrice);
-        netPrice = bidPrice - fees;
-        // royalty check
-        if (_supportRoyalty(_NFTContract)) {
-            (issuer, royaltyAmount) = _getRoyaltyInfo(_NFTContract, tokenId, bidPrice);
-            if (royaltyAmount > 0 && issuer != address(0)) {
-                netPrice = netPrice - royaltyAmount;
-            }
-        }
-    }
-function _premitNFT(address _NFTContract, address target, uint256 tokenId,   uint256 deadline,
+        uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s) internal returns (bool){
-      if (_supportPremit(_NFTContract)) {
-              return     IERC721Premit(_paymentToken).permit(target, address(this), tokenId, deadline, v, r, s);
+        bytes32 s
+    ) internal returns (bool) {
+        if (_supportPremit(_NFTContract)) {
+            return IERC721Premit(_paymentToken).permit(target, address(this), tokenId, deadline, v, r, s);
+        } else {
+            return false;
+        }
+    }
 
-        }else{return false;}
-}
     /**
      *@param user  : participant address
      * @return the value of user reserves
@@ -188,18 +123,17 @@ function _premitNFT(address _NFTContract, address target, uint256 tokenId,   uin
      * @param seller : seller address
      * @param buyer : buyer address
      * @param amount : price
-      */
+     */
     function _addreputationPoints(
         address seller,
         address buyer,
         uint256 amount
     ) internal returns (bool) {
         // calc how much pint for both of them ??
-        // logic and math is defind in the contract 
-        return IStartFiReputation(reputationContract).calcAndMintintReputation(buyer,seller, amount);
-     }
+        // logic and math is defind in the contract
+        return IStartFiReputation(reputationContract).calcAndMintintReputation(buyer, seller, amount);
+    }
 
- 
     /**
      * @dev  Safely transfers `amount` of token from `from` to `to`.
      * @param from address representing the previous owner of the token
@@ -243,15 +177,18 @@ function _premitNFT(address _NFTContract, address target, uint256 tokenId,   uin
         return _userReserves;
     }
 
-   function _permit(address target,     
-   uint256 price,
-   uint256 deadline,
+    function _permit(
+        address target,
+        uint256 price,
+        uint256 deadline,
         uint8 v,
         bytes32 r,
-        bytes32 s) internal  returns (bool) {
-          IERC20(_paymentToken).permit(target, address(this), price, deadline, v, r, s);
-    return true;
+        bytes32 s
+    ) internal returns (bool) {
+        IERC20(_paymentToken).permit(target, address(this), price, deadline, v, r, s);
+        return true;
     }
+
     /**
      *   * @notice  all conditions and checks are made prior to this function
      * @dev  the formula is (fees * 1000)/base
