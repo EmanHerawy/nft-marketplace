@@ -59,7 +59,7 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
         whenPaused
         returns (uint256 percentage)
     {
-        _changeListqualifyAmount(newFees, newBase);
+        percentage = _changeListqualifyAmount(newFees, newBase);
     }
 
     /**
@@ -75,7 +75,7 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
         whenPaused
         returns (uint256 percentage)
     {
-        _changeDelistFeesPerentage(newFees, newBase);
+        percentage = _changeDelistFeesPerentage(newFees, newBase);
     }
 
     /**
@@ -91,7 +91,7 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
         whenPaused
         returns (uint256 percentage)
     {
-        _changeBidPenaltyPercentage(newFees, newBase);
+        percentage = _changeBidPenaltyPercentage(newFees, newBase);
     }
 
     /**
@@ -110,7 +110,7 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
      * @return percentage the value of the state variable `_feeFraction`
      */
     function changeFees(uint256 newFees, uint256 newBase) external onlyOwner whenPaused returns (uint256 percentage) {
-        return _changeFees(newFees, newBase);
+        percentage = _changeFees(newFees, newBase);
     }
 
     /**

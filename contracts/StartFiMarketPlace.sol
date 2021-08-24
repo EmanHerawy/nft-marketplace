@@ -417,42 +417,40 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         );
         // transfer price
 
-        // (address issuer, uint256 royaltyAmount, uint256 fees, uint256 netPrice) =StartFiRoyalityLib. _getListingFinancialInfo(
-        //     _NFTContract,
-        //     tokenId,
-        //     bidPrice,
-        //     _feeFraction,
-        //     _feeBase
-        // );
-        //  listingBids[listingId][_msgSender()].isPurchased = true;
-        // _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
-        // require( _excuteTransfer(_msgSender(),  _NFTContract,  tokenId,   seller, issuer,  royaltyAmount,  fees,  netPrice, true),'StartFi: could not excute transfer');
+        (address issuer, uint256 royaltyAmount, uint256 fees, uint256 netPrice) = StartFiFinanceLib
+            ._getListingFinancialInfo(_NFTContract, tokenId, bidPrice, _feeFraction, _feeBase);
+        listingBids[listingId][_msgSender()].isPurchased = true;
+        _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
+        require(
+            _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
+            'StartFi: could not excute transfer'
+        );
 
-        // // update user reserves
-        // // reserve nigative couldn't be at any case
-        // require(
-        //     _updateUserReserves(winnerBidder, _tokenListings[listingId].qualifyAmount, false) >= 0,
-        //     'negative reserve is not allowed'
-        // );
+        // update user reserves
+        // reserve nigative couldn't be at any case
+        require(
+            _updateUserReserves(winnerBidder, _tokenListings[listingId].qualifyAmount, false) >= 0,
+            'negative reserve is not allowed'
+        );
 
-        // // TODO: add reputation points to both seller and buyer
-        // _addreputationPoints(seller, winnerBidder, bidPrice);
+        // TODO: add reputation points to both seller and buyer
+        _addreputationPoints(seller, winnerBidder, bidPrice);
 
-        // // if bid time is less than 15 min, increase by 15 min
-        // // retuen bid id
-        // emit FullfillBid(
-        //     bidToListing[listingId].bidId,
-        //     listingId,
-        //     _NFTContract,
-        //     winnerBidder,
-        //     tokenId,
-        //     bidPrice,
-        //     issuer,
-        //     royaltyAmount,
-        //     fees,
-        //     netPrice,
-        //     block.timestamp
-        // );
+        // if bid time is less than 15 min, increase by 15 min
+        // retuen bid id
+        emit FullfillBid(
+            bidToListing[listingId].bidId,
+            listingId,
+            _NFTContract,
+            winnerBidder,
+            tokenId,
+            bidPrice,
+            issuer,
+            royaltyAmount,
+            fees,
+            netPrice,
+            block.timestamp
+        );
     }
 
     function _excuteTransfer(
@@ -480,7 +478,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
             require(_safeNFTTransfer(_NFTContract, tokenId, address(this), buyer), "NFT token couldn't be transfered");
             return true;
         } else {
-            require(_safeNFTTransfer(_NFTContract, tokenId, buyer, seller), "NFT token couldn't be transfered");            
+            require(_safeNFTTransfer(_NFTContract, tokenId, buyer, seller), "NFT token couldn't be transfered");
             return true;
         }
     }
@@ -620,36 +618,39 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         );
         // transfer price
 
-        // (address issuer, uint256 royaltyAmount, uint256 fees, uint256 netPrice) =StartFiRoyalityLib. _getListingFinancialInfo(
-        //     _NFTContract,
-        //     tokenId,
-        //     price,
-        //           _feeFraction, _feeBase
-        // );
-        // require( _excuteTransfer(_msgSender(),  _NFTContract,  tokenId,   seller, issuer,  royaltyAmount,  fees,  netPrice, true),'StartFi: could not excute transfer');
+        (address issuer, uint256 royaltyAmount, uint256 fees, uint256 netPrice) = StartFiFinanceLib
+            ._getListingFinancialInfo(_NFTContract, tokenId, price, _feeFraction, _feeBase);
+        require(
+            _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
+            'StartFi: could not excute transfer'
+        );
 
-        // uint256 ListingQualAmount =StartFiFinanceLib. _getListingQualAmount(_tokenListings[listingId].listingPrice,listqualifyPercentage, listqualifyPercentageBase);
+        uint256 ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
+            _tokenListings[listingId].listingPrice,
+            listqualifyPercentage,
+            listqualifyPercentageBase
+        );
 
-        // require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
+        require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
 
-        // // finish listing
-        // _finalizeListing(listingId, _msgSender(), ListingStatus.Sold);
-        // // TODO: add reputation points to both seller and buyer
-        // _addreputationPoints(seller, _msgSender(), price);
-        // emit BuyNow(
-        //     listingId,
-        //     _NFTContract,
-        //     _msgSender(),
-        //     tokenId,
-        //     price,
-        //     seller,
-        //     sellForEnabled,
-        //     issuer,
-        //     royaltyAmount,
-        //     fees,
-        //     netPrice,
-        //     block.timestamp
-        // );
+        // finish listing
+        _finalizeListing(listingId, _msgSender(), ListingStatus.Sold);
+        // TODO: add reputation points to both seller and buyer
+        _addreputationPoints(seller, _msgSender(), price);
+        emit BuyNow(
+            listingId,
+            _NFTContract,
+            _msgSender(),
+            tokenId,
+            price,
+            seller,
+            sellForEnabled,
+            issuer,
+            royaltyAmount,
+            fees,
+            netPrice,
+            block.timestamp
+        );
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
     }
