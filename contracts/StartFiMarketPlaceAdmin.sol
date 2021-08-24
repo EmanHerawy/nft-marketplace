@@ -4,6 +4,7 @@ pragma solidity 0.8.7;
 import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './StartFiMarketPlaceFinance.sol';
+import './StartFiMarketPlaceSpecialOffer.sol';
 import './StartFiMarketPlaceCap.sol';
 
 /**
@@ -11,7 +12,7 @@ import './StartFiMarketPlaceCap.sol';
  *@title  MarketPlace Admin
  * [ desc ] : contract to handle the main functions for any marketplace
  */
-abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceFinance, StartFiMarketPlaceCap {
+abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceFinance, StartFiMarketPlaceCap,StartFiMarketPlaceSpecialOffer {
     /******************************************* decalrations go here ********************************************************* */
 
     /******************************************* constructor goes here ********************************************************* */
