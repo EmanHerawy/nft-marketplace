@@ -410,6 +410,9 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         require(winnerBidder == _msgSender(), 'Caller is not the winner');
         // if it's new, the price will be 0
         uint256 bidPrice = listingBids[listingId][winnerBidder].bidPrice;
+        if (bidPrice > stfiCap) {
+            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
+        }
         // check that contract is allowed to transfer tokens
         require(
             _getAllowance(winnerBidder) >= bidPrice,
@@ -599,6 +602,9 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
      * @return tokenId token id
      */
     function buyNow(bytes32 listingId, uint256 price) public returns (address _NFTContract, uint256 tokenId) {
+        if (price > stfiCap) {
+            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
+        }
         bool sellForEnabled = _tokenListings[listingId].sellForEnabled;
         address seller = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;

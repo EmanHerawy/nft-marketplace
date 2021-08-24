@@ -4,13 +4,14 @@ pragma solidity 0.8.7;
 import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import './StartFiMarketPlaceFinance.sol';
+import './StartFiMarketPlaceCap.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
  *@title  MarketPlace Admin
  * [ desc ] : contract to handle the main functions for any marketplace
  */
-abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceFinance {
+abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceFinance, StartFiMarketPlaceCap {
     /******************************************* decalrations go here ********************************************************* */
 
     /******************************************* constructor goes here ********************************************************* */
@@ -111,6 +112,15 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
      */
     function changeFees(uint256 newFees, uint256 newBase) external onlyOwner whenPaused returns (uint256 percentage) {
         percentage = _changeFees(newFees, newBase);
+    }
+
+    /**
+     *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
+     * @param _usdCap  the new fees value to be stored
+     * @param _stfiCap  the new basefees value to be stored
+     */
+    function setCap(uint256 _usdCap, uint256 _stfiCap) external onlyOwner {
+        _setCap(_usdCap, _stfiCap);
     }
 
     /**
