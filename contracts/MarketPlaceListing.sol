@@ -30,6 +30,7 @@ contract MarketPlaceListing {
         bool sellForEnabled;
         // only if bed and sell for enabled
         uint256 releaseTime;
+        uint256 disputeTime; // only in auction
         uint256 qualifyAmount;
         uint256 sellFor;
         ListingStatus status;
@@ -60,6 +61,7 @@ contract MarketPlaceListing {
       * @return bedEnabeled true if auction enabled  
       * @return sellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
+      * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
       * @return qualifyAmount  amount of token locked as qualify for any bidder wants bid 
       * @return sellFor if sell for enabled for auction, this should be more than zero
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
@@ -77,6 +79,7 @@ contract MarketPlaceListing {
             bool bedEnabeled,
             bool sellForEnabled,
             uint256 releaseTime,
+            uint256 disputeTime,
             uint256 qualifyAmount,
             uint256 sellFor,
             uint256 status
@@ -91,6 +94,7 @@ contract MarketPlaceListing {
         bedEnabeled = _tokenListings[listingId].bedEnabeled;
         sellForEnabled = _tokenListings[listingId].sellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
+        disputeTime = _tokenListings[listingId].disputeTime;
         qualifyAmount = _tokenListings[listingId].qualifyAmount;
         sellFor = _tokenListings[listingId].sellFor;
         status = uint256(_tokenListings[listingId].status);
@@ -127,6 +131,7 @@ contract MarketPlaceListing {
             false,
             false,
             releaseTime,
+            0,
             0,
             0,
             ListingStatus.OnMarket
@@ -169,6 +174,7 @@ contract MarketPlaceListing {
             true,
             sellForEnabled,
             releaseTime,
+            releaseTime + 3 days,
             qualifyAmount,
             sellFor,
             ListingStatus.onAuction

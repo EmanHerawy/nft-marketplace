@@ -700,7 +700,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         _NFTContract = _tokenListings[listingId].nFTContract;
         tokenId = _tokenListings[listingId].tokenId;
         uint256 qualifyAmount = _tokenListings[listingId].qualifyAmount;
-        uint256 timeToDispute = StartFiFinanceLib._calcSum(_tokenListings[listingId].releaseTime, 3 days);
+        uint256 timeToDispute = _tokenListings[listingId].disputeTime;
         require(winnerBidder != address(0) && timeToDispute >= block.timestamp, 'No bids or still running auction');
         require(seller == _msgSender(), 'Caller is not the owner');
         require(!listingBids[listingId][winnerBidder].isPurchased, 'Already purchased');
@@ -786,6 +786,24 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
      */
     function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
         _changeDelistAfter(duration);
+    }
+
+    /**
+     * @dev only called by `owner` to approve listing that exceeded cap
+     *@param listingId listing Id
+     *
+     */
+    function approveDeal(bytes32 listingId) external onlyOwner {
+        require(
+            _tokenListings[listingId].status == ListingStatus.onAuction ||
+                _tokenListings[listingId].status == ListingStatus.OnMarket,
+            'StartFiMarketplace: Invalid ITem'
+        );
+        if (_tokenListings[listingId].status == ListingStatus.onAuction) {
+            require(_tokenListings[listingId].releaseTime < block.timestamp, 'Auction is ended');
+            _tokenListings[listingId].disputeTime = StartFiFinanceLib._calcSum(block.timestamp, 3 days);
+        }
+        kycedDeals[listingId] = true;
     }
     // // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
     // function getAdminWallet() private view returns (address) {
