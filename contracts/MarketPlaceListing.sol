@@ -13,6 +13,7 @@ contract MarketPlaceListing {
 
     // delist after 6 month
     uint256 public delistAfter = 6 * 30 days;
+    uint256 public fulfillDuration = 3 days;
 
     constructor() {}
 
@@ -174,7 +175,7 @@ contract MarketPlaceListing {
             true,
             sellForEnabled,
             releaseTime,
-            releaseTime + 3 days,
+            releaseTime + fulfillDuration,
             qualifyAmount,
             sellFor,
             ListingStatus.onAuction

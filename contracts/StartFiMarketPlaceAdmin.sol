@@ -3,16 +3,14 @@
 pragma solidity 0.8.7;
 import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import './StartFiMarketPlaceFinance.sol';
-import './StartFiMarketPlaceSpecialOffer.sol';
-import './StartFiMarketPlaceCap.sol';
+import './StartFiMarketPlaceController.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
  *@title  MarketPlace Admin
  * [ desc ] : contract to handle the main functions for any marketplace
  */
-abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceFinance, StartFiMarketPlaceCap,StartFiMarketPlaceSpecialOffer {
+abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceController {
     /******************************************* decalrations go here ********************************************************* */
 
     /******************************************* constructor goes here ********************************************************* */
@@ -22,7 +20,7 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
         string memory _marketPlaceName,
         address _paymentContract,
         address _reputationContract
-    ) StartFiMarketPlaceFinance(_marketPlaceName, _paymentContract, _reputationContract) {
+    ) StartFiMarketPlaceController(_marketPlaceName, _paymentContract, _reputationContract) {
         transferOwnership(ownerAddress);
     }
 
@@ -46,6 +44,16 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
      */
     function changeUtiltiyToken(address _token) external onlyOwner whenPaused {
         _changeUtiltiyToken(_token);
+    }
+
+    /**
+     * @dev only called by `owner` to change the fulfill Duration for auctions and `whenPaused`
+     *@param duration duration for bid winner to fulfill an auction
+     *
+     */
+    function changeFulfillDuration(uint256 duration) external onlyOwner whenPaused {
+        require(duration > 1 days, 'Invalid duration');
+        fulfillDuration = duration;
     }
 
     /**

@@ -4,17 +4,14 @@ pragma solidity 0.8.7;
 pragma abicoder v2;
 import './interface/IStartFiReputation.sol';
 
-import './interface/IERC20.sol';
-import './interface/IERC721Premit.sol';
 import './interface/IStartFiStakes.sol';
-import './MarketPlaceBase.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
  *desc   contract to handle all financial work for the marketplace
  * @title StartFi Marketplace Finance
  */
-contract StartFiMarketPlaceFinance is MarketPlaceBase {
+contract StartFiMarketPlaceFinance {
     /******************************************* decalrations go here ********************************************************* */
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees
@@ -26,17 +23,12 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
     uint256 public delistFeesPercentageBase = 100;
     uint256 public listqualifyPercentageBase = 100;
     mapping(address => uint256) userReserves;
-    mapping(address => bytes32[]) userListing;
     address public stakeContract;
     address reputationContract;
 
     /******************************************* constructor goes here ********************************************************* */
 
-    constructor(
-        string memory _name,
-        address _paymentContract,
-        address _reputationContract
-    ) MarketPlaceBase(_name) {
+    constructor(address _paymentContract, address _reputationContract) {
         _paymentToken = _paymentContract;
         reputationContract = _reputationContract;
     }
@@ -45,46 +37,12 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
 
     /******************************************* read state functions go here ********************************************************* */
 
-    function _premitNFT(
-        address _NFTContract,
-        address target,
-        uint256 tokenId,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal returns (bool) {
-        if (_supportPremit(_NFTContract)) {
-            return IERC721Premit(_paymentToken).permit(target, address(this), tokenId, deadline, v, r, s);
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     *@param user  : participant address
-     * @return the value of user reserves
-     */
-    function getUserReserved(address user) external view returns (uint256) {
-        return userReserves[user];
-    }
-
     /**
      *
      * @return the value of the state variable `_feeFraction`
      */
     function getServiceFee() external view returns (uint256) {
         return _feeFraction;
-    }
-
-    /**
-     * @dev :wrap function to get the total allowed number of tokens that this contract can transfer from the given account 
-
-    * @param owner: owner address
-    * @return allowed number of tokens that this contract can transfer from the owner account
-     */
-    function _getAllowance(address owner) internal view returns (uint256) {
-        return IERC20(_paymentToken).allowance(owner, address(this));
     }
 
     /**
@@ -135,21 +93,6 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
     }
 
     /**
-     * @dev  Safely transfers `amount` of token from `from` to `to`.
-     * @param from address representing the previous owner of the token
-     * @param to target address that will receive the tokens
-     * @param amount number of tokens to be transferred
-     * See {transferFrom}
-     */
-    function _safeTokenTransferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) internal returns (bool) {
-        return IERC20(_paymentToken).transferFrom(from, to, amount);
-    }
-
-    /**
      * @notice  all conditions and checks are made prior to this function
      * @dev called to set user reserves
      * @param user : participant address
@@ -175,18 +118,6 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
         _userReserves = isAddition ? userReserves[user] + newReserves : userReserves[user] - newReserves;
         userReserves[user] = _userReserves;
         return _userReserves;
-    }
-
-    function _permit(
-        address target,
-        uint256 price,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) internal returns (bool) {
-        IERC20(_paymentToken).permit(target, address(this), price, deadline, v, r, s);
-        return true;
     }
 
     /**

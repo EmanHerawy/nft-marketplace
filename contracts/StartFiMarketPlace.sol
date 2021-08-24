@@ -164,23 +164,23 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice
-        ) public isNotZero(listingPrice) returns (bytes32 listId) {
+    ) public isNotZero(listingPrice) returns (bytes32 listId) {
         uint256 releaseTime;
         uint256 listQualifyAmount;
-        if(offerTerms[_msgSender()].fee!=0){
+        if (offerTerms[_msgSender()].fee != 0) {
             releaseTime = StartFiFinanceLib._calcSum(block.timestamp, offerTerms[_msgSender()].delistAfter);
             listQualifyAmount = StartFiFinanceLib._getListingQualAmount(
-            listingPrice,
-            offerTerms[_msgSender()].listqualifyPercentage,
-            offerTerms[_msgSender()].listqualifyPercentageBase
-        );
-        }else{
+                listingPrice,
+                offerTerms[_msgSender()].listqualifyPercentage,
+                offerTerms[_msgSender()].listqualifyPercentageBase
+            );
+        } else {
             releaseTime = StartFiFinanceLib._calcSum(block.timestamp, delistAfter);
             listQualifyAmount = StartFiFinanceLib._getListingQualAmount(
-            listingPrice,
-            listqualifyPercentage,
-            listqualifyPercentageBase
-        );
+                listingPrice,
+                listqualifyPercentage,
+                listqualifyPercentageBase
+            );
         }
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
         // check that sender is qualified
@@ -411,7 +411,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         public
         canFullfillBid(listingId)
         returns (address _NFTContract, uint256 tokenId)
-      {
+    {
         address winnerBidder = bidToListing[listingId].bidder;
         address seller = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
@@ -432,15 +432,24 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         uint256 royaltyAmount;
         uint256 fees;
         uint256 netPrice;
-        if(offerTerms[_msgSender()].fee!=0){
-               ( issuer,   royaltyAmount,   fees,   netPrice) = StartFiFinanceLib
-            ._getListingFinancialInfo(_NFTContract, tokenId, bidPrice, offerTerms[_msgSender()].fee, offerTerms[_msgSender()].feeBase);
-        }else{
-                  (  issuer,   royaltyAmount,   fees,   netPrice) = StartFiFinanceLib
-            ._getListingFinancialInfo(_NFTContract, tokenId, bidPrice, _feeFraction, _feeBase);
-      
+        if (offerTerms[_msgSender()].fee != 0) {
+            (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
+                _NFTContract,
+                tokenId,
+                bidPrice,
+                offerTerms[_msgSender()].fee,
+                offerTerms[_msgSender()].feeBase
+            );
+        } else {
+            (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
+                _NFTContract,
+                tokenId,
+                bidPrice,
+                _feeFraction,
+                _feeBase
+            );
         }
-    
+
         listingBids[listingId][_msgSender()].isPurchased = true;
         _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
         require(
@@ -485,7 +494,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         uint256 fees,
         uint256 netPrice,
         bool isDualDir
-     ) internal nonReentrant returns (bool) {
+    ) internal nonReentrant returns (bool) {
         // transfer price
 
         if (isDualDir) {
@@ -525,7 +534,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         uint8 v,
         bytes32 r,
         bytes32 s
-     ) external returns (address _NFTContract, uint256 tokenId) {
+    ) external returns (address _NFTContract, uint256 tokenId) {
         require(
             _permit(_msgSender(), listingBids[listingId][_msgSender()].bidPrice, deadline, v, r, s),
             'StartFi: Invalid signature'
@@ -567,42 +576,41 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         if (status != ListingStatus.onAuction) {
             if (releaseTime < block.timestamp) {
                 // if it's not auction ? pay,
-                  if(offerTerms[_msgSender()].fee!=0){
-                 (fineAmount, remaining) = StartFiFinanceLib._getDeListingQualAmount(
-                    listingPrice,
-                   offerTerms[_msgSender()]. delistFeesPercentage,
-                    offerTerms[_msgSender()].delistFeesPercentageBase,
-                    offerTerms[_msgSender()].listqualifyPercentage,
-                    offerTerms[_msgSender()].listqualifyPercentageBase
-                );
-                  }else{
+                if (offerTerms[_msgSender()].fee != 0) {
+                    (fineAmount, remaining) = StartFiFinanceLib._getDeListingQualAmount(
+                        listingPrice,
+                        offerTerms[_msgSender()].delistFeesPercentage,
+                        offerTerms[_msgSender()].delistFeesPercentageBase,
+                        offerTerms[_msgSender()].listqualifyPercentage,
+                        offerTerms[_msgSender()].listqualifyPercentageBase
+                    );
+                } else {
                     (fineAmount, remaining) = StartFiFinanceLib._getDeListingQualAmount(
                         listingPrice,
                         delistFeesPercentage,
                         delistFeesPercentageBase,
                         listqualifyPercentage,
                         listqualifyPercentageBase
-                );
-                  }
-              
+                    );
+                }
+
                 //TODO: deduct the fine from his stake contract
 
                 require(_deduct(_owner, owner(), fineAmount), "couldn't deduct the fine");
             } else {
-                 if(offerTerms[_msgSender()].fee!=0){
+                if (offerTerms[_msgSender()].fee != 0) {
                     remaining = StartFiFinanceLib._getListingQualAmount(
                         listingPrice,
-                       offerTerms[_msgSender()]. listqualifyPercentage,
-                       offerTerms[_msgSender()]. listqualifyPercentageBase
-                );
-                 }else{
+                        offerTerms[_msgSender()].listqualifyPercentage,
+                        offerTerms[_msgSender()].listqualifyPercentageBase
+                    );
+                } else {
                     remaining = StartFiFinanceLib._getListingQualAmount(
                         listingPrice,
                         listqualifyPercentage,
                         listqualifyPercentageBase
-                );
-                 }
-          
+                    );
+                }
             }
             // update user reserves
             // reserve nigative couldn't be at any case
@@ -662,37 +670,44 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
             'Marketplace is not allowed to withdraw the required amount of tokens'
         );
         address issuer;
-         uint256 royaltyAmount;
-          uint256 fees;
-         uint256 netPrice;
-           uint256 ListingQualAmount;
+        uint256 royaltyAmount;
+        uint256 fees;
+        uint256 netPrice;
+        uint256 ListingQualAmount;
         // transfer price
-        if(offerTerms[_msgSender()].fee!=0){
-        (  issuer,   royaltyAmount,   fees,   netPrice) = StartFiFinanceLib
-                    ._getListingFinancialInfo(_NFTContract, tokenId, price, offerTerms[_msgSender()].fee , offerTerms[_msgSender()].feeBase);
-            
-        ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
-                    _tokenListings[listingId].listingPrice,
-                    offerTerms[_msgSender()].listqualifyPercentage,
-                    offerTerms[_msgSender()].listqualifyPercentageBase
-                );
+        if (offerTerms[_msgSender()].fee != 0) {
+            (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
+                _NFTContract,
+                tokenId,
+                price,
+                offerTerms[_msgSender()].fee,
+                offerTerms[_msgSender()].feeBase
+            );
 
-        }else{
-                (  issuer,   royaltyAmount,   fees,   netPrice) = StartFiFinanceLib
-                    ._getListingFinancialInfo(_NFTContract, tokenId, price, _feeFraction, _feeBase);
-            
-        ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
-                    _tokenListings[listingId].listingPrice,
-                    listqualifyPercentage,
-                    listqualifyPercentageBase
-                );
+            ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
+                _tokenListings[listingId].listingPrice,
+                offerTerms[_msgSender()].listqualifyPercentage,
+                offerTerms[_msgSender()].listqualifyPercentageBase
+            );
+        } else {
+            (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
+                _NFTContract,
+                tokenId,
+                price,
+                _feeFraction,
+                _feeBase
+            );
+
+            ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
+                _tokenListings[listingId].listingPrice,
+                listqualifyPercentage,
+                listqualifyPercentageBase
+            );
         }
-       require(
+        require(
             _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
             'StartFi: could not excute transfer'
         );
-
-      
 
         require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
 
@@ -763,21 +778,21 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         require(!listingBids[listingId][winnerBidder].isPurchased, 'Already purchased');
         // call staking contract to deduct
         uint256 fineAmount;
-         uint256 remaining;
-        if(offerTerms[_msgSender()].fee!=0){
-             (  fineAmount,   remaining) = StartFiFinanceLib._calcBidDisputeFees(
-            qualifyAmount,
-            offerTerms[_msgSender()].bidPenaltyPercentage,
-            offerTerms[_msgSender()].bidPenaltyPercentageBase
-        );
-        }else{
-         (  fineAmount,   remaining) = StartFiFinanceLib._calcBidDisputeFees(
-            qualifyAmount,
-            bidPenaltyPercentage,
-            bidPenaltyPercentageBase
-         );
+        uint256 remaining;
+        if (offerTerms[_msgSender()].fee != 0) {
+            (fineAmount, remaining) = StartFiFinanceLib._calcBidDisputeFees(
+                qualifyAmount,
+                offerTerms[_msgSender()].bidPenaltyPercentage,
+                offerTerms[_msgSender()].bidPenaltyPercentageBase
+            );
+        } else {
+            (fineAmount, remaining) = StartFiFinanceLib._calcBidDisputeFees(
+                qualifyAmount,
+                bidPenaltyPercentage,
+                bidPenaltyPercentageBase
+            );
         }
-     
+
         require(_deduct(winnerBidder, owner(), fineAmount), "couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
         // trnasfer token
