@@ -2,8 +2,6 @@
 
 pragma solidity 0.8.7;
 import './StartFiMarketPlaceAdmin.sol';
-import './MarketPlaceListing.sol';
-import './MarketPlaceBid.sol';
 import './library/StartFiRoyalityLib.sol';
 import './library/StartFiFinanceLib.sol';
 
@@ -15,11 +13,9 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
  *desc  marketplace with all functions for item selling by either ceating auction or selling with fixed prices, the contract auto transfer orginal NFT issuer's shares
  *
  */
-contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarketPlaceAdmin, ReentrancyGuard {
+contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
     // TODO: to be updated ( using value or percentage?? develop function to ready and update the value)
-    uint256 minQualifyAmount = 10;
-
     // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved ,
     ///
     event ListOnMarketplace(
@@ -169,14 +165,14 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         uint256 listQualifyAmount;
         if (offerTerms[_msgSender()].fee != 0) {
             releaseTime = StartFiFinanceLib._calcSum(block.timestamp, offerTerms[_msgSender()].delistAfter);
-            listQualifyAmount = StartFiFinanceLib._getListingQualAmount(
+            listQualifyAmount = StartFiFinanceLib._calcFees(
                 listingPrice,
                 offerTerms[_msgSender()].listqualifyPercentage,
                 offerTerms[_msgSender()].listqualifyPercentageBase
             );
         } else {
             releaseTime = StartFiFinanceLib._calcSum(block.timestamp, delistAfter);
-            listQualifyAmount = StartFiFinanceLib._getListingQualAmount(
+            listQualifyAmount = StartFiFinanceLib._calcFees(
                 listingPrice,
                 listqualifyPercentage,
                 listqualifyPercentageBase
@@ -184,6 +180,10 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         }
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
         // check that sender is qualified
+        // should not be less than 1 USD
+        if (listQualifyAmount < stfiUsdt) {
+            listQualifyAmount = stfiUsdt;
+        }
         require(
             _getStakeAllowance(
                 _msgSender() /*, 0*/
@@ -270,7 +270,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
         uint256 duration
     ) public isNotZero(listingPrice) returns (bytes32 listId) {
         require(duration > 12 hours, 'Auction should be live for more than 12 hours');
-        require(qualifyAmount >= minQualifyAmount, 'Invalid Auction qualify Amount');
+        require(qualifyAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
@@ -599,13 +599,13 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
                 require(_deduct(_owner, owner(), fineAmount), "couldn't deduct the fine");
             } else {
                 if (offerTerms[_msgSender()].fee != 0) {
-                    remaining = StartFiFinanceLib._getListingQualAmount(
+                    remaining = StartFiFinanceLib._calcFees(
                         listingPrice,
                         offerTerms[_msgSender()].listqualifyPercentage,
                         offerTerms[_msgSender()].listqualifyPercentageBase
                     );
                 } else {
-                    remaining = StartFiFinanceLib._getListingQualAmount(
+                    remaining = StartFiFinanceLib._calcFees(
                         listingPrice,
                         listqualifyPercentage,
                         listqualifyPercentageBase
@@ -684,7 +684,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
                 offerTerms[_msgSender()].feeBase
             );
 
-            ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
+            ListingQualAmount = StartFiFinanceLib._calcFees(
                 _tokenListings[listingId].listingPrice,
                 offerTerms[_msgSender()].listqualifyPercentage,
                 offerTerms[_msgSender()].listqualifyPercentageBase
@@ -698,7 +698,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
                 _feeBase
             );
 
-            ListingQualAmount = StartFiFinanceLib._getListingQualAmount(
+            ListingQualAmount = StartFiFinanceLib._calcFees(
                 _tokenListings[listingId].listingPrice,
                 listqualifyPercentage,
                 listqualifyPercentageBase
@@ -848,7 +848,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
                 );
             } else if (_tokenListings[listings[index]].status == ListingStatus.OnMarket) {
                 newListings.push(listings[index]);
-                uint256 listQualifyAmount = StartFiFinanceLib._getListingQualAmount(
+                uint256 listQualifyAmount = StartFiFinanceLib._calcFees(
                     _tokenListings[listings[index]].listingPrice,
                     listqualifyPercentage,
                     listqualifyPercentageBase
@@ -887,6 +887,17 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
             _tokenListings[listingId].disputeTime = StartFiFinanceLib._calcSum(block.timestamp, 3 days);
         }
         kycedDeals[listingId] = true;
+    }
+
+    /**
+     *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
+     * @param _usdCap  the new fees value to be stored
+     * @param _stfiCap  the new basefees value to be stored
+     */
+    function setCap(uint256 _usdCap, uint256 _stfiCap) external onlyOwner {
+        _setCap(_usdCap, _stfiCap);
+        // set
+        stfiUsdt = StartFiFinanceLib.getUSDPriceInSTFI(_usdCap, _stfiCap);
     }
     // // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
     // function getAdminWallet() private view returns (address) {

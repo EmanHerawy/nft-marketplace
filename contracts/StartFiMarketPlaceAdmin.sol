@@ -124,15 +124,6 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
     }
 
     /**
-     *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
-     * @param _usdCap  the new fees value to be stored
-     * @param _stfiCap  the new basefees value to be stored
-     */
-    function setCap(uint256 _usdCap, uint256 _stfiCap) external onlyOwner {
-        _setCap(_usdCap, _stfiCap);
-    }
-
-    /**
      * @dev Pauses contract.
      *
      *
