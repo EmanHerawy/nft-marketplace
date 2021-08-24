@@ -92,4 +92,10 @@ library StartFiFinanceLib {
             }
         }
     }
+
+    function getUSDPriceInSTFI(uint256 _usdCap, uint256 _stfiCap) public pure returns (uint256 usdPrice) {
+        require(_usdCap > 0 && _stfiCap > 0, 'StartFiFinanceLib: cap must be more than zero');
+        // TODO: need to manage when 1 STFI is more than 1 USD ( dicimal issue in solidity)
+        usdPrice = _stfiCap / _usdCap;
+    }
 }
