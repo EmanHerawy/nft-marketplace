@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.7;
 import '@openzeppelin/contracts/security/Pausable.sol';
-import '@openzeppelin/contracts/access/Ownable.sol';
+import '@openzeppelin/contracts/access/AccessControlEnumerable.sol';
 import './StartFiMarketPlaceController.sol';
 
 /**
@@ -10,8 +10,11 @@ import './StartFiMarketPlaceController.sol';
  *@title  MarketPlace Admin
  * [ desc ] : contract to handle the main functions for any marketplace
  */
-abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceController {
+abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, StartFiMarketPlaceController {
     /******************************************* decalrations go here ********************************************************* */
+    bytes32 public constant OWNER_ROLE = keccak256('OWNER_ROLE');
+    bytes32 public constant PRICE_FEEDER_ROLE = keccak256('PRICE_FEEDER_ROLE');
+    address _adminWallet;
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -21,10 +24,19 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
         address _paymentContract,
         address _reputationContract
     ) StartFiMarketPlaceController(_marketPlaceName, _paymentContract, _reputationContract) {
-        transferOwnership(ownerAddress);
+        _setupRole(DEFAULT_ADMIN_ROLE, ownerAddress);
+
+        _setupRole(OWNER_ROLE, ownerAddress);
+        _setupRole(PRICE_FEEDER_ROLE, ownerAddress);
+        _adminWallet = ownerAddress;
     }
 
     /******************************************* read state functions go here ********************************************************* */
+    modifier onlyOwner() {
+        require(hasRole(OWNER_ROLE, _msgSender()), 'StartFiMarketPlaceAdmin: caller is not the owner');
+
+        _;
+    }
 
     /******************************************* state functions go here ********************************************************* */
 
@@ -147,5 +159,11 @@ abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPla
      */
     function unpause() external virtual onlyOwner whenPaused {
         _unpause();
+    }
+
+    function updateAdminWallet(address newWallet) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'UnAuthorized caller');
+        _adminWallet = newWallet;
+        _setupRole(DEFAULT_ADMIN_ROLE, newWallet);
     }
 }

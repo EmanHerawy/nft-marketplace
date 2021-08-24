@@ -498,7 +498,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // transfer price
 
         if (isDualDir) {
-            require(_safeTokenTransferFrom(buyer, owner(), fees), "Couldn't transfer token as fees");
+            require(_safeTokenTransferFrom(buyer, _adminWallet, fees), "Couldn't transfer token as fees");
             if (issuer != address(0)) {
                 require(_safeTokenTransferFrom(buyer, issuer, royaltyAmount), "Couldn't transfer token to issuer");
             }
@@ -596,7 +596,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
                 //TODO: deduct the fine from his stake contract
 
-                require(_deduct(_owner, owner(), fineAmount), "couldn't deduct the fine");
+                require(_deduct(_owner, _adminWallet, fineAmount), "couldn't deduct the fine");
             } else {
                 if (offerTerms[_msgSender()].fee != 0) {
                     remaining = StartFiFinanceLib._calcFees(
@@ -793,7 +793,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             );
         }
 
-        require(_deduct(winnerBidder, owner(), fineAmount), "couldn't deduct the fine for the admin wallet");
+        require(_deduct(winnerBidder, _adminWallet, fineAmount), "couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
         // trnasfer token
         require(
@@ -894,7 +894,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param _usdCap  the new fees value to be stored
      * @param _stfiCap  the new basefees value to be stored
      */
-    function setCap(uint256 _usdCap, uint256 _stfiCap) external onlyOwner {
+    function setCap(uint256 _usdCap, uint256 _stfiCap) external {
+        require(
+            hasRole(OWNER_ROLE, _msgSender()) || hasRole(PRICE_FEEDER_ROLE, _msgSender()),
+            'StartFiMarketPlace: UnAuthorized caller'
+        );
+
         _setCap(_usdCap, _stfiCap);
         // set
         stfiUsdt = StartFiFinanceLib.getUSDPriceInSTFI(_usdCap, _stfiCap);
