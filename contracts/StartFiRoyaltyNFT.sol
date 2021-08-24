@@ -11,11 +11,11 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
- *@title  Startfi Royalty NFT
+ *@title  StartFi Royalty NFT
  * [ desc ] : NFT contract with Royalty option
  *
  */
-contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, ReentrancyGuard {
+contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdTracker;
 
@@ -25,7 +25,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         string memory baseTokenURI
     ) ERC721MinterPauser(name, symbol, baseTokenURI) ERC721Premit(name) {}
 
-    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartfiRoyaltyNFT token, given `owner` account's signed approval.
+    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
     /// Requirements:
     ///   - `deadline` must be timestamp in future.
@@ -33,7 +33,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
     ///   - the signature must use `owner` or 'approved for all' account's current nonce (see {nonces}).
     ///   - the signer cannot be zero address and must be `owner`  or 'approved for all' account.
     /// For more information on signature format, see https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP section].
-    /// StartfiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
+    /// StartFiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
     function permit(
         address target,
         address spender,
@@ -58,7 +58,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         return true;
     }
 
-    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartfiRoyaltyNFT token, given `owner` account's signed approval.
+    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Transfer} event.
     /// Requirements:
     ///   - `deadline` must be timestamp in future.
@@ -66,7 +66,7 @@ contract StartfiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
     ///   - the signature must use `owner` or 'approved for all' account's current nonce (see {nonces}).
     ///   - the signer cannot be zero address and must be `owner`  or 'approved for all' account.
     /// For more information on signature format, see https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP section].
-    /// StartfiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
+    /// StartFiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
 
     function transferWithPermit(
         address target,

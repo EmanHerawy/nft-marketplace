@@ -12,9 +12,9 @@ import './MarketPlaceBase.sol';
 /**
  * @author Eman Herawy, StartFi Team
  *desc   contract to handle all financial work for the marketplace
- * @title Startfi Marketplace Finance
+ * @title StartFi Marketplace Finance
  */
-contract StartfiMarketPlaceFinance is MarketPlaceBase {
+contract StartFiMarketPlaceFinance is MarketPlaceBase {
     /******************************************* decalrations go here ********************************************************* */
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees

@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.7;
 import './interface/IERC721Premit.sol';
-import './library/StartfiSignatureLib.sol';
+import './library/StartFiSignatureLib.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
@@ -36,7 +36,7 @@ abstract contract ERC721Premit is IERC721Premit {
         );
     }
 
-    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartfiRoyaltyNFT token, given `owner` account's signed approval.
+    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
     /// Requirements:
     ///   - `deadline` must be timestamp in future.
@@ -44,7 +44,7 @@ abstract contract ERC721Premit is IERC721Premit {
     ///   - the signature must use `owner` or 'approved for all' account's current nonce (see {nonces}).
     ///   - the signer cannot be zero address and must be `owner`  or 'approved for all' account.
     /// For more information on signature format, see https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP section].
-    /// StartfiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
+    /// StartFiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
     function _permitCheck(
         address target,
         address spender,
@@ -61,14 +61,14 @@ abstract contract ERC721Premit is IERC721Premit {
         );
 
         require(
-            StartfiSignatureLib.verifyEIP712(target, hashStruct, v, r, s, DOMAIN_SEPARATOR) ||
-                StartfiSignatureLib.verifyPersonalSign(target, hashStruct, v, r, s, DOMAIN_SEPARATOR)
+            StartFiSignatureLib.verifyEIP712(target, hashStruct, v, r, s, DOMAIN_SEPARATOR) ||
+                StartFiSignatureLib.verifyPersonalSign(target, hashStruct, v, r, s, DOMAIN_SEPARATOR)
         );
         require(spender != address(0) || spender != address(this));
         return true;
     }
 
-    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartfiRoyaltyNFT token, given `owner` account's signed approval.
+    /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Transfer} event.
     /// Requirements:
     ///   - `deadline` must be timestamp in future.
@@ -76,7 +76,7 @@ abstract contract ERC721Premit is IERC721Premit {
     ///   - the signature must use `owner` or 'approved for all' account's current nonce (see {nonces}).
     ///   - the signer cannot be zero address and must be `owner`  or 'approved for all' account.
     /// For more information on signature format, see https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP section].
-    /// StartfiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
+    /// StartFiRoyaltyNFT token implementation adapted from https://github.com/anyswap/chaindata/blob/main/AnyswapV5ERC20.sol. with some modification
 
     function _transferWithPermitCheck(
         address target,
@@ -92,8 +92,8 @@ abstract contract ERC721Premit is IERC721Premit {
         bytes32 hashStruct = keccak256(abi.encode(TRANSFER_TYPEHASH, target, to, tokenId, nonces[target]++, deadline));
 
         require(
-            StartfiSignatureLib.verifyEIP712(target, hashStruct, v, r, s, DOMAIN_SEPARATOR) ||
-                StartfiSignatureLib.verifyPersonalSign(target, hashStruct, v, r, s, DOMAIN_SEPARATOR)
+            StartFiSignatureLib.verifyEIP712(target, hashStruct, v, r, s, DOMAIN_SEPARATOR) ||
+                StartFiSignatureLib.verifyPersonalSign(target, hashStruct, v, r, s, DOMAIN_SEPARATOR)
         );
 
         require(to != address(0) || to != address(this));

@@ -4,10 +4,10 @@ import { deployContract, MockProvider } from 'ethereum-waffle'
 import { expandTo18Decimals } from './utilities'
 
 import ERC20 from '../../artifacts/contracts/StartFiToken.sol/StartFiToken.json'
-import StartFiRoyaltyNFT from '../../artifacts/contracts/StartfiRoyaltyNFT.sol/StartfiRoyaltyNFT.json'
+import StartFiRoyaltyNFT from '../../artifacts/contracts/StartFiRoyaltyNFT.sol/StartFiRoyaltyNFT.json'
 import StartFiMarketPlace from '../../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
-import StartfiStakes from '../../artifacts/contracts/StartfiStakes.sol/StartfiStakes.json'
-import StartfiReputation from '../../artifacts/contracts/StartFiReputation.sol/StartFiReputation.json'
+import StartFiStakes from '../../artifacts/contracts/StartFiStakes.sol/StartFiStakes.json'
+import StartFiReputation from '../../artifacts/contracts/StartFiReputation.sol/StartFiReputation.json'
 const { Web3Provider } = providers
 interface ContractsFixture {
   token: Contract
@@ -26,8 +26,8 @@ const symbol = 'STFI'
 export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise<ContractsFixture> {
   const token = await deployContract(wallet, ERC20, [name, symbol, wallet.address])
   const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol, baseUri])
-  const stakes = await deployContract(wallet, StartfiStakes, [NFT.address])
-   const reputation = await deployContract(wallet, StartfiReputation)
+  const stakes = await deployContract(wallet, StartFiStakes, [NFT.address])
+   const reputation = await deployContract(wallet, StartFiReputation)
 
   const marketPlace = await deployContract(wallet, StartFiMarketPlace, [
     'StartFi Market',

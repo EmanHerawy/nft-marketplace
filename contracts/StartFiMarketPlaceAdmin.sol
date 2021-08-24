@@ -3,14 +3,14 @@
 pragma solidity 0.8.7;
 import '@openzeppelin/contracts/security/Pausable.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
-import './StartfiMarketPlaceFinance.sol';
+import './StartFiMarketPlaceFinance.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
  *@title  MarketPlace Admin
  * [ desc ] : contract to handle the main functions for any marketplace
  */
-abstract contract StartfiMarketPlaceAdmin is Ownable, Pausable, StartfiMarketPlaceFinance {
+abstract contract StartFiMarketPlaceAdmin is Ownable, Pausable, StartFiMarketPlaceFinance {
     /******************************************* decalrations go here ********************************************************* */
 
     /******************************************* constructor goes here ********************************************************* */
@@ -20,7 +20,7 @@ abstract contract StartfiMarketPlaceAdmin is Ownable, Pausable, StartfiMarketPla
         string memory _marketPlaceName,
         address _paymentContract,
         address _reputationContract
-    ) StartfiMarketPlaceFinance(_marketPlaceName, _paymentContract, _reputationContract) {
+    ) StartFiMarketPlaceFinance(_marketPlaceName, _paymentContract, _reputationContract) {
         transferOwnership(ownerAddress);
     }
 

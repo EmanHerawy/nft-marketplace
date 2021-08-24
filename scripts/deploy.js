@@ -20,11 +20,11 @@ console.log(owner,'owner');
 
 /*******************************get Artifacts ******************************* */ 
   const StartFiToken = await hre.ethers.getContractFactory("StartFiToken");
-  const StartfiRoyaltyNFT = await hre.ethers.getContractFactory("StartfiRoyaltyNFT");
-  const StartfiStakes = await hre.ethers.getContractFactory("StartfiStakes");
+  const StartFiRoyaltyNFT = await hre.ethers.getContractFactory("StartFiRoyaltyNFT");
+  const StartFiStakes = await hre.ethers.getContractFactory("StartFiStakes");
   const StartFiNFTPayment = await hre.ethers.getContractFactory("StartFiNFTPayment");
   const StartFiReputation = await hre.ethers.getContractFactory("StartFiReputation");
-  const StartfiMarketPlace = await hre.ethers.getContractFactory("StartFiMarketPlace");
+  const StartFiMarketPlace = await hre.ethers.getContractFactory("StartFiMarketPlace");
 
 
 
@@ -34,12 +34,12 @@ console.log(owner,'owner');
   await startFiToken.deployed();
   console.log("StartFiToken deployed to:", startFiToken.address);
 
-  const startFiNFT = await StartfiRoyaltyNFT.deploy(name,  symbol,   "http://ipfs.io");
+  const startFiNFT = await StartFiRoyaltyNFT.deploy(name,  symbol,   "http://ipfs.io");
   await startFiNFT.deployed();
 
   console.log("startFiNFT deployed to:", startFiNFT.address);
 
-  const startFiStakes = await StartfiStakes.deploy(startFiToken.address);
+  const startFiStakes = await StartFiStakes.deploy(startFiToken.address);
   await startFiStakes.deployed();
   console.log("startFiStakes deployed to:", startFiStakes.address);
 
@@ -48,7 +48,7 @@ await startFiNFTPayment.deployed();
 console.log("startFiNFTPayment deployed to:", startFiNFTPayment.address);
 
 
-const startfiMarketPlace=  await StartfiMarketPlace.deploy("Test ERC721",  startFiToken.address,startFiStakes.address,startfiReputation.address);
+const startfiMarketPlace=  await StartFiMarketPlace.deploy("Test ERC721",  startFiToken.address,startFiStakes.address,startfiReputation.address);
 await startfiMarketPlace.deployed();
 console.log("startfiMarketPlace deployed to:", startfiMarketPlace.address);
 

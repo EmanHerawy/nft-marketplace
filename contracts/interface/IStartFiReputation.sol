@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 
 /**
  * @author Eman Herawy, StartFi Team
- *@title  Startfi Reputation contract
+ *@title  StartFi Reputation contract
  * desc contract to mamange the reputation for startfi users
  */
 interface IStartFiReputation {

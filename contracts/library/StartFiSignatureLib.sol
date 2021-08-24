@@ -7,7 +7,7 @@ pragma solidity 0.8.7;
  *@title  Singature library.
  *
  */
-library StartfiSignatureLib {
+library StartFiSignatureLib {
     function verifyEIP712(
         address target,
         bytes32 hashStruct,

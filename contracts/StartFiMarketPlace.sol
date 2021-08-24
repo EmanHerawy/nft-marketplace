@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.7;
-import './StartfiMarketPlaceAdmin.sol';
+import './StartFiMarketPlaceAdmin.sol';
 import './MarketPlaceListing.sol';
 import './MarketPlaceBid.sol';
 import './library/StartFiRoyalityLib.sol';
@@ -15,7 +15,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
  *desc  marketplace with all functions for item selling by either ceating auction or selling with fixed prices, the contract auto transfer orginal NFT issuer's shares
  *
  */
-contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartfiMarketPlaceAdmin, ReentrancyGuard {
+contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
     // TODO: to be updated ( using value or percentage?? develop function to ready and update the value)
     uint256 minQualifyAmount = 10;
@@ -117,7 +117,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartfiMarket
         address _stakeContract,
         address _reputationContract,
         address adminWallet
-    ) StartfiMarketPlaceAdmin(adminWallet, _marketPlaceName, _paymentContract, _reputationContract) {
+    ) StartFiMarketPlaceAdmin(adminWallet, _marketPlaceName, _paymentContract, _reputationContract) {
         stakeContract = _stakeContract;
     }
 
