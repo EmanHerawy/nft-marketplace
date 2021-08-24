@@ -480,7 +480,7 @@ contract StartFiMarketPlace is MarketPlaceListing, MarketPlaceBid, StartFiMarket
             require(_safeNFTTransfer(_NFTContract, tokenId, address(this), buyer), "NFT token couldn't be transfered");
             return true;
         } else {
-            require(_safeNFTTransfer(_NFTContract, tokenId, seller, buyer), "NFT token couldn't be transfered");
+            require(_safeNFTTransfer(_NFTContract, tokenId, buyer, seller), "NFT token couldn't be transfered");            
             return true;
         }
     }

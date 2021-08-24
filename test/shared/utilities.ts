@@ -11,6 +11,9 @@ const {
 const PERMIT_TYPEHASH = keccak256(
   toUtf8Bytes('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)')
 )
+const PERMIT_NFT_TYPEHASH = keccak256(
+  toUtf8Bytes('Permit(address owner,address spender,uint256 tokenId,uint256 nonce,uint256 deadline)')
+)
 const TRANSFER_TYPEHASH = keccak256(
   toUtf8Bytes('Transfer(address owner,address to,uint256 value,uint256 nonce,uint256 deadline)')
 )
@@ -79,6 +82,37 @@ export async function getApprovalDigest(
     )
   )
 }
+
+export async function getApprovalNftDigest(
+  nft: Contract,
+  approve: {
+    owner: string
+    spender: string
+    tokenId: number
+  },
+  nonce: BigNumber,
+  deadline: BigNumber
+): Promise<string> {
+  const name = await nft.name()
+  const DOMAIN_SEPARATOR = getDomainSeparator(name, nft.address)
+  return keccak256(
+    solidityPack(
+      ['bytes1', 'bytes1', 'bytes32', 'bytes32'],
+      [
+        '0x19',
+        '0x01',
+        DOMAIN_SEPARATOR,
+        keccak256(
+          defaultAbiCoder.encode(
+            ['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256'],
+            [PERMIT_NFT_TYPEHASH, approve.owner, approve.spender, approve.tokenId, nonce, deadline]
+          )
+        )
+      ]
+    )
+  )
+}
+
 export async function getTransferFromDigest(
   token: Contract,
   transferFrom: {
