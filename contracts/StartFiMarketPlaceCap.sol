@@ -22,9 +22,8 @@ contract StartFiMarketPlaceCap {
     }
 
     /******************************************* state functions go here ********************************************************* */
-    function _setCap(uint256 _usdCap, uint256 _stfiCap) internal {
-        require(_usdCap > 0 && _stfiCap > 0, 'StartFiMarketplaceCap: cap must be more than zero');
+    function _setCap(uint256 _usdCap) internal {
+        require(_usdCap > 0, 'StartFiMarketplaceCap: cap must be more than zero');
         usdCap = _usdCap;
-        stfiCap = _stfiCap;
     }
 }

@@ -892,17 +892,23 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /**
      *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
      * @param _usdCap  the new fees value to be stored
-     * @param _stfiCap  the new basefees value to be stored
      */
-    function setCap(uint256 _usdCap, uint256 _stfiCap) external {
-        require(
-            hasRole(OWNER_ROLE, _msgSender()) || hasRole(PRICE_FEEDER_ROLE, _msgSender()),
-            'StartFiMarketPlace: UnAuthorized caller'
-        );
+    function setUsdCap(uint256 _usdCap) external {
+        require(hasRole(OWNER_ROLE, _msgSender()), 'StartFiMarketPlace: UnAuthorized caller');
 
-        _setCap(_usdCap, _stfiCap);
+        _setCap(_usdCap);
         // set
-        stfiUsdt = StartFiFinanceLib.getUSDPriceInSTFI(_usdCap, _stfiCap);
+    }
+
+    /**
+     *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
+     * @param _stfiPrice  the new stfi price per usdt
+     */
+    function setPrice(uint256 _stfiPrice) external {
+        require(hasRole(PRICE_FEEDER_ROLE, _msgSender()), 'StartFiMarketPlace: UnAuthorized caller');
+        // set
+        stfiUsdt = _stfiPrice;
+        stfiCap = _stfiPrice * usdCap;
     }
     // // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
     // function getAdminWallet() private view returns (address) {
