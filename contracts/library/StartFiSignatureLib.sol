@@ -8,6 +8,8 @@ pragma solidity 0.8.7;
  *
  */
 library StartFiSignatureLib {
+    ///  see https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP section].
+
     function verifyEIP712(
         address target,
         bytes32 hashStruct,
@@ -20,6 +22,8 @@ library StartFiSignatureLib {
         address signer = ecrecover(hash, v, r, s);
         return (signer != address(0) && signer == target);
     }
+
+    ///  see https://eips.ethereum.org/EIPS/eip-2612#specification[relevant EIP section].
 
     function verifyPersonalSign(
         address target,

@@ -26,6 +26,15 @@ contract StartFiMarketPlaceSpecialOffer {
     /******************************************* read functions go here ********************************************************* */
 
     /******************************************* state functions go here ********************************************************* */
+    /**
+     * @dev add new special offer.
+     * called by child contracts
+     *
+     *
+     * Requirements:
+     *
+     * -  must  be new offer.
+     */
     function _addOffer(
         address wallet,
         uint256 _delistAfter,

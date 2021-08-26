@@ -43,6 +43,7 @@ contract StartFiMarketPlaceController is
 
     /******************************************* modifiers go here ********************************************************* */
     /**
+     * @dev called by the dapp to get the user stakes on hold
      *@param user  : participant address
      * @return the value of user reserves
      */
@@ -50,12 +51,29 @@ contract StartFiMarketPlaceController is
         return userReserves[user];
     }
 
+    /**
+     * @dev called by the contract to get who much token this contract is allowed to spend from the `owner` account
+     *@param owner  : token owner address
+     * @return the value of allowence
+     */
     function _getAllowance(address owner) internal view returns (uint256) {
         return IERC20(_paymentToken).allowance(owner, address(this));
     }
 
     /******************************************* read state functions go here ********************************************************* */
-
+    /**
+    * @dev called by the contract to get who much token this contract is allowed to spend from the `owner` account
+     * @param _NFTContract nft contract address
+     * @param tokenId token id
+     * @param target token owner
+     * @param deadline:  must be timestamp in future .
+     * @param v needed to recover the public key
+     * @param r : normal output of an ECDSA signature
+     * @param s: normal output of an ECDSA signature
+     * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+  
+     * @return true when done, false if not
+     */
     function _premitNFT(
         address _NFTContract,
         address target,
@@ -72,6 +90,10 @@ contract StartFiMarketPlaceController is
         }
     }
 
+    /**
+     * @dev See {IERC20-transferFrom}.
+     *
+     */
     function _safeTokenTransferFrom(
         address from,
         address to,
@@ -80,15 +102,28 @@ contract StartFiMarketPlaceController is
         return IERC20(_paymentToken).transferFrom(from, to, amount);
     }
 
+    /**
+    /// @dev Sets `value` as allowance of `spender` account over `owner` account's STFI token, given `owner` account's signed approval.
+    /// Emits {Approval} event.
+     * @param amount amount to transfer
+     * @param target token owner
+     * @param deadline:  must be timestamp in future .
+     * @param v needed to recover the public key
+     * @param r : normal output of an ECDSA signature
+     * @param s: normal output of an ECDSA signature
+     * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
+  
+     * @return true when done, false if not
+     */
     function _permit(
         address target,
-        uint256 price,
+        uint256 amount,
         uint256 deadline,
         uint8 v,
         bytes32 r,
         bytes32 s
     ) internal returns (bool) {
-        IERC20(_paymentToken).permit(target, address(this), price, deadline, v, r, s);
+        IERC20(_paymentToken).permit(target, address(this), amount, deadline, v, r, s);
         return true;
     }
 }

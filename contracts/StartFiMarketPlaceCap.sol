@@ -22,6 +22,15 @@ contract StartFiMarketPlaceCap {
     }
 
     /******************************************* state functions go here ********************************************************* */
+    /**
+     * @dev update the cap, called by child contracts .
+     *
+     *
+     *
+     * Requirements:
+     *
+     * - the `_usdCap` must not be empty.
+     */
     function _setCap(uint256 _usdCap) internal {
         require(_usdCap > 0, 'StartFiMarketplaceCap: cap must be more than zero');
         usdCap = _usdCap;

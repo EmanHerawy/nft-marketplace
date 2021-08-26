@@ -776,7 +776,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(winnerBidder != address(0) && timeToDispute >= block.timestamp, 'No bids or still running auction');
         require(seller == _msgSender(), 'Caller is not the owner');
         require(!listingBids[listingId][winnerBidder].isPurchased, 'Already purchased');
-        // call staking contract to deduct
         uint256 fineAmount;
         uint256 remaining;
         if (offerTerms[_msgSender()].fee != 0) {
@@ -792,7 +791,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 bidPenaltyPercentageBase
             );
         }
-
+        // call staking contract to deduct
         require(_deduct(winnerBidder, _adminWallet, fineAmount), "couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
         // trnasfer token
@@ -863,16 +862,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
-     * @dev only called by `owner` to change the name and `whenPaused`
-     *@param duration duration
-     *
-     */
-    function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
-        _changeDelistAfter(duration);
-    }
-
-    /**
-     * @dev only called by `owner` to approve listing that exceeded cap
+     * @dev only called by `owner` to approve listing that exceeded cap after doing the KYC
      *@param listingId listing Id
      *
      */
@@ -890,7 +880,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
-     *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
+     *  @dev only called by `owner` to update the cap
      * @param _usdCap  the new fees value to be stored
      */
     function setUsdCap(uint256 _usdCap) external {
@@ -901,7 +891,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
-     *  @dev only called by `owner` or `priceFeeds` to update the STFI/usdt price
+     *  @dev only called by  `priceFeeds` to update the STFI/usdt price
      * @param _stfiPrice  the new stfi price per usdt
      */
     function setPrice(uint256 _stfiPrice) external {
@@ -910,8 +900,4 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         stfiUsdt = _stfiPrice;
         stfiCap = _stfiPrice * usdCap;
     }
-    // // ubnormal isssue with calling owner() in deList unction , we have implemented this func as a workaround
-    // function getAdminWallet() private view returns (address) {
-    //     return owner();
-    // }
 }

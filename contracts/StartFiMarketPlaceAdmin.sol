@@ -102,6 +102,15 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
 
     /**
      * @dev only called by `owner` to change the name and `whenPaused`
+     *@param duration duration
+     *
+     */
+    function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
+        _changeDelistAfter(duration);
+    }
+
+    /**
+     * @dev only called by `owner` to change the name and `whenPaused`
      * @param newFees  the new fees value to be stored
      * @param newBase  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
@@ -161,8 +170,19 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         _unpause();
     }
 
+    /**
+     * @dev update the admin wallet address.
+     *
+     *
+     *
+     * Requirements:
+     *
+     * - the caller must be the admin.
+     * - the `newWallet` must not be empty.
+     */
     function updateAdminWallet(address newWallet) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'UnAuthorized caller');
+        require(newWallet != address(0), 'Zero address is not allowed');
         _adminWallet = newWallet;
         _setupRole(DEFAULT_ADMIN_ROLE, newWallet);
     }
