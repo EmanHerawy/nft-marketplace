@@ -50,9 +50,9 @@ contract StartFiMarketPlaceFinance {
      * @param staker : participant address
      * @return allowed number of tokens that this contract can transfer from the owner account
      */
-    function _getStakeAllowance(
+    function getStakeAllowance(
         address staker /*,uint256 prevAmount*/
-    ) internal view returns (uint256) {
+    ) public view returns (uint256) {
         // user can bid multi time, we want to make sure we don't calc the old bid as sperated bid
         uint256 userActualReserved = userReserves[staker]; //.sub(prevAmount);
         return IStartFiStakes(stakeContract).getReserves(staker) - userActualReserved;

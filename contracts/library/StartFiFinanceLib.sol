@@ -2,10 +2,11 @@
 
 pragma solidity 0.8.7;
 import './StartFiRoyalityLib.sol';
-import './WadRayMath.sol';
+
+// import './WadRayMath.sol';
 
 library StartFiFinanceLib {
-    using WadRayMath for uint256;
+    // using WadRayMath for uint256;
 
     function _calcSum(uint256 a, uint256 b) internal pure returns (uint256 result) {
         result = a + b;
@@ -21,7 +22,7 @@ library StartFiFinanceLib {
         uint256 _fee,
         uint256 _feeBase
     ) internal pure returns (uint256 fees) {
-        fees = price.wadMul(_fee).wadDiv(_feeBase);
+        fees = (price * _fee) / _feeBase;
     }
 
     /**

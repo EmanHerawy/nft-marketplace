@@ -36,6 +36,12 @@ abstract contract ERC721Premit is IERC721Premit {
         );
     }
 
+    function getChainId() external view returns (uint256 chainId) {
+        assembly {
+            chainId := chainid()
+        }
+    }
+
     /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
     /// Requirements:
@@ -101,8 +107,7 @@ abstract contract ERC721Premit is IERC721Premit {
         return true;
     }
 
-    // 0x2a55205a
-    // 0x2a55205a
+    // 0xd505accf
     /**
      * @dev See {IERC165-supportsInterface}.
      */

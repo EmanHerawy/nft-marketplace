@@ -115,6 +115,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address adminWallet
     ) StartFiMarketPlaceAdmin(adminWallet, _marketPlaceName, _paymentContract, _reputationContract) {
         stakeContract = _stakeContract;
+        // to be removed
+        usdCap = 10000;
+        stfiCap = 10000;
+        stfiUsdt = 1;
     }
 
     /******************************************* modifiers go here ********************************************************* */
@@ -185,7 +189,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             listQualifyAmount = stfiUsdt;
         }
         require(
-            _getStakeAllowance(
+            getStakeAllowance(
                 _msgSender() /*, 0*/
             ) >= listQualifyAmount,
             'Not enough reserves'
@@ -379,7 +383,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         if (prevAmount == 0) {
             // check that he has reserved
             require(
-                _getStakeAllowance(
+                getStakeAllowance(
                     _msgSender() /*, 0*/
                 ) >= qualifyAmount,
                 'Not enough reserves'
