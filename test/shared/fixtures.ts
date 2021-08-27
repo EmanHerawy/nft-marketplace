@@ -26,7 +26,7 @@ const symbol = 'STFI'
 export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise<ContractsFixture> {
   const token = await deployContract(wallet, ERC20, [name, symbol, wallet.address])
   const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol, baseUri])
-  const stakes = await deployContract(wallet, StartFiStakes, [NFT.address])
+  const stakes = await deployContract(wallet, StartFiStakes, [token.address])
    const reputation = await deployContract(wallet, StartFiReputation)
 
   const marketPlace = await deployContract(wallet, StartFiMarketPlace, [

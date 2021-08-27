@@ -24,7 +24,7 @@ const symbol = "STFI";
 const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = expandTo18Decimals(10)
 // chainId on testing is 0
-const chainId=0;
+const chainId:any=0;
 describe('StartFiToken', () => {
   const provider = new MockProvider()
   const [wallet, other] = provider.getWallets()
@@ -109,7 +109,8 @@ describe('StartFiToken', () => {
       token,
       { owner: wallet.address, spender: other.address, value: TEST_AMOUNT },
       nonce,
-      deadline
+      deadline,
+      chainId,
     )
 
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
@@ -127,7 +128,8 @@ describe('StartFiToken', () => {
       token,
       { owner: wallet.address, spender: other.address, value: TEST_AMOUNT },
       nonce,
-      deadline
+      deadline,
+      chainId,
     )
 
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
