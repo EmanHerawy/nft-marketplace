@@ -84,7 +84,7 @@ contract StartFiMarketPlaceController is
         bytes32 s
     ) internal returns (bool) {
         if (_supportPremit(_NFTContract)) {
-            return IERC721Premit(_paymentToken).permit(target, address(this), tokenId, deadline, v, r, s);
+            return IERC721Premit(_NFTContract).permit(target, address(this), tokenId, deadline, v, r, s);
         } else {
             return false;
         }
