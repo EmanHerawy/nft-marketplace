@@ -17,6 +17,9 @@ const PERMIT_NFT_TYPEHASH = keccak256(
 const TRANSFER_TYPEHASH = keccak256(
   toUtf8Bytes('Transfer(address owner,address to,uint256 value,uint256 nonce,uint256 deadline)')
 )
+const TRANSFER_NFT_TYPEHASH = keccak256(
+  toUtf8Bytes('Transfer(address owner,address to,uint256 tokenId,uint256 nonce,uint256 deadline)')
+)
 
 export function expandTo18Decimals(n: number): BigNumber {
   return BigNumber.from(n).mul(BigNumber.from(10).pow(18))
@@ -146,12 +149,13 @@ export async function getTransferFromDigest(
     )
   )
 }
+
 export async function getNFTTransferFromDigest(
   nft: Contract,
-  transferFrom: {
+  safeTransfer: {
     owner: string
     spender: string
-    value: BigNumber
+    tokenId: number
   },
   nonce: BigNumber,
   deadline: BigNumber,
@@ -169,14 +173,13 @@ export async function getNFTTransferFromDigest(
         keccak256(
           defaultAbiCoder.encode(
             ['bytes32', 'address', 'address', 'uint256', 'uint256', 'uint256'],
-            [TRANSFER_TYPEHASH, transferFrom.owner, transferFrom.spender, transferFrom.value, nonce, deadline]
+            [TRANSFER_NFT_TYPEHASH, safeTransfer.owner, safeTransfer.spender, safeTransfer.tokenId, nonce, deadline]
           )
         )
       ]
     )
   )
 }
-
 export async function mineBlock(provider: any, timestamp: number): Promise<void> {
   await new Promise(async (resolve, reject) => {
     ;(provider._web3Provider.sendAsync as any)(

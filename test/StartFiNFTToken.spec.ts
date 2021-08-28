@@ -21,17 +21,19 @@ import ER721 from '../artifacts/contracts/StartFiRoyaltyNFT.sol/StartFiRoyaltyNF
 chai.use(solidity)
 let baseUri = 'http://ipfs.io'
 let tokenUri = 'http://ipfs.io'
+let chainId:BigNumber;
 const name = 'StartFiToken'
 const symbol = 'STFI'
 const share = 25
 const separator = 10 // 2.5
-const itemPrice=1000;
+const itemPrice=100;
+const muliplyer=10**18;
 describe('StartFiToken', () => {
   const provider = new MockProvider()
   const [wallet, other] = provider.getWallets()
 let walletNftBalance=0
   let token: Contract
-  beforeEach(async () => {
+  before(async () => {
     token = await deployContract(wallet, ER721, [name, symbol, baseUri])
   })
 
@@ -39,7 +41,7 @@ let walletNftBalance=0
     const _name = await token.name()    
     expect(_name).to.eq(name)
     expect(await token.symbol()).to.eq(symbol)
-    const chainId = await token.getChainId()
+     chainId = await token.getChainId()
    expect(await token.DOMAIN_SEPARATOR()).to.eq(
       keccak256(
         defaultAbiCoder.encode(
@@ -60,25 +62,7 @@ let walletNftBalance=0
       keccak256(toUtf8Bytes('Permit(address owner,address spender,uint256 tokenId,uint256 nonce,uint256 deadline)'))
     )
   })
-  it("Should mint without royalty", async () => {
-  
-  
-  
-     expect(await token.balanceOf(
-      wallet.address
-    ))
-      .to.eq(walletNftBalance);
-    await expect(token.mint(
-      wallet.address,
-      tokenUri
-    ))
-      .to.emit(token, 'Transfer')  
-      walletNftBalance++;
-      expect(await token.balanceOf(
-        wallet.address
-      ))
-        .to.eq(walletNftBalance);
-    });
+
 
   it("Should mint with royalty Original issuer share is saved", async () => {
     await expect(await token.mintWithRoyalty(
@@ -88,108 +72,97 @@ let walletNftBalance=0
     ))
       .to.emit(token, 'Transfer') 
       const info:{ issuer:string, _royaltyAmount:BigNumber} = await token.royaltyInfo(
-     0,// tokenid
+        walletNftBalance,
         itemPrice
      );
-  console.log(info,'info');
-  const royaltyAmount=itemPrice*share/(separator*100);
-  console.log(info._royaltyAmount.toNumber(),'royaltyAmount **');
-  console.log(royaltyAmount,'royaltyAmount');
-  
+     walletNftBalance++;
+  const royaltyAmount=itemPrice*muliplyer*share/(separator*100);
       await expect(info.issuer)
         .to.eq( wallet.address);
-      await expect(info._royaltyAmount)
-        .to.eq(royaltyAmount );
+        // we have to convert it to string because the expected number is big ' 18 decimals' and js couldn't handle
+      await expect(info._royaltyAmount.toString())
+        .to.eq(royaltyAmount.toString() );
       
     });
 
-    
-    //   await token.royaltyInfo(startFiPaymentNFT.address, "10000000000000");
-    // const mint = await startFiPaymentNFT.MintNFTWithRoyalty(
-    //   wallet.address,
-    //   "001",
-    //   "1",
-    //   "10"
-    // );
-    // expect(mint.from).to.be.equal(wallet.address);
-  // });
-  // it('Any one can mint', async () => {
-  //   await expect(token.mi(other.address, TEST_AMOUNT))
-  //     .to.emit(token, 'Approval')
-  //     .withArgs(wallet.address, other.address, TEST_AMOUNT)
-  //   expect(await token.allowance(wallet.address, other.address)).to.eq(TEST_AMOUNT)
-  // })
+    it("Should mint without royalty", async () => {
+  
+  
+  
+      expect(await token.balanceOf(
+       wallet.address
+     ))
+       .to.eq(walletNftBalance);
+     await expect(token.mint(
+       wallet.address,
+       tokenUri
+     ))
+       .to.emit(token, 'Transfer')  
+       walletNftBalance++;
+       expect(await token.balanceOf(
+         wallet.address
+       ))
+         .to.eq(walletNftBalance);
+     });
+  
+  it('Contract must support Royalty', async () => {
+     expect(await token.supportsRoyalty())
+    .to.eq('0x2a55205a' );
+        })
+  it('Contract must support Premit', async () => {
+     expect(await token.supportsPremit())
+    .to.eq('0xd505accf' );
+        })
+        it('permit', async () => {
 
-  // it('transfer', async () => {
-  //   await expect(token.transfer(other.address, TEST_AMOUNT))
-  //     .to.emit(token, 'Transfer')
-  //     .withArgs(wallet.address, other.address, TEST_AMOUNT)
-  //   expect(await token.balanceOf(wallet.address)).to.eq(TOTAL_SUPPLY.sub(TEST_AMOUNT))
-  //   expect(await token.balanceOf(other.address)).to.eq(TEST_AMOUNT)
-  // })
+          const nonce = await token.nonces(wallet.address)  
+          const deadline = MaxUint256
+          const digest = await getApprovalNftDigest(
+            token,
+            { owner: wallet.address, spender: other.address, tokenId: 0 },
+            nonce,
+            deadline,
+            chainId,
+          )
+      
+          const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
+      
+          await expect(token.permit(wallet.address, other.address, 0, deadline, v, hexlify(r), hexlify(s)))
+            .to.emit(token, 'Approval')
+            .withArgs(wallet.address, other.address, 0)
+          expect(await token.getApproved(0)).to.eq( other.address)
+          expect(await token.nonces(wallet.address)).to.eq(BigNumber.from(nonce+1))
+        })
+  it('transferFrom', async () => {
+    await expect(token.transferFrom(wallet.address,other.address, 1))
+      .to.emit(token, 'Transfer')
+      .withArgs(wallet.address, other.address, 1)
+    expect(await token.balanceOf(wallet.address)).to.eq(walletNftBalance-1)
+    expect(await token.balanceOf(other.address)).to.eq(1)
+  })
+  it('transferFrom::fail', async () => {
+    await expect(token.transferFrom(wallet.address,other.address, 1))
+    .to.be.reverted
+  })
+ 
+  it('transferWithPermit', async () => {
+    const nonce = await token.nonces(other.address)  
+    const deadline = MaxUint256
+    const digest = await getNFTTransferFromDigest(
+      token,
+      { owner: other.address, spender: wallet.address, tokenId: 1 },
+      nonce,
+      deadline,
+      chainId,
+    )
 
-  // it('transfer:fail', async () => {
-  //   await expect(token.transfer(other.address, TOTAL_SUPPLY.add(1))).to.be.reverted // ds-math-sub-underflow
-  //   await expect(token.connect(other).transfer(wallet.address, 1)).to.be.reverted // ds-math-sub-underflow
-  // })
+    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(other.privateKey.slice(2), 'hex'))
 
-  // it('transferFrom', async () => {
-  //   await token.approve(other.address, TEST_AMOUNT)
-  //   await expect(token.connect(other).transferFrom(wallet.address, other.address, TEST_AMOUNT))
-  //     .to.emit(token, 'Transfer')
-  //     .withArgs(wallet.address, other.address, TEST_AMOUNT)
-  //   expect(await token.allowance(wallet.address, other.address)).to.eq(0)
-  //   expect(await token.balanceOf(wallet.address)).to.eq(TOTAL_SUPPLY.sub(TEST_AMOUNT))
-  //   expect(await token.balanceOf(other.address)).to.eq(TEST_AMOUNT)
-  // })
-
-  // it('transferFrom:max', async () => {
-  //   await token.approve(other.address, MaxUint256)
-  //   await expect(token.connect(other).transferFrom(wallet.address, other.address, TEST_AMOUNT))
-  //     .to.emit(token, 'Transfer')
-  //     .withArgs(wallet.address, other.address, TEST_AMOUNT)
-  //   // expect(await token.allowance(wallet.address, other.address)).to.eq(MaxUint256)
-  //   expect(await token.balanceOf(wallet.address)).to.eq(TOTAL_SUPPLY.sub(TEST_AMOUNT))
-  //   expect(await token.balanceOf(other.address)).to.eq(TEST_AMOUNT)
-  // })
-
-  // it('permit', async () => {
-  //   const nonce = await token.nonces(wallet.address)  
-  //   const deadline = MaxUint256
-  //   const digest = await getApprovalNftDigest(
-  //     token,
-  //     { owner: wallet.address, spender: other.address, value: TEST_AMOUNT },
-  //     nonce,
-  //     deadline,
-  //     chainId,
-  //   )
-
-  //   const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
-
-  //   await expect(token.permit(wallet.address, other.address, TEST_AMOUNT, deadline, v, hexlify(r), hexlify(s)))
-  //     .to.emit(token, 'Approval')
-  //     .withArgs(wallet.address, other.address, TEST_AMOUNT)
-  //   expect(await token.allowance(wallet.address, other.address)).to.eq(TEST_AMOUNT)
-  //   expect(await token.nonces(wallet.address)).to.eq(BigNumber.from(nonce+1))
-  // })
-  // it('transferWithPermit', async () => {
-  //   const nonce = await token.nonces(wallet.address)  
-  //   const deadline = MaxUint256
-  //   const digest = await getNFTTransferFromDigest(
-  //     token,
-  //     { owner: wallet.address, spender: other.address, value: TEST_AMOUNT },
-  //     nonce,
-  //     deadline,
-  //     chainId,
-  //   )
-
-  //   const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
-
-  //   await expect(token.transferWithPermit(wallet.address, other.address, TEST_AMOUNT, deadline, v, hexlify(r), hexlify(s)))
-  //     .to.emit(token, 'Transfer')
-  //     .withArgs(wallet.address, other.address, TEST_AMOUNT)
-  //     expect(await token.balanceOf(wallet.address)).to.eq(TOTAL_SUPPLY.sub(TEST_AMOUNT))
-  //     expect(await token.balanceOf(other.address)).to.eq(TEST_AMOUNT)
-  //     expect(await token.nonces(wallet.address)).to.eq(BigNumber.from(nonce+1))
-  // })
+    await expect(token.transferWithPermit(other.address,wallet.address,  1, deadline, v, hexlify(r), hexlify(s)))
+      .to.emit(token, 'Transfer')
+     
+      .withArgs( other.address,wallet.address,1)
+      expect(await token.balanceOf(wallet.address)).to.eq(walletNftBalance)
+      expect(await token.balanceOf(other.address)).to.eq(0)
+    expect(await token.nonces(other.address)).to.eq(BigNumber.from(nonce+1))  })
 })
