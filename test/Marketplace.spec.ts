@@ -228,40 +228,45 @@ describe('StartFi marketPlace:Actions', () => {
     for (let tokenId = 0; tokenId < 4; tokenId++) {
       await NFT.approve(marketPlace.address, tokenId)
       await marketPlace.createAuction(NFT.address, tokenId, 10, 11, true, 11, 1000000000)
-      const eventFilter = marketPlace.filters.CreateAuction(null, null)
+      const eventFilter = await marketPlace.filters.CreateAuction(null, null)
       const events = await marketPlace.queryFilter(eventFilter)
-      auctionsId.push((events[0] as any).args[0])
+      auctionsId.push(await (events[events.length - 1] as any).args[0])
     }
     for (let tokenId = 4; tokenId < 8; tokenId++) {
       await NFT.approve(marketPlace.address, tokenId)
       await marketPlace.listOnMarketplace(NFT.address, tokenId, 10)
-      const eventFilter = marketPlace.filters.ListOnMarketplace(null, null)
+      const eventFilter = await marketPlace.filters.ListOnMarketplace(null, null)
       const events = await marketPlace.queryFilter(eventFilter)
-      listonMarketplaceIds.push((events[0] as any).args[0])
+      listonMarketplaceIds.push((events[events.length - 1] as any).args[0])
     }
   })
   it('Should bid item', async () => {
     await expect(marketPlace.bid(auctionsId[0], 1200)).to.emit(marketPlace, 'BidOnAuction')
   })
+  it('Should fullfil bid item', async () => {
+    await expect(token.approve(marketPlace.address, 1200)).to.emit(token, 'Approval')
+    await expect(marketPlace.fullfillBid(auctionsId[0])).to.emit(marketPlace, 'FullfillBid')
+  })
   it('Should approve deal', async () => {
-    const transactionRecipe = await marketPlace.approveDeal(auctionsId[0])
+    const transactionRecipe = await marketPlace.approveDeal(listonMarketplaceIds[1])
     expect(transactionRecipe.from).equal(wallet.address)
   })
   it('Buy now: Marketplace is not allowed to withdraw the required amount of tokens', async () => {
-    await expect(marketPlace.buyNow(auctionsId[0], 1200)).to.be.revertedWith(
+    await expect(marketPlace.buyNow(listonMarketplaceIds[2], 1200)).to.be.revertedWith(
       'Marketplace is not allowed to withdraw the required amount of tokens'
     )
   })
   it('Should Buy Now', async () => {
     await expect(token.approve(marketPlace.address, 1200)).to.emit(token, 'Approval')
-    await expect(marketPlace.buyNow(auctionsId[0], 1200)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.buyNow(listonMarketplaceIds[2], 1200)).to.emit(marketPlace, 'BuyNow')
   })
-  it('Should dispute auction', async () => {
+  /*  it('Should dispute auction', async () => {
     await expect(marketPlace.disputeAuction(auctionsId[1])).to.emit(marketPlace, 'DisputeAuction')
-  })
+  }) */
   it('Should delist from marketplace', async () => {
     await expect(marketPlace.deList(listonMarketplaceIds[0])).to.emit(marketPlace, 'DeListOffMarketplace')
   })
+
   it('Should set marketCap', async () => {
     const transactionRecipe = await marketPlace.setUsdCap(5)
     expect(transactionRecipe.from).equal(wallet.address)
@@ -269,5 +274,8 @@ describe('StartFi marketPlace:Actions', () => {
   it('Should set STFI price', async () => {
     const transactionRecipe = await marketPlace.setPrice(23)
     expect(transactionRecipe.from).equal(wallet.address)
+  })
+  it('Should UserReservesFree', async () => {
+    await expect(marketPlace.freeReserves()).to.emit(marketPlace, 'UserReservesFree')
   })
 })
