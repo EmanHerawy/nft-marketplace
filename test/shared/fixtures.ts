@@ -18,7 +18,7 @@ interface ContractsFixture {
 }
 
 const overrides = {
-  gasLimit: 9999999
+  gasLimit: 9999999,
 }
 let baseUri = 'http://ipfs.io'
 const name = 'StartFiToken'
@@ -27,25 +27,27 @@ export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise
   const token = await deployContract(wallet, ERC20, [name, symbol, wallet.address])
   const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol, baseUri])
   const stakes = await deployContract(wallet, StartFiStakes, [token.address])
-   const reputation = await deployContract(wallet, StartFiReputation)
+  const reputation = await deployContract(wallet, StartFiReputation)
 
   const marketPlace = await deployContract(wallet, StartFiMarketPlace, [
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,wallet.address
+    reputation.address,
+    wallet.address,
   ])
 
   // add to minter role
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', NFT.address)
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
-  // mint 4 tokens / 2 without royalty and 2 with royalty
-  await NFT.mint(wallet.address, baseUri)
-  await NFT.mint(wallet.address, baseUri)
-  await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
-  await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
+  // mint 4 tokens / 3 without royalty and 2 with royalty
+  for (let index = 0; index < 5; index++) {
+    await NFT.mint(wallet.address, baseUri)
+    await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
+  }
+
   await stakes.setMarketplace(marketPlace.address)
-  return { token, stakes, NFT, marketPlace,  reputation }
+  return { token, stakes, NFT, marketPlace, reputation }
 }
 
 interface PairFixture extends ContractsFixture {

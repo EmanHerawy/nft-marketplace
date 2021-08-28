@@ -718,7 +718,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // finish listing
         _finalizeListing(listingId, _msgSender(), ListingStatus.Sold);
         // TODO: add reputation points to both seller and buyer
-        _addreputationPoints(seller, _msgSender(), price);
+        //_addreputationPoints(seller, _msgSender(), price);
         emit BuyNow(
             listingId,
             _NFTContract,
@@ -877,7 +877,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             'StartFiMarketplace: Invalid ITem'
         );
         if (_tokenListings[listingId].status == ListingStatus.onAuction) {
-            require(_tokenListings[listingId].releaseTime < block.timestamp, 'Auction is ended');
+            require(_tokenListings[listingId].releaseTime > block.timestamp, 'Auction is ended');
             _tokenListings[listingId].disputeTime = StartFiFinanceLib._calcSum(block.timestamp, 3 days);
         }
         kycedDeals[listingId] = true;
