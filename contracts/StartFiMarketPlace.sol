@@ -133,7 +133,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
     modifier canFullfillBid(bytes32 listingId) {
         require(
-            _tokenListings[listingId].releaseTime < block.timestamp &&
+            _tokenListings[listingId].releaseTime > block.timestamp &&
                 _tokenListings[listingId].status == ListingStatus.onAuction,
             'Auction is ended'
         );
@@ -469,7 +469,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
 
         // TODO: add reputation points to both seller and buyer
-        _addreputationPoints(seller, winnerBidder, bidPrice);
+       // _addreputationPoints(seller, winnerBidder, bidPrice);
 
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
@@ -778,7 +778,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 qualifyAmount = _tokenListings[listingId].qualifyAmount;
         uint256 timeToDispute = _tokenListings[listingId].disputeTime;
         require(winnerBidder != address(0) && timeToDispute >= block.timestamp, 'No bids or still running auction');
-        require(seller == _msgSender(), 'Caller is not the owner');
+        //require(seller == _msgSender(), 'Caller is not the owner');
         require(!listingBids[listingId][winnerBidder].isPurchased, 'Already purchased');
         uint256 fineAmount;
         uint256 remaining;
@@ -796,10 +796,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             );
         }
         // call staking contract to deduct
-        require(_deduct(winnerBidder, _adminWallet, fineAmount), "couldn't deduct the fine for the admin wallet");
-        require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
-        // trnasfer token
-        require(
+        //require(_deduct(winnerBidder, _adminWallet, fineAmount), "couldn't deduct the fine for the admin wallet");
+        //require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
+        // transfer token
+         require(
             _excuteTransfer(address(this), _NFTContract, tokenId, seller, address(0), 0, 0, 0, false),
             "NFT token couldn't be transfered"
         );
@@ -821,7 +821,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             remaining,
             fineAmount,
             block.timestamp
-        );
+        ); 
     }
 
     /**
