@@ -4,16 +4,14 @@ import { deployContract, MockProvider } from 'ethereum-waffle'
 import { expandTo18Decimals } from './utilities'
 
 import ERC20 from '../../artifacts/contracts/StartFiToken.sol/StartFiToken.json'
-import StartFiRoyaltyNFT from '../../artifacts/contracts/StartfiRoyaltyNFT.sol/StartfiRoyaltyNFT.json'
-import StartFiPaymentNFT from '../../artifacts/contracts/StartFiNFTPayment.sol/StartFiNFTPayment.json'
+import StartFiRoyaltyNFT from '../../artifacts/contracts/StartFiRoyaltyNFT.sol/StartFiRoyaltyNFT.json'
 import StartFiMarketPlace from '../../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
-import StartfiStakes from '../../artifacts/contracts/StartfiStakes.sol/StartfiStakes.json'
-import StartfiReputation from '../../artifacts/contracts/StartFiReputation.sol/StartFiReputation.json'
+import StartFiStakes from '../../artifacts/contracts/StartFiStakes.sol/StartFiStakes.json'
+import StartFiReputation from '../../artifacts/contracts/StartFiReputation.sol/StartFiReputation.json'
 const { Web3Provider } = providers
 interface ContractsFixture {
   token: Contract
   NFT: Contract
-  payment: Contract
   marketPlace: Contract
   reputation: Contract
   stakes: Contract
@@ -28,28 +26,27 @@ const symbol = 'STFI'
 export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise<ContractsFixture> {
   const token = await deployContract(wallet, ERC20, [name, symbol, wallet.address])
   const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol, baseUri])
-  const stakes = await deployContract(wallet, StartfiStakes, [NFT.address])
-  const payment = await deployContract(wallet, StartFiPaymentNFT, [NFT.address, token.address])
-  const reputation = await deployContract(wallet, StartfiReputation)
+  const stakes = await deployContract(wallet, StartFiStakes, [token.address])
+   const reputation = await deployContract(wallet, StartFiReputation)
 
   const marketPlace = await deployContract(wallet, StartFiMarketPlace, [
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address
+    reputation.address,wallet.address
   ])
 
   // add to minter role
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', NFT.address)
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
-  await NFT.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', payment.address)
-  // mint 4 tokens / 2 without royalty and 2 with royalty
+  // mint 4 tokens / 3 without royalty and 2 with royalty
+  await NFT.mint(wallet.address, baseUri)
   await NFT.mint(wallet.address, baseUri)
   await NFT.mint(wallet.address, baseUri)
   await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
   await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
   await stakes.setMarketplace(marketPlace.address)
-  return { token, stakes, NFT, marketPlace, payment, reputation }
+  return { token, stakes, NFT, marketPlace,  reputation }
 }
 
 interface PairFixture extends ContractsFixture {

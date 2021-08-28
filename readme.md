@@ -1,4 +1,4 @@
-## Startfi core contracts 
+## StartFi core contracts 
 ==========================
 
 ## How to use?
