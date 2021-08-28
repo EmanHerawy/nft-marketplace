@@ -35,6 +35,28 @@ contract StartFiReputation is Context, AccessControlEnumerable {
     }
 
     /**
+     * @dev this function is to mint reputation points for the "to"
+     * @notice only called by caller in the minter role
+     * @param buyer : buyer address
+     * @param seller : buyer address
+     * @param totalAmount : price
+     * @return true if it's passed : "to" current reputation balance
+     */
+    function calcAndMintintReputation(
+        address buyer,
+        address seller,
+        uint256 totalAmount
+    ) external returns (bool) {
+        require(hasRole(MINTER_ROLE, _msgSender()), 'StartFiReputation: must have minter role to mint');
+        uint256 amount = totalAmount / 2;
+        uint256 buyerBalance = userReputation[buyer] + amount;
+        uint256 sellerBalance = userReputation[seller] + amount;
+        _setReputation(buyer, buyerBalance);
+        _setReputation(seller, sellerBalance);
+        return true;
+    }
+
+    /**
      * @dev this function is to burn reputation points for the "to"
      * @notice only called by caller in the burner role
      * @param to : reciepiant address
