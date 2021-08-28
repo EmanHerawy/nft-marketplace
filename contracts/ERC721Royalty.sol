@@ -54,7 +54,7 @@ contract ERC721Royalty is IERC721Royalty {
         issuer = _issuer[_tokenId];
         if (issuer != address(0)) {
             Base memory _base = _issuerPercentage[_tokenId][issuer];
-            _royaltyAmount = (_value * uint256(_base.share)) / (uint256(_base.shareSeparator) * 100);
+            _royaltyAmount = (_value * 1 ether * uint256(_base.share)) / (uint256(_base.shareSeparator) * 100);
         }
     }
 
