@@ -106,39 +106,39 @@ describe('StartFi marketPlace', () => {
       marketPlace.listOnMarketplaceWithPremit(NFT.address, marketplaceTokenId2, 10, deadline, v, hexlify(r), hexlify(s))
     ).to.emit(marketPlace, 'ListOnMarketplace')
   })
-  // it('Auction: Marketplace is not allowed to transfer your token', async () => {
-  //   await expect(
-  //     marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 11, 1000000000)
-  //   ).to.be.revertedWith('Marketplace is not allowed to transfer your token')
-  // })
-  // it('Auction: listing price should not equal zero', async () => {
-  //   await expect(
-  //     marketPlace.createAuction(NFT.address, auctionTokenId, 0, 11, true, 2000, 1000000000)
-  //   ).to.be.revertedWith('Zero Value is not allowed')
-  // })
+  it('Auction: Marketplace is not allowed to transfer your token', async () => {
+    await expect(
+      marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 11, 1000000000)
+    ).to.be.revertedWith('Marketplace is not allowed to transfer your token')
+  })
+  it('Auction: listing price should not equal zero', async () => {
+    await expect(
+      marketPlace.createAuction(NFT.address, auctionTokenId, 0, 11, true, 2000, 1000000000)
+    ).to.be.revertedWith('Zero Value is not allowed')
+  })
 
-  // it('Auction: Zero price is not allowed', async () => {
-  //   await expect(
-  //     marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 0, 1000000000)
-  //   ).to.be.revertedWith('Zero price is not allowed')
-  // })
+  it('Auction: Zero price is not allowed', async () => {
+    await expect(
+      marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 0, 1000000000)
+    ).to.be.revertedWith('Zero price is not allowed')
+  })
 
-  // it('Auction: listing price should not equal zero', async () => {
-  //   await expect(
-  //     marketPlace.createAuction(NFT.address, auctionTokenId, 0, 11, true, 2000, 1000000000)
-  //   ).to.be.revertedWith('Zero Value is not allowed')
-  // })
-  // it('Auction: sell for price should not equal zero', async () => {
-  //   await expect(
-  //     marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 0, 1000000000)
-  //   ).to.be.revertedWith('Zero price is not allowed')
-  // })
+  it('Auction: listing price should not equal zero', async () => {
+    await expect(
+      marketPlace.createAuction(NFT.address, auctionTokenId, 0, 11, true, 2000, 1000000000)
+    ).to.be.revertedWith('Zero Value is not allowed')
+  })
+  it('Auction: sell for price should not equal zero', async () => {
+    await expect(
+      marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 0, 1000000000)
+    ).to.be.revertedWith('Zero price is not allowed')
+  })
 
-  // it('Auction should live for more than 12 hours', async () => {
-  //   await expect(marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 11, 10)).to.be.revertedWith(
-  //     'Auction should be live for more than 12 hours'
-  //   )
-  // })
+  it('Auction should live for more than 12 hours', async () => {
+    await expect(marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 11, 10)).to.be.revertedWith(
+      'Auction should be live for more than 12 hours'
+    )
+  })
   // it('Auction: Should create auction on marketplace', async () => {
   //   await NFT.approve(marketPlace.address, auctionTokenId)
   //   await expect(marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 11, 1000000000)).to.emit(
