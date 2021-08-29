@@ -317,18 +317,19 @@ describe('StartFi marketPlace:Actions', () => {
       'Marketplace is not allowed to withdraw the required amount of tokens'
     )
   })
-  it('Should Buy Now', async () => {
-    await expect(token.approve(marketPlace.address, 2 * 1200)).to.emit(token, 'Approval')
+  it('Should buy now marketplace', async () => {
+    await expect(token.approve(marketPlace.address, 1200)).to.emit(token, 'Approval')
     await expect(marketPlace.buyNow(listonMarketplaceIds[1], 1200)).to.emit(marketPlace, 'BuyNow')
-    await expect(marketPlace.buyNow(auctionsId[1], 1200)).to.emit(marketPlace, 'BuyNow')
+  })
+  it('Should buy now auction', async () => {
+    await expect(token.approve(marketPlace.address, 4200)).to.emit(token, 'Approval')
+    await expect(marketPlace.buyNow(auctionsId[1], 4200)).to.emit(marketPlace, 'BuyNow')
   })
   it('Should dispute auction', async () => {
     await expect(marketPlace.disputeAuction(auctionsId[2])).to.emit(marketPlace, 'DisputeAuction')
   })
   it('Should be reverted dispute auction', async () => {
-    await expect(marketPlace.disputeAuction(auctionsId[3])).to.be.revertedWith(
-      'No bids or still running auction'
-    )
+    await expect(marketPlace.disputeAuction(auctionsId[3])).to.be.revertedWith('No bids or still running auction')
   })
   it('Should delist from marketplace', async () => {
     await expect(marketPlace.deList(listonMarketplaceIds[2])).to.emit(marketPlace, 'DeListOffMarketplace')
