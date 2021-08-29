@@ -74,31 +74,6 @@ describe('StartFi marketPlace', () => {
       'ListOnMarketplace'
     )
   })
-
-  it('Should list on marketplace:permit', async () => {
-    const nonce = await NFT.nonces(wallet.address)
-    const chainId = await NFT.getChainId()
-    const deadline = MaxUint256
-    const digest = await getApprovalNftDigest(
-      NFT,
-      { owner: wallet.address, spender: marketPlace.address, tokenId: marketplaceTokenId2 },
-      nonce,
-      deadline,
-      chainId
-    )
-    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
-    await expect(
-      await marketPlace.listOnMarketplaceWithPremit(
-        NFT.address,
-        marketplaceTokenId2,
-        10,
-        deadline,
-        v,
-        hexlify(r),
-        hexlify(s)
-      )
-    ).to.emit(marketPlace, 'ListOnMarketplace')
-  })
   it('Auction: Marketplace is not allowed to transfer your token', async () => {
     await expect(
       marketPlace.createAuction(NFT.address, auctionTokenId, 10, 11, true, 11, 1000000000)
@@ -160,7 +135,105 @@ describe('StartFi marketPlace', () => {
       'CreateAuction'
     )
   })
-  it('Should create auction:permit', async () => {
+
+  /*  it("Should list on marketplace", async () => {
+    const listOnMarketplace = await marketPlace.listOnMarketplace(
+      NFT.address,
+      "0",
+      "1"
+    );
+    const info = await marketPlace.getListingDetails("0");
+    console.log("info 0", info);
+  }); */
+})
+describe('StartFi marketPlace : WithPremit', () => {
+  const provider = new MockProvider()
+  const [wallet, other] = provider.getWallets()
+  const loadFixture = createFixtureLoader([wallet])
+
+  let token: Contract
+  before(async () => {
+    const fixture = await loadFixture(tokenFixture)
+    token = fixture.token
+    NFT = fixture.NFT
+    marketPlace = fixture.marketPlace
+    reputation = fixture.reputation
+    stakes = fixture.stakes
+  })
+
+  it('deposit stakes', async () => {
+    const stakeAmount = 1000
+    await expect(token.approve(stakes.address, stakeAmount))
+      .to.emit(token, 'Approval')
+      .withArgs(wallet.address, stakes.address, stakeAmount)
+    expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
+
+    await stakes.deposit(wallet.address, stakeAmount)
+    const reserves = await stakes.getReserves(wallet.address)
+    expect(reserves.toNumber()).to.eq(stakeAmount)
+
+    const stakeAllowance = await marketPlace.getStakeAllowance(wallet.address)
+    expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
+  })
+  // it('Should list on marketplace:permit', async () => {
+  //    await expect(
+  //    await marketPlace._supportPremit(NFT.address)
+  //   ).to.eql(true)
+  // })
+  it('Should list on marketplace:permit', async () => {
+    const nonce = await NFT.nonces(wallet.address)
+    const chainId = await NFT.getChainId()
+    const deadline = MaxUint256
+    const digest = await getApprovalNftDigest(
+      NFT,
+      { owner: wallet.address, spender: marketPlace.address, tokenId: marketplaceTokenId2 },
+      nonce,
+      deadline,
+      chainId
+    )
+    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
+    await expect(
+      await marketPlace.listOnMarketplaceWithPremit(
+        NFT.address,
+        marketplaceTokenId2,
+        10,
+        deadline,
+        v,
+        hexlify(r),
+        hexlify(s)
+      )
+    ).to.emit(marketPlace, 'ListOnMarketplace')
+  })
+
+  it('Creat biding Auction:permit', async () => {
+    const nonce = await NFT.nonces(wallet.address)
+    const chainId = await NFT.getChainId()
+    const deadline = MaxUint256
+    const digest = await getApprovalNftDigest(
+      NFT,
+      { owner: wallet.address, spender: marketPlace.address, tokenId: marketplaceTokenId1 },
+      nonce,
+      deadline,
+      chainId
+    )
+    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
+    await expect(
+      await marketPlace.createAuctionWithPremit(
+        NFT.address,
+        marketplaceTokenId1,
+        10,
+        11,
+        true,
+        11,
+        1000000000,
+        deadline,
+        v,
+        hexlify(r),
+        hexlify(s)
+      )
+    ).to.emit(marketPlace, 'CreateAuction')
+  })
+  it('Should create without biding auction:permit', async () => {
     const nonce = await NFT.nonces(wallet.address)
     const chainId = await NFT.getChainId()
     const deadline = MaxUint256
@@ -191,86 +264,6 @@ describe('StartFi marketPlace', () => {
       )
     ).to.emit(marketPlace, 'CreateAuction')
   })
-  /*  it("Should list on marketplace", async () => {
-    const listOnMarketplace = await marketPlace.listOnMarketplace(
-      NFT.address,
-      "0",
-      "1"
-    );
-    const info = await marketPlace.getListingDetails("0");
-    console.log("info 0", info);
-  }); */
-})
-describe('StartFi marketPlace : WithPremit', () => {
-  const provider = new MockProvider()
-  const [wallet, other] = provider.getWallets()
-  const loadFixture = createFixtureLoader([wallet])
-
-  let token: Contract
-  before(async () => {
-    const fixture = await loadFixture(tokenFixture)
-    token = fixture.token
-    NFT = fixture.NFT
-    marketPlace = fixture.marketPlace
-    reputation = fixture.reputation
-    stakes = fixture.stakes
-  })
-
-
-  it('deposit stakes', async () => {
-    const stakeAmount = 1000
-    await expect(token.approve(stakes.address, stakeAmount))
-      .to.emit(token, 'Approval')
-      .withArgs(wallet.address, stakes.address, stakeAmount)
-    expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
-
-    await stakes.deposit(wallet.address, stakeAmount)
-    const reserves = await stakes.getReserves(wallet.address)
-    expect(reserves.toNumber()).to.eq(stakeAmount)
-
-    const stakeAllowance = await marketPlace.getStakeAllowance(wallet.address)
-    expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
-  })
-  // it('Should list on marketplace:permit', async () => {
-  //    await expect(
-  //    await marketPlace._supportPremit(NFT.address)
-  //   ).to.eql(true)
-  // })
-  it('Should list on marketplace:permit', async () => {
-    const nonce = await NFT.nonces(wallet.address)
-    const chainId = await NFT.getChainId()
-     const deadline = MaxUint256
-    const digest = await getApprovalNftDigest(
-      NFT,
-      { owner: wallet.address, spender: marketPlace.address, tokenId: marketplaceTokenId2 },
-      nonce,
-      deadline,
-      chainId,
-    )
-    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
-     await expect( await
-      marketPlace.listOnMarketplaceWithPremit(NFT.address, marketplaceTokenId2, 10, deadline, v, hexlify(r), hexlify(s))
-    ).to.emit(marketPlace, 'ListOnMarketplace')
-  })
- 
-  it('Creat Auction:permit', async () => {
-    const nonce = await NFT.nonces(wallet.address)
-    const chainId = await NFT.getChainId()
-     const deadline = MaxUint256
-    const digest = await getApprovalNftDigest(
-      NFT,
-      { owner: wallet.address, spender: marketPlace.address, tokenId: marketplaceTokenId1 },
-      nonce,
-      deadline,
-      chainId,
-    )
-    const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
-     await expect( await
-      marketPlace.createAuctionWithPremit(NFT.address, marketplaceTokenId1, 10, 11, true, 11, 1000000000,deadline, v, hexlify(r), hexlify(s))
-    ).to.emit(marketPlace, 'CreateAuction')
-
-  }) 
-  
 })
 
 describe('StartFi marketPlace:Actions', () => {
@@ -291,14 +284,14 @@ describe('StartFi marketPlace:Actions', () => {
     stakes = fixture.stakes
     await token.approve(stakes.address, approvedTokenAmount)
     await stakes.deposit(wallet.address, stakedTokenAmount)
-    for (let tokenId = 0; tokenId < 4; tokenId++) {
+    for (let tokenId = 0; tokenId < 5; tokenId++) {
       await NFT.approve(marketPlace.address, tokenId)
       await marketPlace.createAuction(NFT.address, tokenId, 10, 11, true, 11, 1000000000)
       const eventFilter = await marketPlace.filters.CreateAuction(null, null)
       const events = await marketPlace.queryFilter(eventFilter)
       auctionsId.push(await (events[events.length - 1] as any).args[0])
     }
-    for (let tokenId = 4; tokenId < 8; tokenId++) {
+    for (let tokenId = 5; tokenId < 10; tokenId++) {
       await NFT.approve(marketPlace.address, tokenId)
       await marketPlace.listOnMarketplace(NFT.address, tokenId, 10)
       const eventFilter = await marketPlace.filters.ListOnMarketplace(null, null)
@@ -308,29 +301,37 @@ describe('StartFi marketPlace:Actions', () => {
   })
   it('Should bid item', async () => {
     await expect(marketPlace.bid(auctionsId[0], 1200)).to.emit(marketPlace, 'BidOnAuction')
+    await expect(marketPlace.bid(auctionsId[1], 1200)).to.emit(marketPlace, 'BidOnAuction')
+    await expect(marketPlace.bid(auctionsId[2], 1200)).to.emit(marketPlace, 'BidOnAuction')
   })
   it('Should fullfil bid item', async () => {
     await expect(token.approve(marketPlace.address, 1200)).to.emit(token, 'Approval')
     await expect(marketPlace.fullfillBid(auctionsId[0])).to.emit(marketPlace, 'FullfillBid')
   })
   it('Should approve deal', async () => {
-    const transactionRecipe = await marketPlace.approveDeal(listonMarketplaceIds[1])
+    const transactionRecipe = await marketPlace.approveDeal(listonMarketplaceIds[0])
     expect(transactionRecipe.from).equal(wallet.address)
   })
   it('Buy now: Marketplace is not allowed to withdraw the required amount of tokens', async () => {
-    await expect(marketPlace.buyNow(listonMarketplaceIds[2], 1200)).to.be.revertedWith(
+    await expect(marketPlace.buyNow(listonMarketplaceIds[0], 1200)).to.be.revertedWith(
       'Marketplace is not allowed to withdraw the required amount of tokens'
     )
   })
   it('Should Buy Now', async () => {
-    await expect(token.approve(marketPlace.address, 1200)).to.emit(token, 'Approval')
-    await expect(marketPlace.buyNow(listonMarketplaceIds[2], 1200)).to.emit(marketPlace, 'BuyNow')
+    await expect(token.approve(marketPlace.address, 2 * 1200)).to.emit(token, 'Approval')
+    await expect(marketPlace.buyNow(listonMarketplaceIds[1], 1200)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.buyNow(auctionsId[1], 1200)).to.emit(marketPlace, 'BuyNow')
   })
-  /*  it('Should dispute auction', async () => {
-    await expect(marketPlace.disputeAuction(auctionsId[1])).to.emit(marketPlace, 'DisputeAuction')
-  }) */
+  it('Should dispute auction', async () => {
+    await expect(marketPlace.disputeAuction(auctionsId[2])).to.emit(marketPlace, 'DisputeAuction')
+  })
+  it('Should be reverted dispute auction', async () => {
+    await expect(marketPlace.disputeAuction(auctionsId[3])).to.be.revertedWith(
+      'No bids or still running auction'
+    )
+  })
   it('Should delist from marketplace', async () => {
-    await expect(marketPlace.deList(listonMarketplaceIds[0])).to.emit(marketPlace, 'DeListOffMarketplace')
+    await expect(marketPlace.deList(listonMarketplaceIds[2])).to.emit(marketPlace, 'DeListOffMarketplace')
   })
 
   it('Should set marketCap', async () => {
