@@ -3,12 +3,12 @@
 pragma solidity 0.8.7;
 import './StartFiRoyalityLib.sol';
 
-import './WadRayMath.sol';
+import './SafeDecimalMath.sol';
 
 library StartFiFinanceLib {
-    using WadRayMath for uint256;
+    using SafeDecimalMath for uint256;
 
-    function _calcSum(uint256 a, uint256 b) internal pure returns (uint256 result) {
+    function _calcSum(uint256 a, uint256 b) public pure returns (uint256 result) {
         result = a + b;
     }
 
@@ -21,8 +21,9 @@ library StartFiFinanceLib {
         uint256 price,
         uint256 _fee,
         uint256 _feeBase
-    ) internal pure returns (uint256 fees) {
-        fees = (_fee.wadDiv(_feeBase) * price) / 100;
+    ) public pure returns (uint256 fees) {
+        // round decimal to the nearst value
+        fees = price.multiplyDecimalRound((_fee.divideDecimal(_feeBase * 100)));
     }
 
     /**
@@ -41,7 +42,7 @@ library StartFiFinanceLib {
         uint256 delistFeesPercentageBase,
         uint256 listqualifyPercentage,
         uint256 listqualifyPercentageBase
-    ) internal pure returns (uint256 fineAmount, uint256 remaining) {
+    ) public pure returns (uint256 fineAmount, uint256 remaining) {
         fineAmount = _calcFees(listingPrice, delistFeesPercentage, delistFeesPercentageBase);
         remaining = _calcFees(listingPrice, listqualifyPercentage, listqualifyPercentageBase) - fineAmount;
     }
@@ -58,7 +59,7 @@ library StartFiFinanceLib {
         uint256 qualifyAmount,
         uint256 bidPenaltyPercentage,
         uint256 bidPenaltyPercentageBase
-    ) internal pure returns (uint256 fineAmount, uint256 remaining) {
+    ) public pure returns (uint256 fineAmount, uint256 remaining) {
         fineAmount = _calcFees(qualifyAmount, bidPenaltyPercentage, bidPenaltyPercentageBase);
 
         remaining = qualifyAmount - fineAmount;
@@ -84,7 +85,7 @@ library StartFiFinanceLib {
         uint256 _fee,
         uint256 _feeBase
     )
-        internal
+        public
         view
         returns (
             address issuer,
@@ -104,7 +105,7 @@ library StartFiFinanceLib {
         }
     }
 
-    // function getUSDPriceInSTFI(uint256 _usdCap, uint256 _stfiCap) internal pure returns (uint256 usdPrice) {
+    // function getUSDPriceInSTFI(uint256 _usdCap, uint256 _stfiCap) public pure returns (uint256 usdPrice) {
     //     require(_usdCap > 0 && _stfiCap > 0, 'StartFiFinanceLib: cap must be more than zero');
     //     // TODO: need to manage when 1 STFI is more than 1 USD ( dicimal issue in solidity)
     //     usdPrice = _stfiCap.wadDiv(_usdCap);
