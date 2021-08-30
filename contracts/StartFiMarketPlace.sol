@@ -469,7 +469,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
 
         // TODO: add reputation points to both seller and buyer
-        _addreputationPoints(seller, winnerBidder, bidPrice);
+         _addreputationPoints(seller, winnerBidder, bidPrice);
 
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
@@ -568,7 +568,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(buyer == address(0), 'Already bought token');
         uint256 timeToDelistAuction = StartFiFinanceLib._calcSum(releaseTime, 3 days);
 
-        // require(status==ListingStatus.OnMarket || status==ListingStatus.onAuction,"Already bought or canceled token");
+         require(status==ListingStatus.OnMarket || status==ListingStatus.onAuction,"Already bought or canceled token");
         require(
             (timeToDelistAuction <= block.timestamp && status == ListingStatus.onAuction) ||
                 (status == ListingStatus.OnMarket),
@@ -798,7 +798,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // call staking contract to deduct
         require(_deduct(winnerBidder, _adminWallet, fineAmount), "couldn't deduct the fine for the admin wallet");
         require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
-        // trnasfer token
+        // transfer token
         require(
             _excuteTransfer(address(this), _NFTContract, tokenId, seller, address(0), 0, 0, 0, false),
             "NFT token couldn't be transfered"
