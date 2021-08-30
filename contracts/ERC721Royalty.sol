@@ -2,6 +2,7 @@
 
 pragma solidity 0.8.7;
 import './interface/IERC721Royalty.sol';
+import './library/StartFiFinanceLib.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
@@ -54,7 +55,7 @@ contract ERC721Royalty is IERC721Royalty {
         issuer = _issuer[_tokenId];
         if (issuer != address(0)) {
             Base memory _base = _issuerPercentage[_tokenId][issuer];
-            _royaltyAmount = (_value * 1 ether * uint256(_base.share)) / (uint256(_base.shareSeparator) * 100);
+            _royaltyAmount = StartFiFinanceLib._calcFees(_value, uint256(_base.share), uint256(_base.shareSeparator));
         }
     }
 
