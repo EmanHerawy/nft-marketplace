@@ -159,7 +159,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      * @return percentage the value of the state variable `_feeFraction`
      *
      */
-    function changeDelistFeesPerentage(uint256 newFees, uint256 newBase)
+    function changeDelistFeesPercentage(uint256 newFees, uint256 newBase)
         external
         onlyOwner
         whenPaused
