@@ -61,7 +61,7 @@ contract StartFiStakes is Ownable, IStartFiStakes {
         // TODO:check marketplace user reserves
         uint256 reserves = IStartFiMarketplace(marketplace).getUserReserved(_msgSender());
         uint256 allowance = stakerReserved[_msgSender()] - reserves;
-        require(allowance <= amount, 'Invalid amount');
+        require(allowance >= amount, 'Invalid amount');
         _safeTokenTransfer(_msgSender(), amount);
         stakerReserved[_msgSender()] = stakerReserved[_msgSender()] - amount;
     }
@@ -70,9 +70,9 @@ contract StartFiStakes is Ownable, IStartFiStakes {
     function deduct(
         address finePayer,
         address to,
-        uint256 amount
-    ) external override onlyMarketplace returns (bool) {
-        require(stakerReserved[finePayer] <= amount, 'Invalid amount');
+        uint256 amount /*onlyMarketplace*/
+    ) external override returns (bool) {
+        require(stakerReserved[finePayer] >= amount, 'Invalid amount');
         stakerReserved[finePayer] = stakerReserved[finePayer] - amount;
         stakerReserved[to] = stakerReserved[to] + amount;
         return true;

@@ -15,13 +15,13 @@ contract StartFiMarketPlaceFinance {
     /******************************************* decalrations go here ********************************************************* */
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees
-    uint256 internal _feeBase = 1000;
-    uint256 bidPenaltyPercentage = 1; // 1 %
-    uint256 public delistFeesPercentage = 1;
-    uint256 public listqualifyPercentage = 1;
-    uint256 public bidPenaltyPercentageBase = 100;
-    uint256 public delistFeesPercentageBase = 100;
-    uint256 public listqualifyPercentageBase = 100;
+    uint256 internal _feeBase = 10; // 25/10=2.5
+    uint256 bidPenaltyPercentage = 10; // 1 %
+    uint256 public delistFeesPercentage = 10;
+    uint256 public listqualifyPercentage = 10;
+    uint256 public bidPenaltyPercentageBase = 10;
+    uint256 public delistFeesPercentageBase = 10;
+    uint256 public listqualifyPercentageBase = 10;
     mapping(address => uint256) userReserves;
     address public stakeContract;
     address reputationContract;
