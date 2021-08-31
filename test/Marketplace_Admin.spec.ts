@@ -205,4 +205,52 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
     await marketPlace.unpause()
     await expect(marketPlace.changeBidPenaltyPercentage(1, 100)).to.revertedWith('Pausable: not paused')
   })
+
+  it('Admin should change fees', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeFees(1, 100)).to.emit(marketPlace, 'ChangeFees').withArgs(1, 100)
+  })
+
+  it('Admin should change fees:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeFees(1, 100)).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
+    )
+  })
+
+  it('Admin should change fees:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeFees(1, 100)).to.revertedWith('Pausable: not paused')
+  })
+
+  it('Admin should change name', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeMarketPlaceName('new STFI marketplace'))
+      .to.emit(marketPlace, 'ChangeMarketPlaceName')
+      .withArgs('new STFI marketplace')
+  })
+
+  it('Admin should change name:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeMarketPlaceName('new STFI marketplace')).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
+    )
+  })
+
+  it('Admin should change name:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeMarketPlaceName('new STFI marketplace')).to.revertedWith('Pausable: not paused')
+  })
+
+  it('Admin should update  wallet addrees:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).updateAdminWallet(user1.address)).to.revertedWith('UnAuthorized caller')
+  })
+  it('Admin should update  wallet addrees:revert not the owner ', async () => {
+    await expect(marketPlace.updateAdminWallet('0x0000000000000000000000000000000000000000')).to.revertedWith(
+      'Zero address is not allowed'
+    )
+  })
+  it('Admin should update  wallet address ', async () => {
+    await expect(marketPlace.updateAdminWallet(user1.address))
+      .to.emit(marketPlace, 'UpdateAdminWallet')
+      .withArgs(user1.address)
+  })
 })
