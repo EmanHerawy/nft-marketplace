@@ -20,7 +20,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     event ChangeUtiltiyToken(address utiltiyToken);
     event ChangeFulfillDuration(uint256 duration);
     event ChangeListqualifyAmount(uint256 newFees, uint256 newBase);
-    event ChangeDelistFeesPerentage(uint256 newFees, uint256 newBase);
+    event ChangeDelistFeesPercentage(uint256 newFees, uint256 newBase);
     event ChangeDelistAfter(uint256 duration);
     event ChangeBidPenaltyPercentage(uint256 newFees, uint256 newBase);
     event ChangeMarketPlaceName(string Name);
@@ -168,7 +168,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         returns (uint256 percentage)
     {
         percentage = _changeDelistFeesPerentage(newFees, newBase);
-        emit ChangeDelistFeesPerentage(newFees, newBase);
+        emit ChangeDelistFeesPercentage(newFees, newBase);
     }
 
     /**

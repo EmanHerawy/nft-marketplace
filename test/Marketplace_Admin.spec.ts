@@ -138,19 +138,37 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
   })
 
   it('Admin should change qualify amount', async () => {
-    await expect(marketPlace.changeListqualifyAmount(10*10^18,100*10^18))
+    await expect(marketPlace.changeListqualifyAmount(1, 100))
       .to.emit(marketPlace, 'ChangeListqualifyAmount')
-      .withArgs(10*10^18,100*10^18)
+      .withArgs(1, 100)
   })
 
-  it('Admin should change reputation contract:revert not the owner ', async () => {
-    await expect(marketPlace.connect(user1).changeListqualifyAmount(10*10^18,100*10^18)).to.revertedWith(
+  it('Admin should change  qualify amount :revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeListqualifyAmount(1, 100)).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
     )
   })
 
-  it('Admin should change reputation contract:revert not paused ', async () => {
+  it('Admin should change  qualify amount :revert not paused ', async () => {
     await marketPlace.unpause()
-    await expect(marketPlace.changeListqualifyAmount(10*10^18,100*10^18)).to.revertedWith('Pausable: not paused')
+    await expect(marketPlace.changeListqualifyAmount(1, 100)).to.revertedWith('Pausable: not paused')
+  })
+
+  it('Admin should change delist fees percentage', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeDelistFeesPercentage(1, 100))
+      .to.emit(marketPlace, 'ChangeDelistFeesPercentage')
+      .withArgs(1, 100)
+  })
+
+  it('Admin should change delist fees percentage:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeDelistFeesPercentage(1, 100)).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
+    )
+  })
+
+  it('Admin should change delist fees percentage:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeDelistFeesPercentage(1, 100)).to.revertedWith('Pausable: not paused')
   })
 })
