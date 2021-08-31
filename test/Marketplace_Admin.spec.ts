@@ -1,9 +1,7 @@
 import chai, { expect } from 'chai'
-import { Contract, constants, utils, BigNumber } from 'ethers'
+import { Contract } from 'ethers'
 
 import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
-import { expandTo18Decimals } from './shared/utilities'
 
 import { tokenFixture } from './shared/fixtures'
 
@@ -37,111 +35,106 @@ let NFT: Contract
 let marketPlace: Contract
 let reputation: Contract
 let stakes: Contract
-let adminMarketplace: Contract
 
-const _feeFraction = 25 // 2.5% fees
-const _feeBase = 10
-const bidPenaltyPercentage = 1 // 1 %
-const delistFeesPercentage = 1
-const listqualifyPercentage = 10
-const bidPenaltyPercentageBase = 100
-const delistFeesPercentageBase = 100
-const listqualifyPercentageBase = 10
-const royaltyShare = 25
-const royaltyBase = 10
-const mintedNFT = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-// let marketplaceTokenId1 = mintedNFT[0]
-let marketplaceTokenId1: any
-let marketplaceTokenId2 = mintedNFT[1]
-let auctionTokenId = mintedNFT[2]
-let listingId1: any
-let listingId2: any
-let price1 = 1000
-let price2 = 10000
-let price3 = 50050
-let wrongPrice = 10
-let minimumBid = 10
-let lastbidding = minimumBid
-let isForSale = false
 const newTokenAddress = '0x791E48D5eC148191Baa680fE2Dd337D3D5d4A147'
 const newReputationAddress = '0x2E81345F9082619d900c0204D0913E904648c6E4'
-const calcFees = (price: number, share: number, base: number): number => {
-  // round decimal to the nearst value
-  const _base = base * 100
-  return price * (share / _base)
-}
+const twoDays = 2 * 24 * 60 * 60
+
 describe('MarketPlace admin pause contract and start updating contract', () => {
   const provider = new MockProvider()
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
-  const offers = [
-    {
-      wallet: issuer.address,
-      _delistAfter: 60 * 60 * 24 * 15, //15 days
-      _fee: 30, // 2.5% fees
-      _bidPenaltyPercentage: 20, // 1 %
-      _delistFeesPercentage: 20,
-      _listqualifyPercentage: 20,
-      _bidPenaltyPercentageBase: 10,
-      _delistFeesPercentageBase: 10,
-      _listqualifyPercentageBase: 10,
-      _feeBase: 10,
-    },
-  ]
-  let token: Contract
+
   before(async () => {
     const fixture = await loadFixture(tokenFixture)
     token = fixture.token
     NFT = fixture.NFT
     reputation = fixture.reputation
-    adminMarketplace = fixture.marketPlace
+    marketPlace = fixture.marketPlace
   })
 
   it('Admin should pause contract', async () => {
-    await expect(adminMarketplace.pause()).to.emit(adminMarketplace, 'Pause')
+    await expect(marketPlace.pause()).to.emit(marketPlace, 'Pause')
   })
 
   it('Admin should unpause contract', async () => {
-    await expect(adminMarketplace.unpause()).to.emit(adminMarketplace, 'Unpause')
+    await expect(marketPlace.unpause()).to.emit(marketPlace, 'Unpause')
   })
 
   it('Should revert only admin pause contract', async () => {
-    await expect(adminMarketplace.connect(user1).pause()).to.revertedWith(
-      'StartFiMarketPlaceAdmin: caller is not the owner'
-    )
+    await expect(marketPlace.connect(user1).pause()).to.revertedWith('StartFiMarketPlaceAdmin: caller is not the owner')
   })
   it('Should revert only admin unpause contract', async () => {
-    await expect(adminMarketplace.connect(user1).unpause()).to.revertedWith(
+    await expect(marketPlace.connect(user1).unpause()).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
     )
   })
 
   it("To pause contract it shouldn't be already paused", async () => {
-    await adminMarketplace.pause()
-    await expect(adminMarketplace.pause()).to.revertedWith('Pausable: paused')
+    await marketPlace.pause()
+    await expect(marketPlace.pause()).to.revertedWith('Pausable: paused')
   })
   it("To unpause contract it shouldn't be already unpaused", async () => {
-    await adminMarketplace.unpause()
-    await expect(adminMarketplace.unpause()).to.revertedWith('Pausable: not paused')
+    await marketPlace.unpause()
+    await expect(marketPlace.unpause()).to.revertedWith('Pausable: not paused')
   })
 
   it('Admin should change reputation contract ', async () => {
-    await adminMarketplace.pause()
-    await expect(adminMarketplace.changeReputationContract(newReputationAddress))
-      .to.emit(adminMarketplace, 'ChangeReputationContract')
+    await marketPlace.pause()
+    await expect(marketPlace.changeReputationContract(newReputationAddress))
+      .to.emit(marketPlace, 'ChangeReputationContract')
       .withArgs(newReputationAddress)
   })
 
   it('Admin should change reputation contract:revert not the owner ', async () => {
-    await expect(adminMarketplace.connect(user1).changeReputationContract(newReputationAddress)).to.revertedWith(
+    await expect(marketPlace.connect(user1).changeReputationContract(newReputationAddress)).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
     )
   })
 
   it('Admin should change reputation contract:revert not paused ', async () => {
-    await adminMarketplace.unpause()
-    await expect(adminMarketplace.changeReputationContract(newReputationAddress)).to.revertedWith(
-      'Pausable: not paused'
+    await marketPlace.unpause()
+    await expect(marketPlace.changeReputationContract(newReputationAddress)).to.revertedWith('Pausable: not paused')
+  })
+
+  it('Admin should change utility contract ', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeUtiltiyToken(newTokenAddress))
+      .to.emit(marketPlace, 'ChangeUtiltiyToken')
+      .withArgs(newTokenAddress)
+  })
+
+  it('Admin should change utility contract:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeUtiltiyToken(newTokenAddress)).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
     )
+  })
+
+  it('Admin should change utility contract:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeUtiltiyToken(newTokenAddress)).to.revertedWith('Pausable: not paused')
+  })
+
+  it('Admin should change fulfil bid duration', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeFulfillDuration(twoDays))
+      .to.emit(marketPlace, 'ChangeFulfillDuration')
+      .withArgs(twoDays)
+  })
+
+  it('Admin should change fulfil bid duration:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeFulfillDuration(twoDays)).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
+    )
+  })
+
+  it('Admin should change fulfil bid duration:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeFulfillDuration(twoDays)).to.revertedWith('Pausable: not paused')
+  })
+
+  it('Fulfil bid duration should not  be less than 1 day', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeFulfillDuration(twoDays / 3)).to.revertedWith('Invalid duration')
   })
 })
