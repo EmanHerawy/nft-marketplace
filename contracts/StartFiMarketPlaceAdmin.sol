@@ -26,6 +26,8 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     event ChangeMarketPlaceName(string Name);
     event ChangeFees(uint256 newFees, uint256 newBase);
     event UpdateAdminWallet(address newWallet);
+    event Pause(uint256 now);
+    event Unpause(uint256 now);
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -159,7 +161,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      * @return percentage the value of the state variable `_feeFraction`
      *
      */
-    function changeDelistFeesPerentage(uint256 newFees, uint256 newBase)
+    function changeDelistFeesPercentage(uint256 newFees, uint256 newBase)
         external
         onlyOwner
         whenPaused
@@ -228,6 +230,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function pause() external virtual onlyOwner whenNotPaused {
         _pause();
+        emit Pause(block.timestamp);
     }
 
     /**
@@ -241,6 +244,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function unpause() external virtual onlyOwner whenPaused {
         _unpause();
+        emit Unpause(block.timestamp);
     }
 
     /**
