@@ -34,7 +34,6 @@ let token: Contract
 let NFT: Contract
 let marketPlace: Contract
 let reputation: Contract
-let stakes: Contract
 
 const newTokenAddress = '0x791E48D5eC148191Baa680fE2Dd337D3D5d4A147'
 const newReputationAddress = '0x2E81345F9082619d900c0204D0913E904648c6E4'
@@ -136,5 +135,22 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
   it('Fulfil bid duration should not  be less than 1 day', async () => {
     await marketPlace.pause()
     await expect(marketPlace.changeFulfillDuration(twoDays / 3)).to.revertedWith('Invalid duration')
+  })
+
+  it('Admin should change qualify amount', async () => {
+    await expect(marketPlace.changeListqualifyAmount(10*10^18,100*10^18))
+      .to.emit(marketPlace, 'ChangeListqualifyAmount')
+      .withArgs(10*10^18,100*10^18)
+  })
+
+  it('Admin should change reputation contract:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeListqualifyAmount(10*10^18,100*10^18)).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
+    )
+  })
+
+  it('Admin should change reputation contract:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeListqualifyAmount(10*10^18,100*10^18)).to.revertedWith('Pausable: not paused')
   })
 })
