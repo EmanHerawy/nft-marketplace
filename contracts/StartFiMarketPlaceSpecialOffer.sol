@@ -22,6 +22,19 @@ contract StartFiMarketPlaceSpecialOffer {
         uint256 listqualifyPercentageBase;
         uint256 feeBase;
     }
+    event NewOffer(
+        address admin,
+        address wallet,
+        uint256 _delistAfter,
+        uint256 _fee, // 2.5% fees
+        uint256 _bidPenaltyPercentage, // 1 %
+        uint256 _delistFeesPercentage,
+        uint256 _listqualifyPercentage,
+        uint256 _bidPenaltyPercentageBase,
+        uint256 _delistFeesPercentageBase,
+        uint256 _listqualifyPercentageBase,
+        uint256 _feeBase
+    );
 
     /******************************************* read functions go here ********************************************************* */
 
@@ -47,7 +60,7 @@ contract StartFiMarketPlaceSpecialOffer {
         uint256 _listqualifyPercentageBase,
         uint256 _feeBase
     ) internal {
-        require(offerTerms[wallet].fee != 0, 'StartFiMarketPlaceSpecialOffer: Already exisit');
+        require(offerTerms[wallet].fee == 0, 'StartFiMarketPlaceSpecialOffer: Already exisit');
 
         offerTerms[wallet] = conditions(
             _delistAfter,
@@ -60,5 +73,31 @@ contract StartFiMarketPlaceSpecialOffer {
             _listqualifyPercentageBase,
             _feeBase
         );
+    }
+
+    function getOffer(address wallet)
+        external
+        view
+        returns (
+            uint256 _delistAfter,
+            uint256 _fee, // 2.5% fees
+            uint256 _bidPenaltyPercentage, // 1 %
+            uint256 _delistFeesPercentage,
+            uint256 _listqualifyPercentage,
+            uint256 _bidPenaltyPercentageBase,
+            uint256 _delistFeesPercentageBase,
+            uint256 _listqualifyPercentageBase,
+            uint256 _feeBase
+        )
+    {
+        _delistAfter = offerTerms[wallet].delistAfter;
+        _fee = offerTerms[wallet].fee;
+        _bidPenaltyPercentage = offerTerms[wallet].bidPenaltyPercentage;
+        _delistFeesPercentage = offerTerms[wallet].delistFeesPercentage;
+        _listqualifyPercentage = offerTerms[wallet].listqualifyPercentage;
+        _delistFeesPercentageBase = offerTerms[wallet].delistFeesPercentageBase;
+        _bidPenaltyPercentageBase = offerTerms[wallet].bidPenaltyPercentageBase;
+        _listqualifyPercentageBase = offerTerms[wallet].listqualifyPercentageBase;
+        _feeBase = offerTerms[wallet].feeBase;
     }
 }

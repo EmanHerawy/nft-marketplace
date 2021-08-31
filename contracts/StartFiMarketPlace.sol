@@ -445,13 +445,13 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 royaltyAmount;
         uint256 fees;
         uint256 netPrice;
-        if (offerTerms[_msgSender()].fee != 0) {
+        if (offerTerms[seller].fee != 0) {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
                 _NFTContract,
                 tokenId,
                 bidPrice,
-                offerTerms[_msgSender()].fee,
-                offerTerms[_msgSender()].feeBase
+                offerTerms[seller].fee,
+                offerTerms[seller].feeBase
             );
         } else {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
@@ -666,19 +666,19 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 netPrice;
         uint256 ListingQualAmount;
         // transfer price
-        if (offerTerms[_msgSender()].fee != 0) {
+        if (offerTerms[seller].fee != 0) {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
                 _NFTContract,
                 tokenId,
                 price,
-                offerTerms[_msgSender()].fee,
-                offerTerms[_msgSender()].feeBase
+                offerTerms[seller].fee,
+                offerTerms[seller].feeBase
             );
 
             ListingQualAmount = StartFiFinanceLib._calcFees(
                 _tokenListings[listingId].listingPrice,
-                offerTerms[_msgSender()].listqualifyPercentage,
-                offerTerms[_msgSender()].listqualifyPercentageBase
+                offerTerms[seller].listqualifyPercentage,
+                offerTerms[seller].listqualifyPercentageBase
             );
         } else {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
@@ -760,6 +760,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     function disputeAuction(bytes32 listingId) external returns (address _NFTContract, uint256 tokenId) {
         address winnerBidder = bidToListing[listingId].bidder;
         address seller = _tokenListings[listingId].seller;
+        require(seller == _msgSender(), 'Only Seller can dispute');
         _NFTContract = _tokenListings[listingId].nFTContract;
         tokenId = _tokenListings[listingId].tokenId;
         uint256 qualifyAmount = _tokenListings[listingId].qualifyAmount;
