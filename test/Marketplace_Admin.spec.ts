@@ -171,4 +171,22 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
     await marketPlace.unpause()
     await expect(marketPlace.changeDelistFeesPercentage(1, 100)).to.revertedWith('Pausable: not paused')
   })
+
+  it('Admin should change delist after duration', async () => {
+    await marketPlace.pause()
+    await expect(marketPlace.changeDelistAfter(twoDays))
+      .to.emit(marketPlace, 'ChangeDelistAfter')
+      .withArgs(twoDays)
+  })
+
+  it('Admin should change delist after duration:revert not the owner ', async () => {
+    await expect(marketPlace.connect(user1).changeDelistAfter(twoDays)).to.revertedWith(
+      'StartFiMarketPlaceAdmin: caller is not the owner'
+    )
+  })
+
+  it('Admin should change delist after duration:revert not paused ', async () => {
+    await marketPlace.unpause()
+    await expect(marketPlace.changeDelistAfter(twoDays)).to.revertedWith('Pausable: not paused')
+  })
 })
