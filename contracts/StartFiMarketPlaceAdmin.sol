@@ -15,6 +15,17 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     bytes32 public constant OWNER_ROLE = keccak256('OWNER_ROLE');
     bytes32 public constant PRICE_FEEDER_ROLE = keccak256('PRICE_FEEDER_ROLE');
     address _adminWallet;
+    /******************************************* events goes here ********************************************************* */
+    event ChangeReputationContract(address reputationContract);
+    event ChangeUtiltiyToken(address utiltiyToken);
+    event ChangeFulfillDuration(uint256 duration);
+    event ChangeListqualifyAmount(uint256 newFees, uint256 newBase);
+    event ChangeDelistFeesPerentage(uint256 newFees, uint256 newBase);
+    event ChangeDelistAfter(uint256 duration);
+    event ChangeBidPenaltyPercentage(uint256 newFees, uint256 newBase);
+    event ChangeMarketPlaceName(string Name);
+    event ChangeFees(uint256 newFees, uint256 newBase);
+    event UpdateAdminWallet(address newWallet);
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -100,6 +111,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function changeReputationContract(address _reputationContract) external onlyOwner whenPaused {
         _changeReputationContract(_reputationContract);
+        emit ChangeReputationContract(_reputationContract);
     }
 
     /**
@@ -109,6 +121,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function changeUtiltiyToken(address _token) external onlyOwner whenPaused {
         _changeUtiltiyToken(_token);
+        emit ChangeUtiltiyToken(_token);
     }
 
     /**
@@ -119,6 +132,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     function changeFulfillDuration(uint256 duration) external onlyOwner whenPaused {
         require(duration > 1 days, 'Invalid duration');
         fulfillDuration = duration;
+        emit ChangeFulfillDuration(duration);
     }
 
     /**
@@ -135,6 +149,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         returns (uint256 percentage)
     {
         percentage = _changeListqualifyAmount(newFees, newBase);
+        emit ChangeListqualifyAmount(newFees, newBase);
     }
 
     /**
@@ -151,6 +166,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         returns (uint256 percentage)
     {
         percentage = _changeDelistFeesPerentage(newFees, newBase);
+        emit ChangeDelistFeesPerentage(newFees, newBase);
     }
 
     /**
@@ -160,6 +176,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
         _changeDelistAfter(duration);
+        emit ChangeDelistAfter(duration);
     }
 
     /**
@@ -176,6 +193,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         returns (uint256 percentage)
     {
         percentage = _changeBidPenaltyPercentage(newFees, newBase);
+        emit ChangeBidPenaltyPercentage(newFees, newBase);
     }
 
     /**
@@ -185,6 +203,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function changeMarketPlaceName(string memory _name) external onlyOwner whenPaused {
         _changeMarketPlaceName(_name);
+        emit ChangeMarketPlaceName(_name);
     }
 
     /**
@@ -195,6 +214,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      */
     function changeFees(uint256 newFees, uint256 newBase) external onlyOwner whenPaused returns (uint256 percentage) {
         percentage = _changeFees(newFees, newBase);
+        emit ChangeFees(newFees, newBase);
     }
 
     /**
@@ -238,5 +258,6 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         require(newWallet != address(0), 'Zero address is not allowed');
         _adminWallet = newWallet;
         _setupRole(DEFAULT_ADMIN_ROLE, newWallet);
+        emit UpdateAdminWallet(newWallet);
     }
 }
