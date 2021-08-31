@@ -17,7 +17,12 @@ import { ecsign } from 'ethereumjs-util'
 import { expandTo18Decimals,  getApprovalNftDigest, getNFTTransferFromDigest } from './shared/utilities'
 
 import ER721 from '../artifacts/contracts/StartFiRoyaltyNFT.sol/StartFiRoyaltyNFT.json'
+const calcFees=(price:number,share:number,base:number):number=>{
 
+  // round decimal to the nearst value
+ return price*(share/(base * 100));
+
+}
 chai.use(solidity)
 let baseUri = 'http://ipfs.io'
 let tokenUri = 'http://ipfs.io'
@@ -76,7 +81,7 @@ let walletNftBalance=0
         itemPrice
      );
      walletNftBalance++;
-  const royaltyAmount=itemPrice*muliplyer*share/(separator*100);
+  const royaltyAmount=Math.round(calcFees(itemPrice,share,separator));
       await expect(info.issuer)
         .to.eq( wallet.address);
         // we have to convert it to string because the expected number is big ' 18 decimals' and js couldn't handle

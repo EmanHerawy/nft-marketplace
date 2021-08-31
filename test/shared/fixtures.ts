@@ -40,10 +40,14 @@ export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise
   // add to minter role
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', NFT.address)
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
-  // mint 4 tokens / 3 without royalty and 2 with royalty
-  for (let index = 0; index < 10; index++) {
-    await NFT.mint(wallet.address, baseUri)
+  // mint 10 tokens / 5 without royalty and 5 with royalty
+  for (let index = 0; index < 5; index++) {
     await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
+
+  }
+  for (let index = 5; index < 10; index++) {
+    await NFT.mint(wallet.address, baseUri)
+
   }
 
   await stakes.setMarketplace(marketPlace.address)

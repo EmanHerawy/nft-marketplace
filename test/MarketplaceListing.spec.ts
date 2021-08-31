@@ -27,7 +27,6 @@ describe('StartFi Marketplace Lisitng', () => {
     const fixture = await loadFixture(tokenFixture)
     token = fixture.token
     NFT = fixture.NFT
-    payment = fixture.payment
     marketPlace = fixture.marketPlace
     reputation = fixture.reputation
     stakes = fixture.stakes

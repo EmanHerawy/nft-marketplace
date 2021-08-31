@@ -20,7 +20,7 @@ describe('Staking STFI', () => {
   const [wallet, other] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
-  beforeEach(async () => {
+  before(async () => {
     const fixture = await loadFixture(tokenFixture)
     token = fixture.token
     NFT = fixture.NFT
@@ -40,12 +40,14 @@ describe('Staking STFI', () => {
     await stakes.deposit(wallet.address, 20)
     await stakes.withdraw(10) // @EH  transaction revert
     const reserves = await stakes.getReserves(wallet.address)
-    expect(reserves.toNumber()).to.eq(10)
+    expect(reserves.toNumber()).to.eq(20)
   })
 
   it('Should deduct user', async () => {
-    await stakes.deduct(wallet.address, marketPlace.address, 20)
+
+    await stakes.deduct(wallet.address, other.address, 20)
     const reserves = await stakes.getReserves(wallet.address)
-    expect(reserves.toNumber()).to.eq(10)
+
+    expect(reserves.toNumber()).to.eq(0)
   })
 })
