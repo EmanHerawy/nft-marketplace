@@ -34,7 +34,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address owner,
         uint256 tokenId,
         uint256 fineFees,
-        uint256 remaining,
         uint256 releaseTime,
         uint256 timestamp
     );
@@ -117,8 +116,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         stakeContract = _stakeContract;
         // to be removed
         usdCap = 10000;
-        stfiCap = 10000;
-        stfiUsdt = 1;
+        stfiCap = 50000;
+        stfiUsdt = 5;
     }
 
     /******************************************* modifiers go here ********************************************************* */
@@ -210,7 +209,15 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         userListing[_msgSender()] = listings;
         // list
         require(
-            _listOnMarketPlace(listId, nFTContract, _msgSender(), tokenId, listingPrice, releaseTime),
+            _listOnMarketPlace(
+                listId,
+                nFTContract,
+                _msgSender(),
+                tokenId,
+                listingPrice,
+                listQualifyAmount,
+                releaseTime
+            ),
             "Couldn't list the item"
         );
         emit ListOnMarketplace(
@@ -257,7 +264,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @dev  called by dapps to create  new auction
      * @param nFTContract nft contract address
      * @param tokenId token id
-     * @param listingPrice min price
+     * @param minimumBid minimum Bid price
      * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
      * @param sellForEnabled true if auction enable direct selling
      * @param sellFor  price  to sell with if sellForEnabled=true
@@ -267,19 +274,21 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     function createAuction(
         address nFTContract,
         uint256 tokenId,
-        uint256 listingPrice,
+        uint256 minimumBid,
         uint256 qualifyAmount,
         bool sellForEnabled,
         uint256 sellFor,
         uint256 duration
-    ) public isNotZero(listingPrice) returns (bytes32 listId) {
+    ) public isNotZero(minimumBid) returns (bytes32 listId) {
         require(duration > 12 hours, 'Auction should be live for more than 12 hours');
         require(qualifyAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
         if (sellForEnabled) {
-            require(sellFor > 0, 'Zero price is not allowed');
+            require(sellFor >= minimumBid, 'Zero price is not allowed');
+        } else {
+            sellFor = 0;
         }
         // check that sender is qualified
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
@@ -300,7 +309,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 nFTContract,
                 _msgSender(),
                 tokenId,
-                listingPrice,
+                minimumBid,
                 sellForEnabled,
                 sellFor,
                 releaseTime,
@@ -313,7 +322,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             nFTContract,
             _msgSender(),
             tokenId,
-            listingPrice,
+            minimumBid,
             sellForEnabled,
             sellFor,
             releaseTime,
@@ -469,7 +478,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
 
         // TODO: add reputation points to both seller and buyer
-         _addreputationPoints(seller, winnerBidder, bidPrice);
+        _addreputationPoints(seller, winnerBidder, bidPrice);
 
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
@@ -503,7 +512,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         if (isDualDir) {
             require(_safeTokenTransferFrom(buyer, _adminWallet, fees), "Couldn't transfer token as fees");
-            if (issuer != address(0)) {
+            // if the issuer is the seller , no need to send two 2 transfer transaction , let's do it 1 to reduce gas
+            if (issuer == seller) {
+                netPrice += royaltyAmount;
+            } else if (issuer != address(0)) {
                 require(_safeTokenTransferFrom(buyer, issuer, royaltyAmount), "Couldn't transfer token to issuer");
             }
 
@@ -562,63 +574,39 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address _owner = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
         uint256 releaseTime = _tokenListings[listingId].releaseTime;
-        uint256 listingPrice = _tokenListings[listingId].listingPrice;
         tokenId = _tokenListings[listingId].tokenId;
         require(_owner == _msgSender(), 'Caller is not the owner');
         require(buyer == address(0), 'Already bought token');
         uint256 timeToDelistAuction = StartFiFinanceLib._calcSum(releaseTime, 3 days);
 
-         require(status==ListingStatus.OnMarket || status==ListingStatus.onAuction,"Already bought or canceled token");
+        require(
+            status == ListingStatus.OnMarket || status == ListingStatus.onAuction,
+            'Already bought or canceled token'
+        );
         require(
             (timeToDelistAuction <= block.timestamp && status == ListingStatus.onAuction) ||
                 (status == ListingStatus.OnMarket),
             "Can't delist"
         );
-        uint256 fineAmount;
-        uint256 remaining;
+
         // if realse time < now , pay
         if (status != ListingStatus.onAuction) {
-            if (releaseTime < block.timestamp) {
+            if (releaseTime > block.timestamp) {
                 // if it's not auction ? pay,
-                if (offerTerms[_msgSender()].fee != 0) {
-                    (fineAmount, remaining) = StartFiFinanceLib._getDeListingQualAmount(
-                        listingPrice,
-                        offerTerms[_msgSender()].delistFeesPercentage,
-                        offerTerms[_msgSender()].delistFeesPercentageBase,
-                        offerTerms[_msgSender()].listqualifyPercentage,
-                        offerTerms[_msgSender()].listqualifyPercentageBase
-                    );
-                } else {
-                    (fineAmount, remaining) = StartFiFinanceLib._getDeListingQualAmount(
-                        listingPrice,
-                        delistFeesPercentage,
-                        delistFeesPercentageBase,
-                        listqualifyPercentage,
-                        listqualifyPercentageBase
-                    );
-                }
 
                 //TODO: deduct the fine from his stake contract
 
-                require(_deduct(_owner, _adminWallet, fineAmount), "couldn't deduct the fine");
-            } else {
-                if (offerTerms[_msgSender()].fee != 0) {
-                    remaining = StartFiFinanceLib._calcFees(
-                        listingPrice,
-                        offerTerms[_msgSender()].listqualifyPercentage,
-                        offerTerms[_msgSender()].listqualifyPercentageBase
-                    );
-                } else {
-                    remaining = StartFiFinanceLib._calcFees(
-                        listingPrice,
-                        listqualifyPercentage,
-                        listqualifyPercentageBase
-                    );
-                }
+                require(
+                    _deduct(_owner, _adminWallet, _tokenListings[listingId].qualifyAmount),
+                    "couldn't deduct the fine"
+                );
             }
             // update user reserves
             // reserve nigative couldn't be at any case
-            require(_updateUserReserves(_msgSender(), remaining, false) >= 0, 'negative reserve is not allowed');
+            require(
+                _updateUserReserves(_msgSender(), _tokenListings[listingId].qualifyAmount, false) >= 0,
+                'negative reserve is not allowed'
+            );
         }
 
         // trnasfer token
@@ -634,8 +622,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             _NFTContract,
             _owner,
             tokenId,
-            fineAmount,
-            remaining,
+            _tokenListings[listingId].qualifyAmount,
             releaseTime,
             block.timestamp
         );

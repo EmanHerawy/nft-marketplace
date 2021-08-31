@@ -32,7 +32,7 @@ contract MarketPlaceListing {
         // only if bed and sell for enabled
         uint256 releaseTime;
         uint256 disputeTime; // only in auction
-        uint256 qualifyAmount;
+        uint256 qualifyAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
         uint256 sellFor;
         ListingStatus status;
     }
@@ -111,6 +111,8 @@ contract MarketPlaceListing {
      * @param seller seller address
      * @param tokenId token id
      * @param listingPrice min price
+     * @param qualifyAmount  amount of token locked as insurance from the seller 
+
      * @param releaseTime  time to delist for free
      * @return true if it's done
      */
@@ -120,6 +122,7 @@ contract MarketPlaceListing {
         address seller,
         uint256 tokenId,
         uint256 listingPrice,
+        uint256 qualifyAmount,
         uint256 releaseTime
     ) internal returns (bool) {
         _tokenListings[listId] = Listing(
@@ -133,7 +136,7 @@ contract MarketPlaceListing {
             false,
             releaseTime,
             0,
-            0,
+            qualifyAmount,
             0,
             ListingStatus.OnMarket
         );
