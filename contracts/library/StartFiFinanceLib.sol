@@ -38,6 +38,10 @@ library StartFiFinanceLib {
         remaining = qualifyAmount - fineAmount;
     }
 
+    function _calcShare(uint256 numerator, uint256 donomirator) internal pure returns (uint256 share) {
+        share = numerator.divideDecimalRound(donomirator);
+    }
+
     /**
      *@dev  call the royaltyInfo function in nft contract
      *@param _NFTContract NFT contract address
