@@ -61,7 +61,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 timestamp
     );
 
-    event FullfillBid(
+    event FulfillBid(
         bytes32 bidId,
         bytes32 listingId,
         address tokenAddress,
@@ -130,11 +130,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
         _;
     }
-    modifier canFullfillBid(bytes32 listingId) {
+    modifier canFulfillBid(bytes32 listingId) {
         require(
             _tokenListings[listingId].releaseTime > block.timestamp &&
                 _tokenListings[listingId].status == ListingStatus.onAuction,
-            'Auction is ended'
+            'Auction is not ended or no longer on auction'
         );
         _;
     }
@@ -420,9 +420,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return _NFTContract nft contract address
      * @return tokenId token id
      */
-    function fullfillBid(bytes32 listingId)
+    function fulfillBid(bytes32 listingId)
         public
-        canFullfillBid(listingId)
+        canFulfillBid(listingId)
         returns (address _NFTContract, uint256 tokenId)
     {
         address winnerBidder = bidToListing[listingId].bidder;
@@ -482,7 +482,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
-        emit FullfillBid(
+        emit FulfillBid(
             bidToListing[listingId].bidId,
             listingId,
             _NFTContract,
@@ -544,7 +544,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return tokenId token id
 
      */
-    function fullfillBidWithPremit(
+    function fulfillBidWithPremit(
         bytes32 listingId,
         uint256 deadline,
         uint8 v,
@@ -556,7 +556,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             'StartFi: Invalid signature'
         );
 
-        return fullfillBid(listingId);
+        return fulfillBid(listingId);
     }
 
     // delist
@@ -653,7 +653,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 (_tokenListings[listingId].status == ListingStatus.onAuction &&
                     sellForEnabled == true &&
                     _tokenListings[listingId].releaseTime > block.timestamp),
-            'Token isnot for sale '
+            'Token is not for sale'
         );
         // check that contract is allowed to transfer tokens
         require(
@@ -664,7 +664,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 royaltyAmount;
         uint256 fees;
         uint256 netPrice;
-        uint256 ListingQualAmount;
+        uint256 ListingQualAmount = _tokenListings[listingId].qualifyAmount;
         // transfer price
         if (offerTerms[seller].fee != 0) {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
@@ -674,12 +674,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 offerTerms[seller].fee,
                 offerTerms[seller].feeBase
             );
-
-            ListingQualAmount = StartFiFinanceLib._calcFees(
-                _tokenListings[listingId].listingPrice,
-                offerTerms[seller].listqualifyPercentage,
-                offerTerms[seller].listqualifyPercentageBase
-            );
         } else {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
                 _NFTContract,
@@ -688,19 +682,15 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _feeFraction,
                 _feeBase
             );
-
-            ListingQualAmount = StartFiFinanceLib._calcFees(
-                _tokenListings[listingId].listingPrice,
-                listqualifyPercentage,
-                listqualifyPercentageBase
-            );
         }
         require(
             _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
             'StartFi: could not excute transfer'
         );
-
-        require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
+        // free reserves for seller
+        if (_tokenListings[listingId].status == ListingStatus.OnMarket) {
+            require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
+        }
 
         // finish listing
         _finalizeListing(listingId, _msgSender(), ListingStatus.Sold);
@@ -751,7 +741,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
-     * @dev called by seller through dapps when his/her auction is  not fullfilled after 3 days
+     * @dev called by seller through dapps when his/her auction is  not fulfilled after 3 days
      *  @notice  after auction with winner bid . bidder didn't call fullfile within 3 days of auction closing  auction owner can call dispute to delist and punish the spam winner bidder fine is share between the plateform and the auction owner
      * @param listingId listing id
      * @return _NFTContract nft contract address
@@ -765,27 +755,17 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         tokenId = _tokenListings[listingId].tokenId;
         uint256 qualifyAmount = _tokenListings[listingId].qualifyAmount;
         uint256 timeToDispute = _tokenListings[listingId].disputeTime;
-        require(winnerBidder != address(0) && timeToDispute >= block.timestamp, 'No bids or still running auction');
-        //require(seller == _msgSender(), 'Caller is not the owner');
-        require(!listingBids[listingId][winnerBidder].isPurchased, 'Already purchased');
-        uint256 fineAmount;
-        uint256 remaining;
-        if (offerTerms[_msgSender()].fee != 0) {
-            (fineAmount, remaining) = StartFiFinanceLib._calcBidDisputeFees(
-                qualifyAmount,
-                offerTerms[_msgSender()].bidPenaltyPercentage,
-                offerTerms[_msgSender()].bidPenaltyPercentageBase
-            );
-        } else {
-            (fineAmount, remaining) = StartFiFinanceLib._calcBidDisputeFees(
-                qualifyAmount,
-                bidPenaltyPercentage,
-                bidPenaltyPercentageBase
-            );
-        }
+        require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
+        require(timeToDispute <= block.timestamp, 'Marketplace: Can not dispute before time');
+        require(_tokenListings[listingId].status == ListingStatus.onAuction, 'Marketplace: Item is not on Auction');
+        //50% goes to the platform
+        (uint256 fineAmount, uint256 remaining) = StartFiFinanceLib._calcBidDisputeFees(qualifyAmount);
         // call staking contract to deduct
-        require(_deduct(winnerBidder, _adminWallet, fineAmount), "couldn't deduct the fine for the admin wallet");
-        require(_deduct(winnerBidder, seller, remaining), "couldn't deduct the fine for the admin wallet");
+        require(
+            _deduct(winnerBidder, _adminWallet, fineAmount),
+            "Marketplace: couldn't deduct the fine for the admin wallet"
+        );
+        require(_deduct(winnerBidder, seller, remaining), "Marketplace: couldn't deduct the fine for the admin wallet");
         // transfer token
         require(
             _excuteTransfer(address(this), _NFTContract, tokenId, seller, address(0), 0, 0, 0, false),
