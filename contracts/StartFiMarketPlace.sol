@@ -163,7 +163,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice
-    ) public isNotZero(listingPrice) returns (bytes32 listId) {
+    ) public whenNotPaused isNotZero(listingPrice) returns (bytes32 listId) {
         uint256 releaseTime;
         uint256 listQualifyAmount;
         if (offerTerms[_msgSender()].fee != 0) {
@@ -279,7 +279,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bool sellForEnabled,
         uint256 sellFor,
         uint256 duration
-    ) public isNotZero(minimumBid) returns (bytes32 listId) {
+    ) public whenNotPaused isNotZero(minimumBid) returns (bytes32 listId) {
         require(duration > 12 hours, 'Auction should be live for more than 12 hours');
         require(qualifyAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
@@ -372,7 +372,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param bidPrice price
      * @return bidId bid id
      */
-    function bid(bytes32 listingId, uint256 bidPrice) external isOpenAuction(listingId) returns (bytes32 bidId) {
+    function bid(bytes32 listingId, uint256 bidPrice)
+        external
+        whenNotPaused
+        isOpenAuction(listingId)
+        returns (bytes32 bidId)
+    {
         address tokenAddress = _tokenListings[listingId].nFTContract;
         uint256 tokenId = _tokenListings[listingId].tokenId;
         bidId = keccak256(abi.encodePacked(listingId, tokenAddress, _msgSender(), tokenId));
@@ -422,6 +427,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      */
     function fulfillBid(bytes32 listingId)
         public
+        whenNotPaused
         canFulfillBid(listingId)
         returns (address _NFTContract, uint256 tokenId)
     {
@@ -568,7 +574,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return _NFTContract nft contract address
      * @return tokenId token id
      */
-    function deList(bytes32 listingId) external returns (address _NFTContract, uint256 tokenId) {
+    function deList(bytes32 listingId) external whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         ListingStatus status = _tokenListings[listingId].status;
         address buyer = _tokenListings[listingId].buyer;
         address _owner = _tokenListings[listingId].seller;
@@ -639,7 +645,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return _NFTContract nft contract address
      * @return tokenId token id
      */
-    function buyNow(bytes32 listingId, uint256 price) public returns (address _NFTContract, uint256 tokenId) {
+    function buyNow(bytes32 listingId, uint256 price)
+        public
+        whenNotPaused
+        returns (address _NFTContract, uint256 tokenId)
+    {
         if (price > stfiCap) {
             require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
         }
@@ -747,7 +757,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return _NFTContract nft contract address
      * @return tokenId token id
      */
-    function disputeAuction(bytes32 listingId) external returns (address _NFTContract, uint256 tokenId) {
+    function disputeAuction(bytes32 listingId) external whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         address winnerBidder = bidToListing[listingId].bidder;
         address seller = _tokenListings[listingId].seller;
         require(seller == _msgSender(), 'Only Seller can dispute');
@@ -838,7 +848,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      *@param listingId listing Id
      *
      */
-    function approveDeal(bytes32 listingId) external onlyOwner {
+    function approveDeal(bytes32 listingId) external onlyOwner whenNotPaused {
         require(
             _tokenListings[listingId].status == ListingStatus.onAuction ||
                 _tokenListings[listingId].status == ListingStatus.OnMarket,
