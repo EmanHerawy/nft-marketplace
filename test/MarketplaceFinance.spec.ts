@@ -56,7 +56,7 @@ describe('StartFi Marketplace Finance', () => {
     expect(changeFees.from).to.eq(wallet.address)
   })
   it('change utility token', async () => {
-    const utilityToken = await marketPlace._changeUtiltiyToken(token.address)
+    const utilityToken = await marketPlace._changeUtilityToken(token.address)
     expect(utilityToken.from).to.eq(wallet.address)
   })
   it('change reputation token', async () => {

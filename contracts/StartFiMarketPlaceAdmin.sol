@@ -17,7 +17,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     address _adminWallet;
     /******************************************* events goes here ********************************************************* */
     event ChangeReputationContract(address reputationContract);
-    event ChangeUtiltiyToken(address utiltiyToken);
+    event ChangeUtilityToken(address utiltiyToken);
     event ChangeFulfillDuration(uint256 duration);
     event ChangeListqualifyAmount(uint256 newFees, uint256 newBase);
     event ChangeDelistFeesPercentage(uint256 newFees, uint256 newBase);
@@ -121,9 +121,9 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      *@param _token token address
      *
      */
-    function changeUtiltiyToken(address _token) external onlyOwner whenPaused {
-        _changeUtiltiyToken(_token);
-        emit ChangeUtiltiyToken(_token);
+    function changeUtilityToken(address _token) external onlyOwner whenPaused {
+        _changeUtilityToken(_token);
+        emit ChangeUtilityToken(_token);
     }
 
     /**

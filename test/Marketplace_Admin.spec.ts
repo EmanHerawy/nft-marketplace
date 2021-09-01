@@ -98,20 +98,20 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
 
   it('Admin should change utility contract ', async () => {
     await marketPlace.pause()
-    await expect(marketPlace.changeUtiltiyToken(newTokenAddress))
-      .to.emit(marketPlace, 'ChangeUtiltiyToken')
+    await expect(marketPlace.changeUtilityToken(newTokenAddress))
+      .to.emit(marketPlace, 'ChangeUtilityToken')
       .withArgs(newTokenAddress)
   })
 
   it('Admin should change utility contract:revert not the owner ', async () => {
-    await expect(marketPlace.connect(user1).changeUtiltiyToken(newTokenAddress)).to.revertedWith(
+    await expect(marketPlace.connect(user1).changeUtilityToken(newTokenAddress)).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
     )
   })
 
   it('Admin should change utility contract:revert not paused ', async () => {
     await marketPlace.unpause()
-    await expect(marketPlace.changeUtiltiyToken(newTokenAddress)).to.revertedWith('Pausable: not paused')
+    await expect(marketPlace.changeUtilityToken(newTokenAddress)).to.revertedWith('Pausable: not paused')
   })
 
   it('Admin should change fulfil bid duration', async () => {
