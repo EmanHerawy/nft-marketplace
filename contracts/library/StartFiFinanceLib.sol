@@ -27,40 +27,13 @@ library StartFiFinanceLib {
     }
 
     /**
-     @dev calculat the platform fine amount when seller delist before time
-    *@param listingPrice  : item listing price
-    *@param delistFeesPercentage delist Fees .  the formula is (delist fees * 1000)/ delist base
-    *@param delistFeesPercentageBase delist fee base 
-    *@param listqualifyPercentage listqualify fee .  the formula is (listqualify fees * 1000)/ listqualify base
-     *@param listqualifyPercentageBase listqualify fee base 
-    *@return fineAmount the value that the platform will get
-    *@return remaining the value remaing after subtracting the fine
-     */
-    function _getDeListingQualAmount(
-        uint256 listingPrice,
-        uint256 delistFeesPercentage,
-        uint256 delistFeesPercentageBase,
-        uint256 listqualifyPercentage,
-        uint256 listqualifyPercentageBase
-    ) internal pure returns (uint256 fineAmount, uint256 remaining) {
-        fineAmount = _calcFees(listingPrice, delistFeesPercentage, delistFeesPercentageBase);
-        remaining = _calcFees(listingPrice, listqualifyPercentage, listqualifyPercentageBase) - fineAmount;
-    }
-
-    /**
       @dev calculat the platform share when seller call disput
     *@param qualifyAmount  : seller defind value to be staked in order to participate in a gevin auction
-    *@param bidPenaltyPercentage bid Penalty fees.  the formula is ( bid Penalty * 1000)/  bid Penalty base
-     *@param bidPenaltyPercentageBase  bid Penalty fee base 
     * @return fineAmount the value that the platform will get
     * @return remaining the value that the auction woner will get
      */
-    function _calcBidDisputeFees(
-        uint256 qualifyAmount,
-        uint256 bidPenaltyPercentage,
-        uint256 bidPenaltyPercentageBase
-    ) internal pure returns (uint256 fineAmount, uint256 remaining) {
-        fineAmount = _calcFees(qualifyAmount, bidPenaltyPercentage, bidPenaltyPercentageBase);
+    function _calcBidDisputeFees(uint256 qualifyAmount) internal pure returns (uint256 fineAmount, uint256 remaining) {
+        fineAmount = qualifyAmount.divideDecimalRound(2 ether); // divided by 2 * 18 decimal
 
         remaining = qualifyAmount - fineAmount;
     }
