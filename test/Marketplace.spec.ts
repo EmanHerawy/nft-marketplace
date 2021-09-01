@@ -74,6 +74,7 @@ let price2=10000;
 let price3=50050;
 let wrongPrice=10;
 let minimumBid=10;
+let zeroPrice=0;
 let lastbidding=minimumBid;
 let isForSale=false;
 const calcFees=(price:number,share:number,base:number):number=>{
@@ -126,6 +127,11 @@ describe('StartFi marketPlace', () => {
     
   })
 
+  it('ListOnMarketplace: Zero price is not allowed', async () => {
+    await expect(marketPlace.connect(issuer).listOnMarketplace(NFT.address, marketplaceTokenId1, zeroPrice)).to.be.revertedWith(
+      'Zero Value is not allowed'
+    )
+  })
   it('ListOnMarketplace: Not enough reserves', async () => {
     await expect(marketPlace.connect(issuer).listOnMarketplace(NFT.address, marketplaceTokenId1, price1)).to.be.revertedWith(
       'Not enough reserves'

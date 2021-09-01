@@ -132,7 +132,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
     modifier canFulfillBid(bytes32 listingId) {
         require(
-            _tokenListings[listingId].releaseTime > block.timestamp &&
+            _tokenListings[listingId].releaseTime < block.timestamp &&
                 _tokenListings[listingId].status == ListingStatus.onAuction,
             'Auction is not ended or no longer on auction'
         );
