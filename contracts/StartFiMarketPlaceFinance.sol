@@ -141,7 +141,7 @@ contract StartFiMarketPlaceFinance {
      * @dev for later on upgrade , if we have
      * @param _token : startfi new utility contract
      */
-    function _changeUtiltiyToken(address _token) internal {
+    function _changeUtilityToken(address _token) internal {
         _paymentToken = _token;
     }
 
