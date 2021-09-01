@@ -58,11 +58,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      *@param wallet marketplace reputation contract
      *@param _delistAfter marketplace reputation contract
      *@param _fee marketplace reputation contract
-     *@param _bidPenaltyPercentage marketplace reputation contract
-     *@param _delistFeesPercentage marketplace reputation contract
      *@param _listqualifyPercentage marketplace reputation contract
-     *@param _bidPenaltyPercentageBase marketplace reputation contract
-     *@param _delistFeesPercentageBase marketplace reputation contract
      *@param _listqualifyPercentage marketplace reputation contract
      *@param feeBase marketplace reputation contract
      *
@@ -71,11 +67,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         address wallet,
         uint256 _delistAfter,
         uint256 _fee, // 2.5% fees
-        uint256 _bidPenaltyPercentage, // 1 %
-        uint256 _delistFeesPercentage,
         uint256 _listqualifyPercentage,
-        uint256 _bidPenaltyPercentageBase,
-        uint256 _delistFeesPercentageBase,
         uint256 _listqualifyPercentageBase,
         uint256 feeBase
     ) external onlyOwner whenNotPaused {
@@ -83,11 +75,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
             wallet,
             _delistAfter,
             _fee, // 2.5% fees
-            _bidPenaltyPercentage, // 1 %
-            _delistFeesPercentage,
             _listqualifyPercentage,
-            _bidPenaltyPercentageBase,
-            _delistFeesPercentageBase,
             _listqualifyPercentageBase,
             feeBase
         );
@@ -96,11 +84,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
             wallet,
             _delistAfter,
             _fee,
-            _bidPenaltyPercentage,
-            _delistFeesPercentage,
             _listqualifyPercentage,
-            _bidPenaltyPercentageBase,
-            _delistFeesPercentageBase,
             _listqualifyPercentageBase,
             feeBase
         );
@@ -156,46 +140,12 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
 
     /**
      * @dev only called by `owner` to change the name and `whenPaused`
-     * @param newFees  the new fees value to be stored
-     * @param newBase  the new basefees value to be stored
-     * @return percentage the value of the state variable `_feeFraction`
-     *
-     */
-    function changeDelistFeesPercentage(uint256 newFees, uint256 newBase)
-        external
-        onlyOwner
-        whenPaused
-        returns (uint256 percentage)
-    {
-        percentage = _changeDelistFeesPerentage(newFees, newBase);
-        emit ChangeDelistFeesPerentage(newFees, newBase);
-    }
-
-    /**
-     * @dev only called by `owner` to change the name and `whenPaused`
      *@param duration duration
      *
      */
     function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
         _changeDelistAfter(duration);
         emit ChangeDelistAfter(duration);
-    }
-
-    /**
-     * @dev only called by `owner` to change the name and `whenPaused`
-     * @param newFees  the new fees value to be stored
-     * @param newBase  the new basefees value to be stored
-     * @return percentage the value of the state variable `_feeFraction`
-     *
-     */
-    function changeBidPenaltyPercentage(uint256 newFees, uint256 newBase)
-        external
-        onlyOwner
-        whenPaused
-        returns (uint256 percentage)
-    {
-        percentage = _changeBidPenaltyPercentage(newFees, newBase);
-        emit ChangeBidPenaltyPercentage(newFees, newBase);
     }
 
     /**

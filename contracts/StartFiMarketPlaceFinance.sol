@@ -5,6 +5,7 @@ pragma abicoder v2;
 import './interface/IStartFiReputation.sol';
 
 import './interface/IStartFiStakes.sol';
+import './library/StartFiFinanceLib.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
@@ -16,11 +17,7 @@ contract StartFiMarketPlaceFinance {
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees
     uint256 internal _feeBase = 10; // 25/10=2.5
-    uint256 bidPenaltyPercentage = 10; // 1 %
-    uint256 public delistFeesPercentage = 10;
     uint256 public listqualifyPercentage = 10;
-    uint256 public bidPenaltyPercentageBase = 10;
-    uint256 public delistFeesPercentageBase = 10;
     uint256 public listqualifyPercentageBase = 10;
     mapping(address => uint256) userReserves;
     address public stakeContract;
@@ -123,17 +120,16 @@ contract StartFiMarketPlaceFinance {
     /**
      *   * @notice  all conditions and checks are made prior to this function
      * @dev  the formula is (fees * 1000)/base
-     * @param newFees  the new fees value to be stored
-     * @param newBase  the new basefees value to be stored
+     * @param numerator  the new fees value to be stored
+     * @param donomirator  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
      */
-    function _changeFees(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, 'Fee fraction exceeded base.');
-        percentage = (newFees * 1000) / newBase;
-        require(percentage <= 30 && percentage >= 10, 'Percentage should be from 1-3 %');
+    function _changeFees(uint256 numerator, uint256 donomirator) internal returns (uint256 percentage) {
+        percentage = StartFiFinanceLib._calcShare(numerator, donomirator);
+        require(percentage <= 4 ether && percentage >= 1 ether, 'Percentage should be from 1-4 %');
 
-        _feeFraction = newFees;
-        _feeBase = newBase;
+        _feeFraction = numerator;
+        _feeBase = donomirator;
     }
 
     /**
@@ -157,49 +153,15 @@ contract StartFiMarketPlaceFinance {
     /**
      * @notice  all conditions and checks are made prior to this function
      * @dev  the formula is (fees * 1000)/base
-     * @param newFees  the new fees value to be stored
-     * @param newBase  the new basefees value to be stored
+     * @param numerator  the new fees value to be stored
+     * @param donomirator  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
      */
-    function _changeBidPenaltyPercentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, 'Fee fraction exceeded base.');
-        percentage = (newFees * 1000) / newBase;
-        require(percentage <= 40 && percentage >= 10, 'Percentage should be from 1-4 %');
+    function _changeListqualifyAmount(uint256 numerator, uint256 donomirator) internal returns (uint256 percentage) {
+        percentage = StartFiFinanceLib._calcShare(numerator, donomirator);
+        require(percentage <= 4 ether && percentage >= 1 ether, 'Percentage should be from 1-4 %');
 
-        bidPenaltyPercentage = newFees;
-        bidPenaltyPercentageBase = newBase;
-    }
-
-    /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev  the formula is (fees * 1000)/base
-     * @param newFees  the new fees value to be stored
-     * @param newBase  the new basefees value to be stored
-     * @return percentage the value of the state variable `_feeFraction`
-     */
-
-    function _changeDelistFeesPerentage(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, 'Fee fraction exceeded base.');
-        percentage = (newFees * 1000) / newBase;
-        require(percentage <= 40 && percentage >= 10, 'Percentage should be from 1-4 %');
-
-        delistFeesPercentage = newFees;
-        delistFeesPercentageBase = newBase;
-    }
-
-    /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev  the formula is (fees * 1000)/base
-     * @param newFees  the new fees value to be stored
-     * @param newBase  the new basefees value to be stored
-     * @return percentage the value of the state variable `_feeFraction`
-     */
-    function _changeListqualifyAmount(uint256 newFees, uint256 newBase) internal returns (uint256 percentage) {
-        require(newFees <= newBase, 'Fee fraction exceeded base.');
-        percentage = (newFees * 1000) / newBase;
-        require(percentage <= 40 && percentage >= 10, 'Percentage should be from 1-4 %');
-
-        listqualifyPercentage = newFees;
-        listqualifyPercentageBase = newBase;
+        listqualifyPercentage = numerator;
+        listqualifyPercentageBase = donomirator;
     }
 }
