@@ -29,25 +29,25 @@ describe('StartFi Marketplace Finance', () => {
   })
 
   it('Should pay fin', async () => {
-    const deduct = await marketPlace._deduct('0xe092b1fa25DF5786D151246E492Eed3d15EA4dAA', wallet.address, 10)
+    const deduct = await marketPlace.deduct('0xe092b1fa25DF5786D151246E492Eed3d15EA4dAA', wallet.address, 10)
     expect(deduct.from).to.eq(wallet.address)
   })
   it('add reputation point', async () => {
-    const points = await marketPlace._addreputationPoints(wallet.address, wallet.address, 10)
+    const points = await marketPlace.addreputationPoints(wallet.address, wallet.address, 10)
     expect(points.from).to.eq(wallet.address)
   })
   /* it('safe transfer/ from', async () => {
-    const transferer = await marketPlace._safeTokenTransfer(wallet.address, 1)
-    const transfererFrom = await marketPlace._safeTokenTransferFrom(wallet.address, wallet.address, 1)
+    const transferer = await marketPlace.safeTokenTransfer(wallet.address, 1)
+    const transfererFrom = await marketPlace.safeTokenTransferFrom(wallet.address, wallet.address, 1)
     expect(transfererFrom.from).to.eq(wallet.address)
   }) */
   it('set reserve', async () => {
-    const reserve = await marketPlace._setUserReserves(wallet.address, 1)
+    const reserve = await marketPlace.setUserReserves(wallet.address, 1)
     expect(reserve.from).to.eq(wallet.address)
   })
   it('update reserve', async () => {
-    const addReserve = await marketPlace._updateUserReserves(wallet.address, 1, true)
-    const subReserve = await marketPlace._updateUserReserves(wallet.address, 1, true)
+    const addReserve = await marketPlace.updateUserReserves(wallet.address, 1, true)
+    const subReserve = await marketPlace.updateUserReserves(wallet.address, 1, true)
     expect(addReserve.from).to.eq(wallet.address)
     expect(subReserve.from).to.eq(wallet.address)
   })
@@ -56,23 +56,16 @@ describe('StartFi Marketplace Finance', () => {
     expect(changeFees.from).to.eq(wallet.address)
   })
   it('change utility token', async () => {
-    const utilityToken = await marketPlace._changeUtilityToken(token.address)
+    const utilityToken = await marketPlace.changeUtilityToken(token.address)
     expect(utilityToken.from).to.eq(wallet.address)
   })
   it('change reputation token', async () => {
-    const utilityToken = await marketPlace._changeReputationContract(token.address)
+    const utilityToken = await marketPlace.changeReputationContract(token.address)
     expect(utilityToken.from).to.eq(wallet.address)
   })
-  it('change bid Penalty Percentage', async () => {
-    const penalty = await marketPlace._changeBidPenaltyPercentage(35, 1000)
-    expect(penalty.from).to.eq(wallet.address)
-  })
-  it('change delist fees Percentage', async () => {
-    const delistFees = await marketPlace._changeDelistFeesPerentage(20, 1000)
-    expect(delistFees.from).to.eq(wallet.address)
-  })
+
   it('change qualify amount', async () => {
-    const qualifyAmount = await marketPlace._changeListqualifyAmount(30, 1000)
+    const qualifyAmount = await marketPlace.changeListqualifyAmount(30, 1000)
     expect(qualifyAmount.from).to.eq(wallet.address)
   })
 })

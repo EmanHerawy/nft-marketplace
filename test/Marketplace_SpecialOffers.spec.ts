@@ -54,11 +54,9 @@ let stakes: Contract
 
 const   _feeFraction = 25; // 2.5% fees
 const   _feeBase = 10;
-const bidPenaltyPercentage = 1; // 1 %
-const   delistFeesPercentage = 1;
+ 
 const   listqualifyPercentage = 10;
-const   bidPenaltyPercentageBase = 100;
-const   delistFeesPercentageBase = 100;
+ 
 const   listqualifyPercentageBase = 10;
 const royaltyShare=25
 const royaltyBase=10
@@ -91,11 +89,9 @@ describe('StartFi marketPlace', () => {
     wallet:issuer.address,
     _delistAfter:60*60*24*15,//15 days
     _fee:30, // 2.5% fees
-    _bidPenaltyPercentage:20, // 1 %
-    _delistFeesPercentage:20,
+ 
     _listqualifyPercentage:20,
-    _bidPenaltyPercentageBase:10,
-    _delistFeesPercentageBase:10,
+ 
     _listqualifyPercentageBase:10,
     _feeBase:10
 }]
@@ -141,11 +137,9 @@ describe('StartFi marketPlace', () => {
     await expect(marketPlace.addOffer(offers[0].wallet,  
       offers[0]. _delistAfter,
       offers[0]. _fee, // 2.5% fees
-      offers[0]. _bidPenaltyPercentage, // 1 %
-      offers[0]._delistFeesPercentage,
+ 
       offers[0].  _listqualifyPercentage,
-      offers[0]._bidPenaltyPercentageBase,
-      offers[0]. _delistFeesPercentageBase,
+ 
       offers[0]._listqualifyPercentageBase,
       offers[0].  _feeBase)).to.be.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
@@ -155,21 +149,17 @@ describe('StartFi marketPlace', () => {
     await expect(marketPlace.connect(admin).addOffer(offers[0].wallet,  
       offers[0]. _delistAfter,
       offers[0]. _fee, // 2.5% fees
-      offers[0]. _bidPenaltyPercentage, // 1 %
-      offers[0]._delistFeesPercentage,
+ 
       offers[0].  _listqualifyPercentage,
-      offers[0]._bidPenaltyPercentageBase,
-      offers[0]. _delistFeesPercentageBase,
+   
       offers[0]._listqualifyPercentageBase,
       offers[0].  _feeBase)).to.emit(marketPlace,'NewOffer')
       .withArgs(admin.address,offers[0].wallet,  
       offers[0]. _delistAfter,
       offers[0]. _fee, // 2.5% fees
-      offers[0]. _bidPenaltyPercentage, // 1 %
-      offers[0]._delistFeesPercentage,
+ 
       offers[0].  _listqualifyPercentage,
-      offers[0]._bidPenaltyPercentageBase,
-      offers[0]. _delistFeesPercentageBase,
+    
       offers[0]._listqualifyPercentageBase,
       offers[0].  _feeBase)
   })
@@ -177,11 +167,9 @@ describe('StartFi marketPlace', () => {
     await expect(marketPlace.connect(admin).addOffer(offers[0].wallet,  
       offers[0]. _delistAfter,
       offers[0]. _fee, // 2.5% fees
-      offers[0]. _bidPenaltyPercentage, // 1 %
-      offers[0]._delistFeesPercentage,
+ 
       offers[0].  _listqualifyPercentage,
-      offers[0]._bidPenaltyPercentageBase,
-      offers[0]. _delistFeesPercentageBase,
+ 
       offers[0]._listqualifyPercentageBase,
       offers[0].  _feeBase)).to.revertedWith('StartFiMarketPlaceSpecialOffer: Already exisit')
   })
