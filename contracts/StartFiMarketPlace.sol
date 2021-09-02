@@ -768,6 +768,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
         require(timeToDispute <= block.timestamp, 'Marketplace: Can not dispute before time');
         require(_tokenListings[listingId].status == ListingStatus.onAuction, 'Marketplace: Item is not on Auction');
+        if (listingBids[listingId][winnerBidder].bidPrice > stfiCap) {
+            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
+        }
         //50% goes to the platform
         (uint256 fineAmount, uint256 remaining) = StartFiFinanceLib._calcBidDisputeFees(qualifyAmount);
         // call staking contract to deduct
@@ -821,21 +824,26 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         // loop
         for (uint256 index = 0; index < listings.length; index++) {
+            /**
+             * we want to free stakes bidders do in auctions with the following scenarios
+             * - bidder is not the winner and the auction is ended ( bought, fulfilled , dispute) , free
+             *- auction is finished, is not the winner bidder and winner bidder and auction creator have not fulfilled or disputed , free
+             */
             if (_tokenListings[listings[index]].status == ListingStatus.onAuction) {
-                newListings.push(listings[index]);
-                curentReserves = StartFiFinanceLib._calcSum(
-                    curentReserves,
-                    _tokenListings[listings[index]].qualifyAmount
-                );
+                if (
+                    _tokenListings[listings[index]].disputeTime < block.timestamp &&
+                    bidToListing[listings[index]].bidder != _msgSender()
+                ) {
+                    // free
+                } else {
+                    newListings.push(listings[index]);
+                    curentReserves = _tokenListings[listings[index]].qualifyAmount;
+                }
             } else if (_tokenListings[listings[index]].status == ListingStatus.OnMarket) {
                 newListings.push(listings[index]);
-                uint256 listQualifyAmount = StartFiFinanceLib._calcFees(
-                    _tokenListings[listings[index]].listingPrice,
-                    listqualifyPercentage,
-                    listqualifyPercentageBase
-                );
+                uint256 listQualifyAmount = _tokenListings[listings[index]].qualifyAmount;
 
-                curentReserves = StartFiFinanceLib._calcSum(curentReserves, listQualifyAmount);
+                curentReserves += listQualifyAmount;
             }
         }
         userListing[_msgSender()] = newListings;
@@ -854,9 +862,18 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _tokenListings[listingId].status == ListingStatus.OnMarket,
             'StartFiMarketplace: Invalid ITem'
         );
+        /**
+       we have the following scenario : 
+       * auction bid get higher than the cap , and needs to get approved 
+       * kyc process for anyreason takes some longer time that might exceed the time to dispute 
+       * malicious auction creator call diputeAuction and winner bider loses money 
+       * to protect we put condition on dispute to check if the bid price exceed cap and the deal is approved in order to proceed because at this case this is malicious bidder
+       * second condition is in deal approval, if we have approved the deal before time to realse ( we are monitoring the marketplace when the auction bids exceed the cap , we can  ) 
+       */
         if (_tokenListings[listingId].status == ListingStatus.onAuction) {
-            require(_tokenListings[listingId].releaseTime < block.timestamp, 'Auction is ended');
-            _tokenListings[listingId].disputeTime = StartFiFinanceLib._calcSum(block.timestamp, 3 days);
+            if (_tokenListings[listingId].releaseTime < block.timestamp) {
+                _tokenListings[listingId].disputeTime = StartFiFinanceLib._calcSum(block.timestamp, fulfillDuration);
+            }
         }
         kycedDeals[listingId] = true;
     }
