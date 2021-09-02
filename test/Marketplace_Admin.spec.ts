@@ -53,11 +53,11 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
   })
 
   it('Admin should pause contract', async () => {
-    await expect(marketPlace.pause()).to.emit(marketPlace, 'Pause')
+    await expect(marketPlace.pause()).to.emit(marketPlace, 'Paused')
   })
 
   it('Admin should unpause contract', async () => {
-    await expect(marketPlace.unpause()).to.emit(marketPlace, 'Unpause')
+    await expect(marketPlace.unpause()).to.emit(marketPlace, 'Unpaused')
   })
 
   it('Should revert only admin pause contract', async () => {
@@ -171,8 +171,6 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
     await expect(marketPlace.changeDelistAfter(twoDays)).to.revertedWith('Pausable: not paused')
   })
 
- 
-
   it('Admin should change fees', async () => {
     await marketPlace.pause()
     await expect(marketPlace.changeFees(30,10)).to.emit(marketPlace, 'ChangeFees').withArgs(30,10)
@@ -210,7 +208,7 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
   it('Admin should update  wallet addrees:revert not the owner ', async () => {
     await expect(marketPlace.connect(user1).updateAdminWallet(user1.address)).to.revertedWith('UnAuthorized caller')
   })
-  it('Admin should update  wallet addrees:revert not the owner ', async () => {
+  it('Admin should update  wallet addrees:revert no zero address', async () => {
     await expect(marketPlace.updateAdminWallet('0x0000000000000000000000000000000000000000')).to.revertedWith(
       'Zero address is not allowed'
     )
