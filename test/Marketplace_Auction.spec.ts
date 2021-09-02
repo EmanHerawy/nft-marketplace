@@ -480,7 +480,7 @@ it('Non winner bidder can not fulfill auction', async () => {
 
 })
 // it('exceeded cap bids can not be fulfilled without approval', async () => {
-//   await expect(marketPlace.fulfillBid(listingId1)).to.revertedWith(  'StartfiMarketplace: Price exceeded the cap. You need to get approved')
+//   await expect(marketPlace.fulfillBid(listingId1)).to.revertedWith(  'StartfiMarketplace: StartfiMarketplace: Price exceeded the cap. You need to get approved')
 
 // })
 it('Should not fulfill auction without allowing token to pay', async () => {
@@ -694,7 +694,7 @@ it('Non winner bidder can not fulfill auction', async () => {
 
 })
 // it('exceeded cap bids can not be fulfilled without approval', async () => {
-//   await expect(marketPlace.fulfillBid(listingId1)).to.revertedWith(  'StartfiMarketplace: Price exceeded the cap. You need to get approved')
+//   await expect(marketPlace.fulfillBid(listingId1)).to.revertedWith(  'StartfiMarketplace: StartfiMarketplace: Price exceeded the cap. You need to get approved')
 
 // })
 it('Should not fulfill auction without allowing token to pay', async () => {
@@ -1136,6 +1136,217 @@ describe('StartFi marketPlace : create auction and bid and fulfill WithPremit', 
    
   })
 })
+
+describe('StartFi marketPlace Auction: big deals that exceed cap', () => {
+  const provider = new MockProvider()
+  const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
+  const loadFixture = createFixtureLoader([wallet])
+
+  let token: Contract
+  before(async () => {
+    const fixture = await loadFixture(tokenFixture)
+    token = fixture.token
+    NFT = fixture.NFT
+    reputation = fixture.reputation
+    stakes = fixture.stakes
+
+
+   marketPlace = await deployContract(wallet, StartFiMarketPlace, [
+    'StartFi Market',
+    token.address,
+    stakes.address,
+    reputation.address,
+    admin.address,
+  ])
+price1=500000;
+forSalePrice=price1
+  // add to minter role
+  await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
+
+  await stakes.setMarketplace(marketPlace.address)
+    // the 3 user need to get balance
+
+    await token.transfer(user1.address,TEST_AMOUNT );
+    await token.transfer(user2.address,TEST_AMOUNT );
+    await token.transfer(user3.address,TEST_AMOUNT );
+
+
+    /// issuer mint NFT to test changed balance
+    let baseUri = 'http://ipfs.io'
+    await NFT.mintWithRoyalty(issuer.address, baseUri, royaltyShare, royaltyBase)
+    const eventFilter = await NFT.filters.Transfer(null, null )
+    const events = await NFT.queryFilter(eventFilter)
+    marketplaceTokenId1=(events[events.length - 1] as any).args[2].toNumber()
+     console.log(marketplaceTokenId1,'marketplaceTokenId1');
+    
+  })
+  it('approve', async () => {
+    await expect(NFT.connect(issuer).approve(marketPlace.address, marketplaceTokenId1))
+      .to.emit(NFT, 'Approval')
+      .withArgs(issuer.address, marketPlace.address, marketplaceTokenId1)
+    expect(await NFT.getApproved(marketplaceTokenId1)).to.eq(marketPlace.address)
+  })
+  it('Should create auction', async () => {
+    await expect(marketPlace.connect(issuer).createAuction(  NFT.address,
+      marketplaceTokenId1,
+
+      minimumBid,
+      qualifyAmount,
+      !isForSale,
+      forSalePrice,
+      duration)).to.emit(
+      marketPlace,
+      'CreateAuction'
+    )
+    const eventFilter = await marketPlace.filters.CreateAuction(null, null)
+    const events = await marketPlace.queryFilter(eventFilter)
+    listingId1=(events[events.length - 1] as any).args[0]
+  })
+
+  it('user can not buy  an item on marketplace that exceeded the cap before it is approved', async () => {
+    await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
+    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.revertedWith('StartfiMarketplace: Price exceeded the cap. You need to get approved')
+ 
+// check balance 
+  })
+  it('Should approve deal', async () => {
+    // TODO: add event here
+    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1)
+    expect(transactionRecipe.from).equal(admin.address)
+  })
+  it('user can buy  an item that exceeded the cap on marketplace after it is approved', async () => {
+    await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
+    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.emit(marketPlace, 'BuyNow')
+    expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
+    expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
+    const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))
+    expect(await token.balanceOf(admin.address)).to.eq(platformShare)
+    expect(await token.balanceOf(issuer.address)).to.eq(price1-platformShare)
+
+
+
+  })
+
+  })
+describe('StartFi marketPlace Auction bid and fulfill: big deals that exceed cap', () => {
+  const provider = new MockProvider()
+  const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
+  const loadFixture = createFixtureLoader([wallet])
+
+  let token: Contract
+  before(async () => {
+    const fixture = await loadFixture(tokenFixture)
+    token = fixture.token
+    NFT = fixture.NFT
+    reputation = fixture.reputation
+    stakes = fixture.stakes
+
+
+   marketPlace = await deployContract(wallet, StartFiMarketPlace, [
+    'StartFi Market',
+    token.address,
+    stakes.address,
+    reputation.address,
+    admin.address,
+  ])
+price1=500000;
+forSalePrice=price1
+  // add to minter role
+  await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
+
+  await stakes.setMarketplace(marketPlace.address)
+    // the 3 user need to get balance
+
+    await token.transfer(user1.address,TEST_AMOUNT );
+    await token.transfer(user2.address,TEST_AMOUNT );
+    await token.transfer(user3.address,TEST_AMOUNT );
+
+
+    /// issuer mint NFT to test changed balance
+    let baseUri = 'http://ipfs.io'
+    await NFT.mintWithRoyalty(issuer.address, baseUri, royaltyShare, royaltyBase)
+    const eventFilter = await NFT.filters.Transfer(null, null )
+    const events = await NFT.queryFilter(eventFilter)
+    marketplaceTokenId1=(events[events.length - 1] as any).args[2].toNumber()
+     console.log(marketplaceTokenId1,'marketplaceTokenId1');
+    
+  })
+  it('approve', async () => {
+    await expect(NFT.connect(issuer).approve(marketPlace.address, marketplaceTokenId1))
+      .to.emit(NFT, 'Approval')
+      .withArgs(issuer.address, marketPlace.address, marketplaceTokenId1)
+    expect(await NFT.getApproved(marketplaceTokenId1)).to.eq(marketPlace.address)
+  })
+  it('Should create auction', async () => {
+    await expect(marketPlace.connect(issuer).createAuction(  NFT.address,
+      marketplaceTokenId1,
+
+      minimumBid,
+      qualifyAmount,
+      !isForSale,
+      forSalePrice,
+      duration)).to.emit(
+      marketPlace,
+      'CreateAuction'
+    )
+    const eventFilter = await marketPlace.filters.CreateAuction(null, null)
+    const events = await marketPlace.queryFilter(eventFilter)
+    listingId1=(events[events.length - 1] as any).args[0]
+  })
+  it('deposit stakes', async () => {
+    const stakeAmount = qualifyAmount;
+    
+    await expect(token.approve(stakes.address, stakeAmount))
+      .to.emit(token, 'Approval')
+      .withArgs(wallet.address, stakes.address, stakeAmount)
+    expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
+
+    await stakes.deposit(user1.address, stakeAmount)
+    const reserves = await stakes.getReserves(user1.address)
+    expect(reserves.toNumber()).to.eq(stakeAmount)
+
+    const stakeAllowance = await marketPlace.getStakeAllowance(user1.address)
+    expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
+  })
+  it('Should  bid on item with price equal or more than the mini bid price', async () => {
+    await expect(marketPlace.connect(user1).bid(listingId1, price1)).to.emit(marketPlace, 'BidOnAuction')
+
+  })
+
+
+  it('Should not fulfill unapproved auction  even after allowing token to pay', async () => {
+    const listingDetails = await marketPlace.getListingDetails(listingId1);
+ 
+    await provider.send('evm_increaseTime', [listingDetails.releaseTime.toNumber()]); 
+    await provider.send('evm_mine',[]);
+    const winnerBid= await marketPlace.winnerBid(listingId1)
+  
+    await expect(token.connect(user1).approve(marketPlace.address, winnerBid.bidPrice)).to.emit(token, 'Approval')
+    await expect(marketPlace.connect(user1).fulfillBid(listingId1)).to.revertedWith('StartfiMarketplace: Price exceeded the cap. You need to get approved')
+  })
+ 
+
+  it('Should   approve deal', async () => {
+    // TODO: add event here
+    const listingDetails = await marketPlace.getListingDetails(listingId1);
+ 
+    await provider.send('evm_increaseTime', [listingDetails.releaseTime.toNumber()]); 
+    await provider.send('evm_mine',[]);
+    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1)
+    expect(transactionRecipe.from).equal(admin.address)
+  })
+  it('Should  fulfill approved auction  even after allowing token to pay', async () => {
+    const winnerBid= await marketPlace.winnerBid(listingId1)
+  
+    await expect(token.connect(user1).approve(marketPlace.address, winnerBid.bidPrice)).to.emit(token, 'Approval')
+    await expect(marketPlace.connect(user1).fulfillBid(listingId1)).to.emit(marketPlace,  'FulfillBid')
+    expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
+    const platformShare =Math.round(calcFees(winnerBid.bidPrice,_feeFraction,_feeBase))
+    expect(await token.balanceOf(admin.address)).to.eq(platformShare)
+    expect(await token.balanceOf(issuer.address)).to.eq(winnerBid.bidPrice-platformShare)
+  })
+
+  })
 /*
 describe('StartFi marketPlace:Actions', () => {
   const provider = new MockProvider()

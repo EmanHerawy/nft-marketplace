@@ -220,4 +220,16 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
       .to.emit(marketPlace, 'UpdateAdminWallet')
       .withArgs(user1.address)
   })
+
+  it('Should set marketCap', async () => {
+    const transactionRecipe = await marketPlace.setUsdCap(5)
+    expect(transactionRecipe.from).equal(wallet.address)
+  })
+  it('Should set STFI price', async () => {
+    const transactionRecipe = await marketPlace.setPrice(23)
+    expect(transactionRecipe.from).equal(wallet.address)
+  })
+  it('Should UserReservesFree', async () => {
+    await expect(marketPlace.freeReserves()).to.emit(marketPlace, 'UserReservesFree')
+  })
 })
