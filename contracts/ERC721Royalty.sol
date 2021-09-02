@@ -10,7 +10,7 @@ import './library/StartFiFinanceLib.sol';
  * [ desc ] : erc721 with reoylaty support interface
  */
 contract ERC721Royalty is IERC721Royalty {
-    mapping(uint256 => address) internal _issuer;
+    mapping(uint256 => address) internal tokenIdToIssuer;
     mapping(uint256 => mapping(address => Base)) internal _issuerPercentage;
 
     // 3.5 is 35 share and 10 separator
@@ -34,7 +34,7 @@ contract ERC721Royalty is IERC721Royalty {
         uint8 share,
         uint8 separator
     ) internal {
-        _issuer[_tokenId] = issuer;
+        tokenIdToIssuer[_tokenId] = issuer;
         _issuerPercentage[_tokenId][issuer] = Base(share, separator);
     }
 
@@ -52,7 +52,7 @@ contract ERC721Royalty is IERC721Royalty {
         override
         returns (address issuer, uint256 _royaltyAmount)
     {
-        issuer = _issuer[_tokenId];
+        issuer = tokenIdToIssuer[_tokenId];
         if (issuer != address(0)) {
             Base memory _base = _issuerPercentage[_tokenId][issuer];
             _royaltyAmount = StartFiFinanceLib._calcFees(_value, uint256(_base.share), uint256(_base.shareSeparator));

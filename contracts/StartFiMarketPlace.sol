@@ -53,7 +53,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address seller,
         uint256 tokenId,
         uint256 listingPrice,
-        bool sellForEnabled,
+        bool isSellForEnabled,
         uint256 sellFor,
         uint256 releaseTime,
         uint256 qualifyAmount,
@@ -275,8 +275,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param tokenId token id
      * @param minimumBid minimum Bid price
      * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
-     * @param sellForEnabled true if auction enable direct selling
-     * @param sellFor  price  to sell with if sellForEnabled=true
+     * @param isSellForEnabled true if auction enable direct selling
+     * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param duration  when auction ends
      * @return listId listing id
      */
@@ -285,7 +285,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 tokenId,
         uint256 minimumBid,
         uint256 qualifyAmount,
-        bool sellForEnabled,
+        bool isSellForEnabled,
         uint256 sellFor,
         uint256 duration
     ) public whenNotPaused isNotZero(minimumBid) returns (bytes32 listId) {
@@ -294,7 +294,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
-        if (sellForEnabled) {
+        if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
             sellFor = 0;
@@ -319,7 +319,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _msgSender(),
                 tokenId,
                 minimumBid,
-                sellForEnabled,
+                isSellForEnabled,
                 sellFor,
                 releaseTime,
                 qualifyAmount
@@ -332,7 +332,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             _msgSender(),
             tokenId,
             minimumBid,
-            sellForEnabled,
+            isSellForEnabled,
             sellFor,
             releaseTime,
             qualifyAmount,
@@ -346,8 +346,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param tokenId token id
      * @param listingPrice min price
      * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
-     * @param sellForEnabled true if auction enable direct selling
-     * @param sellFor  price  to sell with if sellForEnabled=true
+     * @param isSellForEnabled true if auction enable direct selling
+     * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param duration  when auction ends
      * @param deadline:  must be timestamp in future .
      * @param v needed to recover the public key
@@ -362,7 +362,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 tokenId,
         uint256 listingPrice,
         uint256 qualifyAmount,
-        bool sellForEnabled,
+        bool isSellForEnabled,
         uint256 sellFor,
         uint256 duration,
         uint256 deadline,
@@ -371,7 +371,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 s
     ) external returns (bytes32 listId) {
         require(_premitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
-        listId = createAuction(nFTContract, tokenId, listingPrice, qualifyAmount, sellForEnabled, sellFor, duration);
+        listId = createAuction(nFTContract, tokenId, listingPrice, qualifyAmount, isSellForEnabled, sellFor, duration);
     }
 
     /**
@@ -662,7 +662,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         if (price > stfiCap) {
             require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
         }
-        bool sellForEnabled = _tokenListings[listingId].sellForEnabled;
+        bool isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         address seller = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
         tokenId = _tokenListings[listingId].tokenId;
@@ -670,7 +670,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(
             _tokenListings[listingId].status == ListingStatus.OnMarket ||
                 (_tokenListings[listingId].status == ListingStatus.onAuction &&
-                    sellForEnabled == true &&
+                    isSellForEnabled == true &&
                     _tokenListings[listingId].releaseTime > block.timestamp),
             'Token is not for sale'
         );
@@ -722,7 +722,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             tokenId,
             price,
             seller,
-            sellForEnabled,
+            isSellForEnabled,
             issuer,
             royaltyAmount,
             fees,
