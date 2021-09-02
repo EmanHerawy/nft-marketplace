@@ -37,6 +37,15 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 releaseTime,
         uint256 timestamp
     );
+    event MigrateEmergency(
+        bytes32 listId,
+        address nFTContract,
+        address owner,
+        uint256 tokenId,
+        uint256 fineFees,
+        uint256 releaseTime,
+        uint256 timestamp
+    );
 
     event CreateAuction(
         bytes32 listId,
@@ -898,5 +907,55 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // set
         stfiUsdt = _stfiPrice;
         stfiCap = _stfiPrice * usdCap;
+    }
+
+    /** **************************Emergency Zone ********************/
+
+    /**
+     * @dev called by seller through dapps when s/he wants to remove this token from the marketplace
+     * @notice called only when puased , let user to migrate for free if they don't agree on our new terms
+     * @param listingId listing id
+     * @return _NFTContract nft contract address
+     * @return tokenId token id
+     */
+    function migrateEmergency(bytes32 listingId) external whenPaused returns (address _NFTContract, uint256 tokenId) {
+        ListingStatus status = _tokenListings[listingId].status;
+        address buyer = _tokenListings[listingId].buyer;
+        address _owner = _tokenListings[listingId].seller;
+        _NFTContract = _tokenListings[listingId].nFTContract;
+        uint256 releaseTime = _tokenListings[listingId].releaseTime;
+        tokenId = _tokenListings[listingId].tokenId;
+        require(_owner == _msgSender(), 'Caller is not the owner');
+        require(buyer == address(0), 'Already bought token');
+        require(
+            status == ListingStatus.OnMarket || status == ListingStatus.onAuction,
+            'Already bought or canceled token'
+        );
+
+        // if realse time < now , pay
+        if (status == ListingStatus.OnMarket) {
+            // update user reserves
+            // reserve nigative couldn't be at any case
+            require(
+                _updateUserReserves(_msgSender(), _tokenListings[listingId].qualifyAmount, false) >= 0,
+                'negative reserve is not allowed'
+            );
+        }
+
+        require(
+            _excuteTransfer(address(this), _NFTContract, tokenId, _owner, address(0), 0, 0, 0, false),
+            "NFT token couldn't be transfered"
+        );
+        // finish listing
+        _finalizeListing(listingId, address(0), ListingStatus.Canceled);
+        emit MigrateEmergency(
+            listingId,
+            _NFTContract,
+            _owner,
+            tokenId,
+            _tokenListings[listingId].qualifyAmount,
+            releaseTime,
+            block.timestamp
+        );
     }
 }
