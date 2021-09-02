@@ -206,11 +206,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         // transfer token to contract
 
-        require(
-            _excuteTransfer(_msgSender(), nFTContract, tokenId, address(this), address(0), 0, 0, 0, false),
-            "NFT token couldn't be transfered"
-        );
-
         // update reserved
         _updateUserReserves(_msgSender(), listQualifyAmount, true);
         bytes32[] storage listings = userListing[_msgSender()];
@@ -238,6 +233,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             releaseTime,
             listQualifyAmount,
             block.timestamp
+        );
+        require(
+            _excuteTransfer(_msgSender(), nFTContract, tokenId, address(this), address(0), 0, 0, 0, false),
+            "NFT token couldn't be transfered"
         );
     }
 
@@ -302,13 +301,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // check that sender is qualified
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
-        // transfer token to contract
-
-        require(
-            _excuteTransfer(_msgSender(), nFTContract, tokenId, address(this), address(0), 0, 0, 0, false),
-            "NFT token couldn't be transfered"
-        );
-
         // update reserved
         // create auction
 
@@ -337,6 +329,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             releaseTime,
             qualifyAmount,
             block.timestamp
+        );
+        // transfer token to contract
+
+        require(
+            _excuteTransfer(_msgSender(), nFTContract, tokenId, address(this), address(0), 0, 0, 0, false),
+            "NFT token couldn't be transfered"
         );
     }
 
@@ -455,7 +453,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             _getAllowance(winnerBidder) >= bidPrice,
             'Marketplace is not allowed to withdraw the required amount of tokens'
         );
-        // transfer price
         address issuer;
         uint256 royaltyAmount;
         uint256 fees;
@@ -480,6 +477,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         listingBids[listingId][_msgSender()].isPurchased = true;
         _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
+        // transfer price
+
         require(
             _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
             'StartFi: could not excute transfer'
@@ -624,12 +623,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             );
         }
 
-        // trnasfer token
-
-        require(
-            _excuteTransfer(address(this), _NFTContract, tokenId, _owner, address(0), 0, 0, 0, false),
-            "NFT token couldn't be transfered"
-        );
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
         emit DeListOffMarketplace(
@@ -641,8 +634,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             releaseTime,
             block.timestamp
         );
-        // if bid time is less than 15 min, increase by 15 min
-        // retuen bid id
+        // trnasfer token
+
+        require(
+            _excuteTransfer(address(this), _NFTContract, tokenId, _owner, address(0), 0, 0, 0, false),
+            "NFT token couldn't be transfered"
+        );
     }
 
     // buynow
@@ -702,10 +699,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _feeBase
             );
         }
-        require(
-            _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
-            'StartFi: could not excute transfer'
-        );
+
         // free reserves for seller
         if (_tokenListings[listingId].status == ListingStatus.OnMarket) {
             require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
@@ -714,7 +708,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // finish listing
         _finalizeListing(listingId, _msgSender(), ListingStatus.Sold);
         // TODO: add reputation points to both seller and buyer
-        //_addreputationPoints(seller, _msgSender(), price);
+        _addreputationPoints(seller, _msgSender(), price);
         emit BuyNow(
             listingId,
             _NFTContract,
@@ -729,8 +723,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             netPrice,
             block.timestamp
         );
-        // if bid time is less than 15 min, increase by 15 min
-        // retuen bid id
+        require(
+            _excuteTransfer(_msgSender(), _NFTContract, tokenId, seller, issuer, royaltyAmount, fees, netPrice, true),
+            'StartFi: could not excute transfer'
+        );
     }
 
     // buynow
@@ -788,11 +784,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             "Marketplace: couldn't deduct the fine for the admin wallet"
         );
         require(_deduct(winnerBidder, seller, remaining), "Marketplace: couldn't deduct the fine for the admin wallet");
-        // transfer token
-        require(
-            _excuteTransfer(address(this), _NFTContract, tokenId, seller, address(0), 0, 0, 0, false),
-            "NFT token couldn't be transfered"
-        );
 
         require(_updateUserReserves(winnerBidder, qualifyAmount, false) >= 0, 'negative reserve is not allowed');
 
@@ -811,6 +802,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             remaining,
             fineAmount,
             block.timestamp
+        );
+        // transfer token
+        require(
+            _excuteTransfer(address(this), _NFTContract, tokenId, seller, address(0), 0, 0, 0, false),
+            "NFT token couldn't be transfered"
         );
     }
 
@@ -942,10 +938,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             );
         }
 
-        require(
-            _excuteTransfer(address(this), _NFTContract, tokenId, _owner, address(0), 0, 0, 0, false),
-            "NFT token couldn't be transfered"
-        );
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
         emit MigrateEmergency(
@@ -956,6 +948,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             _tokenListings[listingId].qualifyAmount,
             releaseTime,
             block.timestamp
+        );
+        require(
+            _excuteTransfer(address(this), _NFTContract, tokenId, _owner, address(0), 0, 0, 0, false),
+            "NFT token couldn't be transfered"
         );
     }
 }
