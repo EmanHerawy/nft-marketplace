@@ -39,9 +39,9 @@ describe('StartFi Reputation', () => {
     const burnReputation = await reputation.burnReputation(wallet.address, 10)
     expect(burnReputation.from).to.eq(wallet.address) //_setReputation
   })
-  it('should set and get reputation', async () => {
-    await reputation._setReputation(wallet.address, 10)
-    const userReputation = await reputation.getUserReputation(wallet.address)
-    expect(userReputation).to.eq(10) //
-  })
+  // it('should set and get reputation', async () => {
+  //   await reputation._setReputation(wallet.address, 10)
+  //   const userReputation = await reputation.getUserReputation(wallet.address)
+  //   expect(userReputation).to.eq(10) //
+  // })
 })
