@@ -160,19 +160,19 @@ describe('StartFi marketPlace', () => {
     const events = await marketPlace.queryFilter(eventFilter)
     listingId1=(events[events.length - 1] as any).args[0]
   })
-  it('user can not buy with price lower than the list price', async () => {
-    await expect(marketPlace.connect(user1).buyNow(listingId1, wrongPrice)).to.revertedWith(
-   'Invalid price'
-    )
-  })
+  // it('user can not buy with price lower than the list price', async () => {
+  //   await expect(marketPlace.connect(user1).buyNow(listingId1, wrongPrice)).to.revertedWith(
+  //  'StartfiMarketplce: Invalid price or Token is not for sale'
+  //   )
+  // })
   it('user can not buy without allowing marketplace to transfer tokens', async () => {
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.revertedWith(
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
       'Marketplace is not allowed to withdraw the required amount of tokens'
     )
   })
   it('user can buy  an item on marketplace', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
     expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
     const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))
@@ -476,7 +476,7 @@ price1=500000;
 
   it('user can not buy  an item on marketplace that exceeded the cap before it is approved', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.revertedWith('StartfiMarketplace: Price exceeded the cap. You need to get approved')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith('StartfiMarketplace: Price exceeded the cap. You need to get approved')
  
 // check balance 
   })
@@ -487,7 +487,7 @@ price1=500000;
   })
   it('user can buy  an item that exceeded the cap on marketplace after it is approved', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
     expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
     const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))

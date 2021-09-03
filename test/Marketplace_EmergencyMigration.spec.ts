@@ -227,7 +227,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
     forSalePrice,
     duration)).to.be.revertedWith('Pausable: paused')
     await expect(token.connect(wallet).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(wallet).buyNow(listingId1, price1)).to.be.revertedWith('Pausable: paused')
+    await expect(marketPlace.connect(wallet).buyNow(listingId1)).to.be.revertedWith('Pausable: paused')
 
 
     })

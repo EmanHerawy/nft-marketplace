@@ -647,30 +647,30 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @dev called by buyer through dapps when s/he wants to buy a gevin NFT  token from the marketplace
      * @notice  if auction, the seller must enabe forSale. prices should be more than or equal the listing price
      * @param listingId listing id
-     * @param price gevin price
      * @return _NFTContract nft contract address
      * @return tokenId token id
      */
-    function buyNow(bytes32 listingId, uint256 price)
-        public
-        whenNotPaused
-        returns (address _NFTContract, uint256 tokenId)
-    {
-        if (price > stfiCap) {
-            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
-        }
+    function buyNow(bytes32 listingId) public whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         bool isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
+
+        uint256 price;
+        if (_tokenListings[listingId].status == ListingStatus.OnMarket) {
+            price = _tokenListings[listingId].listingPrice;
+        } else if (_tokenListings[listingId].status == ListingStatus.onAuction) {
+            require(
+                isSellForEnabled == true && _tokenListings[listingId].releaseTime > block.timestamp,
+                'Token is not for sale'
+            );
+            price = _tokenListings[listingId].sellFor;
+        }
         address seller = _tokenListings[listingId].seller;
         _NFTContract = _tokenListings[listingId].nFTContract;
         tokenId = _tokenListings[listingId].tokenId;
-        require(price >= _tokenListings[listingId].listingPrice, 'Invalid price');
-        require(
-            _tokenListings[listingId].status == ListingStatus.OnMarket ||
-                (_tokenListings[listingId].status == ListingStatus.onAuction &&
-                    isSellForEnabled == true &&
-                    _tokenListings[listingId].releaseTime > block.timestamp),
-            'Token is not for sale'
-        );
+        require(price > 0, 'StartfiMarketplce: Invalid price or Token is not for sale');
+        if (price > stfiCap) {
+            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
+        }
+
         // check that contract is allowed to transfer tokens
         require(
             _getAllowance(_msgSender()) >= price,
@@ -752,7 +752,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 s
     ) external {
         require(_permit(_msgSender(), price, deadline, v, r, s), 'StartFi: Invalid signature');
-        buyNow(listingId, price);
+        buyNow(listingId);
     }
 
     /**
