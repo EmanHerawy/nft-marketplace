@@ -18,7 +18,7 @@ import { hexlify } from 'ethers/lib/utils'
  * to get the number of stakes that not on hold, call  userReserves on marketplace , this function subtract the user stakes in staking contract from the on-hold stakes on marketplace
       # Story 
     * let's say we have 4 bidders , they bid in 4 auctions 
-    *  given that the insurance is equal the qualifyAmount, total is 40 for each
+    *  given that the insurance is equal the insurancAmount, total is 40 for each
     * when  
     * ## user 1 : 40 // 0 on hold
     * bid on auction 1 , status : winner bidder , fulfill  //10
@@ -80,7 +80,7 @@ let listingId5:any;
 let price1=1000;
 let price2=10000;
 let price3=50050;
-let qualifyAmount=10;
+let insurancAmount=10;
 let minimumBid=10;
 let wrongPrice=10;
 let lastbidding=minimumBid;
@@ -200,7 +200,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         mintedNFT[0],
   
         minimumBid,
-        qualifyAmount,
+        insurancAmount,
         isForSale,
         forSalePrice,
         duration)).to.emit(
@@ -216,7 +216,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         mintedNFT[1],
   
         minimumBid,
-        qualifyAmount,
+        insurancAmount,
         isForSale,
         forSalePrice,
         duration)).to.emit(
@@ -231,7 +231,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         mintedNFT[2],
   
         minimumBid,
-        qualifyAmount,
+        insurancAmount,
         isForSale,
         forSalePrice,
         duration)).to.emit(
@@ -248,7 +248,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         mintedNFT[3],
   
         minimumBid,
-        qualifyAmount,
+        insurancAmount,
         isForSale,
         forSalePrice,
         duration)).to.emit(
@@ -266,7 +266,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
   
 
     it('deposit stakes', async () => {
-      const stakeAmount = qualifyAmount;
+      const stakeAmount = insurancAmount;
       
       await expect(token.approve(stakes.address, TEST_AMOUNT))// needs stakes
         .to.emit(token, 'Approval')

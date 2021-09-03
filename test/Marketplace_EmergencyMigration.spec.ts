@@ -52,7 +52,7 @@ let listingId5:any;
 let price1=1000;
 let price2=10000;
 let price3=50050;
-let qualifyAmount=10;
+let insurancAmount=10;
 let minimumBid=10;
 let wrongPrice=10;
 let lastbidding=minimumBid;
@@ -174,7 +174,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         mintedNFT[0],
   
         minimumBid,
-        qualifyAmount,
+        insurancAmount,
         isForSale,
         forSalePrice,
         duration)).to.emit(
@@ -190,7 +190,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         mintedNFT[1],
   
         minimumBid,
-        qualifyAmount,
+        insurancAmount,
         isForSale,
         forSalePrice,
         duration)).to.emit(
@@ -222,7 +222,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
     mintedNFT[3],
 
     minimumBid,
-    qualifyAmount,
+    insurancAmount,
     isForSale,
     forSalePrice,
     duration)).to.be.revertedWith('Pausable: paused')

@@ -28,14 +28,14 @@ library StartFiFinanceLib {
 
     /**
       @dev calculat the platform share when seller call disput
-    *@param qualifyAmount  : seller defind value to be staked in order to participate in a gevin auction
+    *@param insurancAmount  : seller defind value to be staked in order to participate in a gevin auction
     * @return fineAmount the value that the platform will get
     * @return remaining the value that the auction woner will get
      */
-    function _calcBidDisputeFees(uint256 qualifyAmount) internal pure returns (uint256 fineAmount, uint256 remaining) {
-        fineAmount = qualifyAmount.divideDecimalRound(2 ether); // divided by 2 * 18 decimal
+    function _calcBidDisputeFees(uint256 insurancAmount) internal pure returns (uint256 fineAmount, uint256 remaining) {
+        fineAmount = insurancAmount.divideDecimalRound(2 ether); // divided by 2 * 18 decimal
 
-        remaining = qualifyAmount - fineAmount;
+        remaining = insurancAmount - fineAmount;
     }
 
     function _calcShare(uint256 numerator, uint256 donomirator) internal pure returns (uint256 share) {

@@ -32,7 +32,7 @@ contract MarketPlaceListing {
         // only if bed and sell for enabled
         uint256 releaseTime;
         uint256 disputeTime; // only in auction
-        uint256 qualifyAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
+        uint256 insurancAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
         uint256 sellFor;
         ListingStatus status;
     }
@@ -63,7 +63,7 @@ contract MarketPlaceListing {
       * @return isSellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
       * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
-      * @return qualifyAmount  amount of token locked as qualify for any bidder wants bid 
+      * @return insurancAmount  amount of token locked as qualify for any bidder wants bid 
       * @return sellFor if sell for enabled for auction, this should be more than zero
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
      */
@@ -81,7 +81,7 @@ contract MarketPlaceListing {
             bool isSellForEnabled,
             uint256 releaseTime,
             uint256 disputeTime,
-            uint256 qualifyAmount,
+            uint256 insurancAmount,
             uint256 sellFor,
             uint256 status
         )
@@ -96,7 +96,7 @@ contract MarketPlaceListing {
         isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
         disputeTime = _tokenListings[listingId].disputeTime;
-        qualifyAmount = _tokenListings[listingId].qualifyAmount;
+        insurancAmount = _tokenListings[listingId].insurancAmount;
         sellFor = _tokenListings[listingId].sellFor;
         status = uint256(_tokenListings[listingId].status);
     }
@@ -111,7 +111,7 @@ contract MarketPlaceListing {
      * @param seller seller address
      * @param tokenId token id
      * @param listingPrice min price
-     * @param qualifyAmount  amount of token locked as insurance from the seller 
+     * @param insurancAmount  amount of token locked as insurance from the seller 
 
      * @param releaseTime  time to delist for free
      * @return true if it's done
@@ -122,7 +122,7 @@ contract MarketPlaceListing {
         address seller,
         uint256 tokenId,
         uint256 listingPrice,
-        uint256 qualifyAmount,
+        uint256 insurancAmount,
         uint256 releaseTime
     ) internal returns (bool) {
         _tokenListings[listId] = Listing(
@@ -136,7 +136,7 @@ contract MarketPlaceListing {
             false,
             releaseTime,
             0,
-            qualifyAmount,
+            insurancAmount,
             0,
             ListingStatus.OnMarket
         );
@@ -154,7 +154,7 @@ contract MarketPlaceListing {
      * @param isSellForEnabled true if auction enable direct selling
      * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param releaseTime  when auction ends
-     * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
+     * @param insurancAmount  amount of token locked as qualify for any bidder wants bid
      * @return true if it's done
      */
     function _creatAuction(
@@ -166,7 +166,7 @@ contract MarketPlaceListing {
         bool isSellForEnabled,
         uint256 sellFor,
         uint256 releaseTime,
-        uint256 qualifyAmount
+        uint256 insurancAmount
     ) internal returns (bool) {
         _tokenListings[listId] = Listing(
             tokenAddress,
@@ -179,7 +179,7 @@ contract MarketPlaceListing {
             isSellForEnabled,
             releaseTime,
             releaseTime + fulfillDuration,
-            qualifyAmount,
+            insurancAmount,
             sellFor,
             ListingStatus.onAuction
         );

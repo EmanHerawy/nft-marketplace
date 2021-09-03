@@ -25,7 +25,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 tokenId,
         uint256 listingPrice,
         uint256 releaseTime,
-        uint256 qualifyAmount,
+        uint256 insurancAmount,
         uint256 timestamp
     );
     event DeListOffMarketplace(
@@ -56,7 +56,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bool isSellForEnabled,
         uint256 sellFor,
         uint256 releaseTime,
-        uint256 qualifyAmount,
+        uint256 insurancAmount,
         uint256 timestamp
     );
 
@@ -91,7 +91,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address bidder,
         uint256 tokenId,
         address seller,
-        uint256 qualifyAmount,
+        uint256 insurancAmount,
         uint256 remaining,
         uint256 finefees,
         uint256 timestamp
@@ -112,6 +112,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 timestamp
     );
     event UserReservesFree(address user, uint256 lastReserves, uint256 newReserves, uint256 timestamp);
+    event ApproveDeal(bytes32 listId, address approver, uint256 timestamp);
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -167,6 +168,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param tokenId token id
      * @param listingPrice min price
      * @return listId listing id
+     **
+      Users who want to list their NFT for sale with fixed price call this function 
+    - user MUST approve contract to transfer the NFT     
+    - user MUST have enough stakes used as insurance to not delist the item before the duration stated in the smart contract , if they decided to delist before that time, they lose this insurance. the required insurance amount is a percentage  based on the listing price.
+    ** 
+    emit : ListOnMarketplace
      */
     function listOnMarketplace(
         address nFTContract,
@@ -253,6 +260,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
   
      * @return listId listing id
+     **
+     Users who want to list their NFT for sale with fixed price call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`listOnMarketplace`] internally
+     **
      */
     function listOnMarketplaceWithPremit(
         address nFTContract,
@@ -273,23 +283,31 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param nFTContract nft contract address
      * @param tokenId token id
      * @param minimumBid minimum Bid price
-     * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
+     * @param insurancAmount  amount of token locked as qualify for any bidder wants bid
      * @param isSellForEnabled true if auction enable direct selling
      * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param duration  when auction ends
      * @return listId listing id
+     ** 
+     Users who want to list their NFT as auction for bidding with/without allowing direct sale.
+    - user MUST approve contract to transfer the NFT     
+    - Time to live auction duration must be more than 12 hours.
+    - if `sellForEnabled` is true, `sellFor` value must be more than zero
+    - auction creator MUST specify the insurance amounts for any bidder to bid with considering that it MUST NOT be less that 1 USDT value in STFI. 
+    ** 
+    emit : CreateAuction
      */
     function createAuction(
         address nFTContract,
         uint256 tokenId,
         uint256 minimumBid,
-        uint256 qualifyAmount,
+        uint256 insurancAmount,
         bool isSellForEnabled,
         uint256 sellFor,
         uint256 duration
     ) public whenNotPaused isNotZero(minimumBid) returns (bytes32 listId) {
         require(duration > 12 hours, 'Auction should be live for more than 12 hours');
-        require(qualifyAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
+        require(insurancAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
@@ -314,7 +332,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 isSellForEnabled,
                 sellFor,
                 releaseTime,
-                qualifyAmount
+                insurancAmount
             ),
             "Couldn't list the item"
         );
@@ -327,7 +345,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             isSellForEnabled,
             sellFor,
             releaseTime,
-            qualifyAmount,
+            insurancAmount,
             block.timestamp
         );
         // transfer token to contract
@@ -343,7 +361,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @param nFTContract nft contract address
      * @param tokenId token id
      * @param listingPrice min price
-     * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
+     * @param insurancAmount  amount of token locked as qualify for any bidder wants bid
      * @param isSellForEnabled true if auction enable direct selling
      * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param duration  when auction ends
@@ -354,12 +372,15 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * `v`, `r` and `s` must be valid `secp256k1` signature from `owner`  or 'approved for all' account over EIP712-formatted function arguments.
   
      * @return listId listing id
+     ** 
+     Users who want to list their NFT as auction for bidding with/without allowing direct sale call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`createAuction`] internally.
+     **
      */
     function createAuctionWithPremit(
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice,
-        uint256 qualifyAmount,
+        uint256 insurancAmount,
         bool isSellForEnabled,
         uint256 sellFor,
         uint256 duration,
@@ -369,15 +390,23 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 s
     ) external returns (bytes32 listId) {
         require(_premitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
-        listId = createAuction(nFTContract, tokenId, listingPrice, qualifyAmount, isSellForEnabled, sellFor, duration);
+        listId = createAuction(nFTContract, tokenId, listingPrice, insurancAmount, isSellForEnabled, sellFor, duration);
     }
 
     /**
+    ** Users who interested in a certain auction, can bid on it by calling this   function.Bidder don't pay / transfer SFTI on bidding. Only when win the auction [`the auction is ended and this bidder is the last one to bid`], bidder pays by calling [`fulfillBid`] OR [`buyNowWithPremit`]
+    - user MUST have enough stakes used as insurance; grantee and punishment mechanism for malicious bidder. If the bidder don't pay in the  
+    - Bidders can bid as much as they wants , insurance is taken once in the first participation 
+    - the bid price MUST be more than the last bid , if this is the first bid, the bid price MUST be more than or equal the minimum bid the auction creator state
+    - Users CAN NOT bid on auction after auction time is over
+    
+    **
      * @dev called by dapps to bid on an auction
      *
      * @param listingId listing id
      * @param bidPrice price
      * @return bidId bid id
+     * emit : BidOnAuction
      */
     function bid(bytes32 listingId, uint256 bidPrice)
         external
@@ -390,7 +419,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bidId = keccak256(abi.encodePacked(listingId, tokenAddress, _msgSender(), tokenId));
         // bid should be more than than the mini and more than the last bid
         address lastbidder = bidToListing[listingId].bidder;
-        uint256 qualifyAmount = _tokenListings[listingId].qualifyAmount;
+        uint256 insurancAmount = _tokenListings[listingId].insurancAmount;
         if (lastbidder == address(0)) {
             require(
                 bidPrice >= _tokenListings[listingId].listingPrice,
@@ -406,7 +435,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             require(
                 getStakeAllowance(
                     _msgSender() /*, 0*/
-                ) >= qualifyAmount,
+                ) >= insurancAmount,
                 'Not enough reserves'
             );
             bytes32[] storage listings = userListing[_msgSender()];
@@ -414,7 +443,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             userListing[_msgSender()] = listings;
             // update user reserves
             // reserve Zero couldn't be at any case
-            require(_updateUserReserves(_msgSender(), qualifyAmount, true) > 0, 'Reserve Zero is not allowed');
+            require(_updateUserReserves(_msgSender(), insurancAmount, true) > 0, 'Reserve Zero is not allowed');
         }
 
         // bid
@@ -426,6 +455,14 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
+    ** 
+    After the end of the Auction, the winner bidder , the last bidder call this function within a certain duration to pay and get the NFT
+    - user MUST approve contract to transfer the STFI tokens , MUST NOT be less than the bid price     
+    - Winner bidder can call it within the `fulfillDuration` right after the end of the auction.
+    - Winner bider can call it even after the its end as long as the auction reactor has not called dispute. the winner bidder can have chat with the seller  and if the auction creator thinks the winner bidder is not a malicious bidder,  they might agree to wait so we don't want to prevent the scenario where the can see eye to eye. At the end the auction creator wants to buy the NFT and get the price
+    - If the bid price exceed the cap, STartfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, KYC is need first and the transaction can't be proceed unless this deal is approved by Startfi by calling [`approveDeal`] 
+    **
+    * emit : FulfillBid
      * @dev called by bidder through dapps when bidder win an auction and wants to pay to get the NFT
      *
      * @param listingId listing id
@@ -487,7 +524,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // update user reserves
         // reserve nigative couldn't be at any case
         require(
-            _updateUserReserves(winnerBidder, _tokenListings[listingId].qualifyAmount, false) >= 0,
+            _updateUserReserves(winnerBidder, _tokenListings[listingId].insurancAmount, false) >= 0,
             'negative reserve is not allowed'
         );
 
@@ -545,6 +582,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
+    **After the end of the Auction, the winner bidder , the last bidder call this function within a certain duration to pay and get the NFT, they call this function without sending prior transaction to `approve` the marketplace to transfer STFI. This function call`permit` [`eip-2612`] then call [`fulfillBid`] internally.
+    ** 
      * @dev called by bidder through dapps when bidder win an auction and wants to pay to get the NFT
      *
      * @param listingId listing id
@@ -576,11 +615,16 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     // delist
 
     /**
+    ** Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost while the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPremit`]  might lose the insurance amount if they decided to delist the items before the greed time stated in the contract `delistAfter`
+    - Only buyers can delist their own items 
+    - Auction items can't delisted until the auction ended
+    **
      * @dev called by seller through dapps when s/he wants to remove this token from the marketplace
      * @notice auction can't be canceled , if seller delist time on sale on maretplace before time to delist, he will pay a fine
      * @param listingId listing id
      * @return _NFTContract nft contract address
      * @return tokenId token id
+     * emit DeListOffMarketplace
      */
     function deList(bytes32 listingId) external whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         ListingStatus status = _tokenListings[listingId].status;
@@ -611,14 +655,14 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 //TODO: deduct the fine from his stake contract
 
                 require(
-                    _deduct(_owner, _adminWallet, _tokenListings[listingId].qualifyAmount),
+                    _deduct(_owner, _adminWallet, _tokenListings[listingId].insurancAmount),
                     "couldn't deduct the fine"
                 );
             }
             // update user reserves
             // reserve nigative couldn't be at any case
             require(
-                _updateUserReserves(_msgSender(), _tokenListings[listingId].qualifyAmount, false) >= 0,
+                _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false) >= 0,
                 'negative reserve is not allowed'
             );
         }
@@ -630,7 +674,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             _NFTContract,
             _owner,
             tokenId,
-            _tokenListings[listingId].qualifyAmount,
+            _tokenListings[listingId].insurancAmount,
             releaseTime,
             block.timestamp
         );
@@ -644,11 +688,16 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     // buynow
     /**
+    **  Users who want to buy an NFT from the marketplace whether it's fixed price or auction with `sellForEnabled = true` can call this function.
+    - User MUST approve contract to transfer the STFI token , MUST NOT be less than the price.
+   - If the bid price exceed the cap, STartfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, KYC is need first and the transaction can't be proceed unless this deal is approved by Startfi by calling [`approveDeal`]
+   **
      * @dev called by buyer through dapps when s/he wants to buy a gevin NFT  token from the marketplace
      * @notice  if auction, the seller must enabe forSale. prices should be more than or equal the listing price
      * @param listingId listing id
      * @return _NFTContract nft contract address
      * @return tokenId token id
+     * emit : BuyNow
      */
     function buyNow(bytes32 listingId) public whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         bool isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
@@ -680,7 +729,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 royaltyAmount;
         uint256 fees;
         uint256 netPrice;
-        uint256 ListingQualAmount = _tokenListings[listingId].qualifyAmount;
+        uint256 ListingQualAmount = _tokenListings[listingId].insurancAmount;
         // transfer price
         if (offerTerms[seller].fee != 0) {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
@@ -729,8 +778,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
     }
 
-    // buynow
+    //
     /**
+    ** 
+    Users who want to buy an NFT from the marketplace whether it's fixed price or auction with `sellForEnabled = true` can this call this function without sending prior transaction to `approve` the marketplace to transfer STFI tokens. This function call`permit` [`eip-2612`] then call [`buyNow`] internally.
+    **
      * @dev called by buyer through dapps when s/he wants to buy a gevin NFT  token from the marketplace
      * @notice  if auction, the seller must enabe forSale. prices should be more than or equal the listing price
      * @param listingId listing id
@@ -756,11 +808,21 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
+    ** 
+    If the winning bidder didn't pay within the time range stated in te contract `fulfillDuration`, Auction creator calls this function to get the nft back and punish the malicious bidder by taking the insurance (50% goes to the auction staking balance, 50% goes to the platform)
+    - Current time  MUST be more than or equal the `disputeTime` for this auction     
+    - Only auction Creator can dispute.
+    - If the bid price exceed the cap, STartfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, and the auction is approved , auction creator can dispute, if it's not approved yet, auction creator can not.
+- [`buyNow`]: Users who want to buy an NFT from the marketplace whether it's fixed price or auction with `sellForEnabled = true` can call this function.
+    - User MUST approve contract to transfer the STFI token , MUST NOT be less than the price.
+   - If the bid price exceed the cap, STartfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, KYC is need first and the transaction can't be proceed unless this deal is approved by Startfi by calling [`approveDeal`]
+   **
      * @dev called by seller through dapps when his/her auction is  not fulfilled after 3 days
      *  @notice  after auction with winner bid . bidder didn't call fullfile within 3 days of auction closing  auction owner can call dispute to delist and punish the spam winner bidder fine is share between the plateform and the auction owner
      * @param listingId listing id
      * @return _NFTContract nft contract address
      * @return tokenId token id
+     * emit : DisputeAuction
      */
     function disputeAuction(bytes32 listingId) external whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         address winnerBidder = bidToListing[listingId].bidder;
@@ -768,7 +830,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(seller == _msgSender(), 'Only Seller can dispute');
         _NFTContract = _tokenListings[listingId].nFTContract;
         tokenId = _tokenListings[listingId].tokenId;
-        uint256 qualifyAmount = _tokenListings[listingId].qualifyAmount;
+        uint256 insurancAmount = _tokenListings[listingId].insurancAmount;
         uint256 timeToDispute = _tokenListings[listingId].disputeTime;
         require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
         require(timeToDispute <= block.timestamp, 'Marketplace: Can not dispute before time');
@@ -777,7 +839,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
         }
         //50% goes to the platform
-        (uint256 fineAmount, uint256 remaining) = StartFiFinanceLib._calcBidDisputeFees(qualifyAmount);
+        (uint256 fineAmount, uint256 remaining) = StartFiFinanceLib._calcBidDisputeFees(insurancAmount);
         // call staking contract to deduct
         require(
             _deduct(winnerBidder, _adminWallet, fineAmount),
@@ -785,7 +847,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
         require(_deduct(winnerBidder, seller, remaining), "Marketplace: couldn't deduct the fine for the admin wallet");
 
-        require(_updateUserReserves(winnerBidder, qualifyAmount, false) >= 0, 'negative reserve is not allowed');
+        require(_updateUserReserves(winnerBidder, insurancAmount, false) >= 0, 'negative reserve is not allowed');
 
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
@@ -798,7 +860,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             winnerBidder,
             tokenId,
             seller,
-            qualifyAmount,
+            insurancAmount,
             remaining,
             fineAmount,
             block.timestamp
@@ -811,11 +873,19 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
-    * @dev called by user through dapps when his/her wants to free his reserved tokens which are no longer in active auction or listing
+    ** users need to stake STFI to list or bid in the marketplace , these tokens needs to set free if the auction is no longer active and user can use these stakes to bid , list or even to withdraw tokens thus, function to free tokens reserved to items of market 
+ *  in order to keep track of the on hold stakes.  
+ * we store user on-hold stakes in a map `userReserves` 
+ * to get user on-hold reserves call  getUserReserved on marketplace
+ * to get the number of stakes that not on hold, call  userReserves on marketplace , this function subtract the user stakes in staking contract from the on-hold stakes on marketplace
+*This function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
+   - Only users can free their own reserves 
+   ** 
+    * @dev called by user through dapps when his/her wants to free his reserved tokens which are no longer in active auction .
     *  @notice this function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
   
     * @return curentReserves user reserves after freeing the unused reservd
-
+    * emit : UserReservesFree
      */
 
     function freeReserves() external returns (uint256 curentReserves) {
@@ -842,11 +912,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                     // free
                 } else {
                     newListings.push(listings[index]);
-                    curentReserves = _tokenListings[listings[index]].qualifyAmount;
+                    curentReserves = _tokenListings[listings[index]].insurancAmount;
                 }
             } else if (_tokenListings[listings[index]].status == ListingStatus.OnMarket) {
                 newListings.push(listings[index]);
-                uint256 listQualifyAmount = _tokenListings[listings[index]].qualifyAmount;
+                uint256 listQualifyAmount = _tokenListings[listings[index]].insurancAmount;
 
                 curentReserves += listQualifyAmount;
             }
@@ -857,9 +927,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     }
 
     /**
+    *STartfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, KYC is need first and any purchase transaction with price exceed the cap can't be proceed unless this deal is approved by Startfi by calling this function
+- called only by account in owner role
      * @dev only called by `owner` to approve listing that exceeded cap after doing the KYC
      *@param listingId listing Id
-     *
+     * emit ApproveDeal
      */
     function approveDeal(bytes32 listingId) external onlyOwner whenNotPaused {
         require(
@@ -881,6 +953,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             }
         }
         kycedDeals[listingId] = true;
+        emit ApproveDeal(listingId, _msgSender(), block.timestamp);
     }
 
     /**
@@ -908,11 +981,16 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /** **************************Emergency Zone ********************/
 
     /**
+    **
+    Only when contract is paused, users can safely delist their token with no cost. Startfi team might have to pause the contract to make any update on the protocol terms or in emergency if high risk vulnerability is discovered to protect the users.    
+   - Only buyers can delist their own items 
+   **
      * @dev called by seller through dapps when s/he wants to remove this token from the marketplace
      * @notice called only when puased , let user to migrate for free if they don't agree on our new terms
      * @param listingId listing id
      * @return _NFTContract nft contract address
      * @return tokenId token id
+     * emit : MigrateEmergency
      */
     function migrateEmergency(bytes32 listingId) external whenPaused returns (address _NFTContract, uint256 tokenId) {
         ListingStatus status = _tokenListings[listingId].status;
@@ -933,7 +1011,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             // update user reserves
             // reserve nigative couldn't be at any case
             require(
-                _updateUserReserves(_msgSender(), _tokenListings[listingId].qualifyAmount, false) >= 0,
+                _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false) >= 0,
                 'negative reserve is not allowed'
             );
         }
@@ -945,7 +1023,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             _NFTContract,
             _owner,
             tokenId,
-            _tokenListings[listingId].qualifyAmount,
+            _tokenListings[listingId].insurancAmount,
             releaseTime,
             block.timestamp
         );

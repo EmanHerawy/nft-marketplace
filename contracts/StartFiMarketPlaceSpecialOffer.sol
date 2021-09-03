@@ -4,7 +4,8 @@ pragma solidity 0.8.7;
 
 /**
  * @author Eman Herawy, StartFi Team
- *desc   contract to manage the special deals
+ *desc   contract to manage the special deals.
+ * We might have some celebrities or big names who come to our platform though agreement, those users might need different terms and conditions and to enforce the agreement via smart contract we store them the contract and apply them in their deals
  * @title StartFi Marketplace Special Offer
  */
 contract StartFiMarketPlaceSpecialOffer {

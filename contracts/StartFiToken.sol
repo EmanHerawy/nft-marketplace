@@ -27,8 +27,9 @@ contract StartFiToken is ERC20PresetFixedSupply {
         address owner
     ) ERC20PresetFixedSupply(name, symbol, 100000000 * 1 ether, owner) {
         uint256 chainId;
+
         assembly {
-            chainId := chainId
+            chainId := chainId // always return 0 , we fixed this in other conracts [nft contract] and this token won't be deployed to other networks so no front runnign attack risk
         }
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(

@@ -12,33 +12,8 @@ import { tokenFixture } from './shared/fixtures'
 import { hexlify } from 'ethers/lib/utils'
 /**
  * scenarios
- *  we have 3 type of listings , fix price , auction , auction with direct sale.
- * 1- user can sell item on marketplace  with fixed price 
- * -- user must stake some tokens 
- * -- marketplace must be allowed to transfer his token and he must pass all condition 
- * -- any buyer can buy this item after passing all condition 
- * -- seller balance is increased , wallet is increased and original issuer balance is increased if the nft has
- * -- user adds item but no one bought the item , user delist before the time and loses the qualify amount 
- * -- user adds item but no one bought the item , user delist after the time and without losing the qualify amount 
- * *************
- * 2- user can sell item on marketplace  ass auction with direct sell 
- * -- marketplace must be allowed to transfer his token and he must pass all condition 
- * -- buyers can bid and bid and bid  as long as it's active after staking and giving the right bid
- * -- any buyer can buy this item after passing all condition 
- * -- seller balance is increased , wallet is increased and original issuer balance is increased if the nft has
-
- * -- user adds item but no one bought the item , user delist only after the auction is ended 
-* *************
- * 2- user can sell item on marketplace  ass auction with direct sell 
- * -- marketplace must be allowed to transfer his token and he must pass all condition 
- * -- buyers can bid and bid and bid  as long as it's active after staking and giving the right bid
- * -- last bidder can get the item by fulfill 
- * -- if winner bidder doesn't fulfill, auction creator dispute and get 50% from the qualify amount while startfi takes the other 50%, NFT ownership is returned back to the auction creator 
- * -- user adds item but no one bought the item , user delist only after the auction is ended 
-
- * 
- * -- big deals 
- * -- transaction with permit
+ *  we might have some celebrities or big names who come to our platform though agreement, those users might need different terms and conditions and to enforce the agreement via smart contract we store them the contract and apply them in their deals  .
+ *
  * 
  */
 chai.use(solidity)
@@ -71,7 +46,7 @@ let zeroPrice=0;
 let price1=1000;
 let price2=10000;
 let price3=50050;
-let qualifyAmount=10;
+let insurancAmount=10;
 let minimumBid=10;
 let wrongPrice=10;
 let lastbidding=minimumBid;
@@ -582,7 +557,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      qualifyAmount,
+      insurancAmount,
       !isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -717,7 +692,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
       marketplaceTokenId1,
 
       minimumBid,
-      qualifyAmount,
+      insurancAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -730,7 +705,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
   })
  
   it('deposit stakes', async () => {
-    const stakeAmount = qualifyAmount;
+    const stakeAmount = insurancAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -873,7 +848,7 @@ describe('StartFi marketPlace : special Offers with Auction then delist', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      qualifyAmount,
+      insurancAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(

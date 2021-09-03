@@ -19,7 +19,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     event ChangeReputationContract(address reputationContract);
     event ChangeUtilityToken(address utiltiyToken);
     event ChangeFulfillDuration(uint256 duration);
-    event ChangeListqualifyAmount(uint256 newFees, uint256 newBase);
+    event ChangeListinsurancAmount(uint256 newFees, uint256 newBase);
     event ChangeDelistAfter(uint256 duration);
     event ChangeMarketPlaceName(string Name);
     event ChangeFees(uint256 newFees, uint256 newBase);
@@ -124,14 +124,14 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      * @return percentage the value of the state variable `_feeFraction`
      *
      */
-    function changeListqualifyAmount(uint256 newFees, uint256 newBase)
+    function changeListinsurancAmount(uint256 newFees, uint256 newBase)
         external
         onlyOwner
         whenPaused
         returns (uint256 percentage)
     {
-        percentage = _changeListqualifyAmount(newFees, newBase);
-        emit ChangeListqualifyAmount(newFees, newBase);
+        percentage = _changeListinsurancAmount(newFees, newBase);
+        emit ChangeListinsurancAmount(newFees, newBase);
     }
 
     /**

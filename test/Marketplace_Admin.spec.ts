@@ -138,20 +138,20 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
   })
 
   it('Admin should change qualify amount', async () => {
-    await expect(marketPlace.changeListqualifyAmount(30,10))
-      .to.emit(marketPlace, 'ChangeListqualifyAmount')
+    await expect(marketPlace.changeListinsurancAmount(30,10))
+      .to.emit(marketPlace, 'ChangeListinsurancAmount')
       .withArgs(30,10)
   })
 
   it('Admin should change  qualify amount :revert not the owner ', async () => {
-    await expect(marketPlace.connect(user1).changeListqualifyAmount(30,10)).to.revertedWith(
+    await expect(marketPlace.connect(user1).changeListinsurancAmount(30,10)).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
     )
   })
 
   it('Admin should change  qualify amount :revert not paused ', async () => {
     await marketPlace.unpause()
-    await expect(marketPlace.changeListqualifyAmount(30, 10)).to.revertedWith('Pausable: not paused')
+    await expect(marketPlace.changeListinsurancAmount(30, 10)).to.revertedWith('Pausable: not paused')
   })
 
  

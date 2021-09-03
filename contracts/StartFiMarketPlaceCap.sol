@@ -5,6 +5,7 @@ pragma solidity 0.8.7;
 /**
  * @author Eman Herawy, StartFi Team
  *desc   contract to manage the deal cap to keep all our transaction regulated
+ *  Startfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, KYC is need first and the purchase transaction can't be proceed unless this deal is approved by Startfi by calling [approveDeal]
  * @title StartFi Marketplace Cap
  */
 contract StartFiMarketPlaceCap {
