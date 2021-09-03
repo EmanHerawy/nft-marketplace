@@ -14,14 +14,14 @@ import './library/StartFiFinanceLib.sol';
  */
 contract StartFiMarketPlaceFinance {
     /******************************************* decalrations go here ********************************************************* */
+    address internal reputationContract;
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees
     uint256 internal _feeBase = 10; // 25/10=2.5
+    mapping(address => uint256) internal userReserves;
+    address public stakeContract;
     uint256 public listqualifyPercentage = 10;
     uint256 public listqualifyPercentageBase = 10;
-    mapping(address => uint256) userReserves;
-    address public stakeContract;
-    address reputationContract;
 
     /******************************************* constructor goes here ********************************************************* */
 

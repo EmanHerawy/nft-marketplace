@@ -36,10 +36,7 @@ contract StartFiMarketPlaceController is
         string memory _name,
         address _paymentContract,
         address _reputationContract
-    ) MarketPlaceBase(_name) StartFiMarketPlaceFinance(_paymentContract, _reputationContract) {
-        _paymentToken = _paymentContract;
-        reputationContract = _reputationContract;
-    }
+    ) MarketPlaceBase(_name) StartFiMarketPlaceFinance(_paymentContract, _reputationContract) {}
 
     /******************************************* modifiers go here ********************************************************* */
     /**

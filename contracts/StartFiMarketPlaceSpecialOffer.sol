@@ -10,7 +10,7 @@ pragma solidity 0.8.7;
 contract StartFiMarketPlaceSpecialOffer {
     /******************************************* decalrations go here ********************************************************* */
 
-    mapping(address => conditions) offerTerms;
+    mapping(address => conditions) internal offerTerms;
     struct conditions {
         uint256 delistAfter;
         uint256 fee; // 2.5% fees

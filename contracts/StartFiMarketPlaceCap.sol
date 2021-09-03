@@ -13,7 +13,7 @@ contract StartFiMarketPlaceCap {
     uint256 public usdCap;
     uint256 public stfiCap;
     uint256 public stfiUsdt; // how many STFI per 1 usd?
-    mapping(bytes32 => bool) kycedDeals;
+    mapping(bytes32 => bool) internal kycedDeals;
 
     /******************************************* read functions go here ********************************************************* */
 
