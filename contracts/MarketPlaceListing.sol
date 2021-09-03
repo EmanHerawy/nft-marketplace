@@ -28,7 +28,7 @@ contract MarketPlaceListing {
         address seller;
         address buyer;
         bool bedEnabeled;
-        bool sellForEnabled;
+        bool isSellForEnabled;
         // only if bed and sell for enabled
         uint256 releaseTime;
         uint256 disputeTime; // only in auction
@@ -60,7 +60,7 @@ contract MarketPlaceListing {
       * @return seller  nft seller address
       * @return buyer  nft buyer address
       * @return bedEnabeled true if auction enabled  
-      * @return sellForEnabled true if auction enable direct selling
+      * @return isSellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
       * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
       * @return qualifyAmount  amount of token locked as qualify for any bidder wants bid 
@@ -78,7 +78,7 @@ contract MarketPlaceListing {
             address seller,
             address buyer,
             bool bedEnabeled,
-            bool sellForEnabled,
+            bool isSellForEnabled,
             uint256 releaseTime,
             uint256 disputeTime,
             uint256 qualifyAmount,
@@ -93,7 +93,7 @@ contract MarketPlaceListing {
         seller = _tokenListings[listingId].seller;
         buyer = _tokenListings[listingId].buyer;
         bedEnabeled = _tokenListings[listingId].bedEnabeled;
-        sellForEnabled = _tokenListings[listingId].sellForEnabled;
+        isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
         disputeTime = _tokenListings[listingId].disputeTime;
         qualifyAmount = _tokenListings[listingId].qualifyAmount;
@@ -151,8 +151,8 @@ contract MarketPlaceListing {
      * @param seller seller address
      * @param tokenId token id
      * @param listingPrice min price
-     * @param sellForEnabled true if auction enable direct selling
-     * @param sellFor  price  to sell with if sellForEnabled=true
+     * @param isSellForEnabled true if auction enable direct selling
+     * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param releaseTime  when auction ends
      * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
      * @return true if it's done
@@ -163,7 +163,7 @@ contract MarketPlaceListing {
         address seller,
         uint256 tokenId,
         uint256 listingPrice,
-        bool sellForEnabled,
+        bool isSellForEnabled,
         uint256 sellFor,
         uint256 releaseTime,
         uint256 qualifyAmount
@@ -176,7 +176,7 @@ contract MarketPlaceListing {
             seller,
             address(0),
             true,
-            sellForEnabled,
+            isSellForEnabled,
             releaseTime,
             releaseTime + fulfillDuration,
             qualifyAmount,
