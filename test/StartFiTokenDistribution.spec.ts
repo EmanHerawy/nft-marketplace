@@ -77,41 +77,12 @@ it('erc20, paused, owner, tokenOwners', async () => {
   console.log(info,'info');
   expect(info[2]).to.eq(Date.now()) */
 })
-it('Paused', async () => {
-  await expect(tokenDistrbution.pause())
-    .to.emit(tokenDistrbution, 'Paused')
-    .withArgs(wallet.address)
-  expect(await tokenDistrbution.paused()).to.eq(true)
-})
-it('owner can  call safeGuardAllTokens to transfer all tokens that contract has when bug found', async () => {
-  // await expect(tokenDistrbution.pause())
-  // .to.emit(tokenDistrbution, 'Paused')
-  // .withArgs(wallet.address)
-expect(await tokenDistrbution.paused()).to.eq(true)
-  await expect(tokenDistrbution.safeGuardAllTokens( other.address))
-    .to.emit(startfiToken, 'Transfer')
-    .withArgs(tokenDistrbution.address, other.address, TEST_AMOUNT)
-    expect(await startfiToken.balanceOf(other.address)).to.eq(TEST_AMOUNT)
-})
-it('Unpaused', async () => {
-  await expect(tokenDistrbution.unpause())
-    .to.emit(tokenDistrbution, 'Unpaused')
-    .withArgs(wallet.address)
-  expect(await tokenDistrbution.paused()).to.eq(false)
-})
 it('anyone can  call triggerTokenSend to transfer distributed tokens when not paused', async () => {
   const TGEDate = await tokenDistrbution.TGEDate();
-  // const time = Date.now() + 86400
+   // const time = Date.now() + 86400
   await provider.send('evm_increaseTime', [TGEDate.toNumber()]); 
   await provider.send('evm_mine',[]);
 expect(await tokenDistrbution.paused()).to.eq(false)
-const balance= await startfiToken.balanceOf(tokenDistrbution.address)
-console.log(balance.toNumber(),'balance.toNumber()');
-// for some resone , balance is reset to 0 and we have to refund it
-if(balance.toNumber()==0){
-  await startfiToken.transfer(tokenDistrbution.address,TEST_AMOUNT)
-
-}
   await expect(tokenDistrbution.triggerTokenSend())
      .to.emit(startfiToken, 'Transfer')
   await expect(tokenDistrbution.triggerTokenSend())
@@ -119,6 +90,28 @@ if(balance.toNumber()==0){
 
     
 })
+it('Paused', async () => {
+  await expect(tokenDistrbution.pause())
+    .to.emit(tokenDistrbution, 'Paused')
+    .withArgs(wallet.address)
+  expect(await tokenDistrbution.paused()).to.eq(true)
+})
+it('owner can  call safeGuardAllTokens to transfer all tokens that contract has when bug found', async () => {
+  const balance= await startfiToken.balanceOf(tokenDistrbution.address)
+
+expect(await tokenDistrbution.paused()).to.eq(true)
+  await expect(tokenDistrbution.safeGuardAllTokens( other.address))
+    .to.emit(startfiToken, 'Transfer')
+    .withArgs(tokenDistrbution.address, other.address, balance)
+    expect(await startfiToken.balanceOf(other.address)).to.eq(balance)
+})
+it('Unpaused', async () => {
+  await expect(tokenDistrbution.unpause())
+    .to.emit(tokenDistrbution, 'Unpaused')
+    .withArgs(wallet.address)
+  expect(await tokenDistrbution.paused()).to.eq(false)
+})
+
 
 
 it('non Owner can not pause', async () => {
