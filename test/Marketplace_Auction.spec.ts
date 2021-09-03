@@ -258,7 +258,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
 
   it('user can  buy auction which is  for sale', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, forSalePrice)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, forSalePrice)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
     expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -forSalePrice)
     const platformShare =Math.round(calcFees(forSalePrice,_feeFraction,_feeBase))
@@ -414,7 +414,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
     listingId1=(events[events.length - 1] as any).args[0]
   })
   it('user can not buy auction which is not for sale', async () => {
-    await expect(marketPlace.connect(user1).buyNow(listingId1, forSalePrice)).to.revertedWith(
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
    'Token is not for sale'
     )
   })
@@ -628,7 +628,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
     listingId1=(events[events.length - 1] as any).args[0]
   })
   it('user can not buy auction which is not for sale', async () => {
-    await expect(marketPlace.connect(user1).buyNow(listingId1, forSalePrice)).to.revertedWith(
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
    'Token is not for sale'
     )
   })
@@ -846,7 +846,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
     listingId1=(events[events.length - 1] as any).args[0]
   })
   it('user can not buy auction which is not for sale', async () => {
-    await expect(marketPlace.connect(user1).buyNow(listingId1, forSalePrice)).to.revertedWith(
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
    'Token is not for sale'
     )
   })
@@ -1205,7 +1205,7 @@ forSalePrice=price1
 
   it('user can not buy  an item on marketplace that exceeded the cap before it is approved', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.revertedWith('StartfiMarketplace: Price exceeded the cap. You need to get approved')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith('StartfiMarketplace: Price exceeded the cap. You need to get approved')
  
 // check balance 
   })
@@ -1216,7 +1216,7 @@ forSalePrice=price1
   })
   it('user can buy  an item that exceeded the cap on marketplace after it is approved', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
     expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
     const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))

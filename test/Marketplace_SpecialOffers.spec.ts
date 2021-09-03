@@ -237,7 +237,7 @@ describe('StartFi marketPlace : special Offers with fixed prices', () => {
  
   it('user can buy  an item on marketplace  using the offer terms', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, price1)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
     expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
     const platformShare =Math.round(calcFees(price1,offers[0]. _fee,offers[0]. _feeBase))
@@ -597,7 +597,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
  
   it('user can buy  an item on marketplace  using the offer terms', async () => {
     await expect(token.connect(user1).approve(marketPlace.address, forSalePrice)).to.emit(token, 'Approval')
-    await expect(marketPlace.connect(user1).buyNow(listingId1, forSalePrice)).to.emit(marketPlace, 'BuyNow')
+    await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
     expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -forSalePrice)
     const platformShare =Math.round(calcFees(forSalePrice,offers[0]. _fee,offers[0]. _feeBase))
