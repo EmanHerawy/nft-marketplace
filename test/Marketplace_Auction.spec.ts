@@ -42,9 +42,6 @@ import { hexlify } from 'ethers/lib/utils'
  * 
  */
 chai.use(solidity)
-const name = 'StartFiToken'
-const symbol = 'STFI'
-const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = 100000000//expandTo18Decimals(10)
 let token: Contract
 let NFT: Contract
@@ -58,20 +55,12 @@ const   _feeBase = 10;
 const royaltyShare=25
 const royaltyBase=10
 const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
-// let marketplaceTokenId1 = mintedNFT[0]
 let marketplaceTokenId1:any;
-let marketplaceTokenId2 =  mintedNFT[1]
-let auctionTokenId =  mintedNFT[2]
 let listingId1:any;
-let listingId2:any;
 let zeroPrice=0;
 let price1=1000;
-let price2=10000;
-let price3=50050;
 let insurancAmount=10;
 let minimumBid=10;
-let wrongPrice=10;
-let lastbidding=minimumBid;
 let duration=60*60*15; // 15 hours
 let isForSale=false;
 let forSalePrice=10000;
