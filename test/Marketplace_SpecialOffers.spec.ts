@@ -1,11 +1,9 @@
 import chai, { expect } from 'chai'
-import { Contract, constants, utils,BigNumber } from 'ethers'
-import { ecsign } from 'ethereumjs-util'
+import { Contract,BigNumber } from 'ethers'
 
-const { MaxUint256 } = constants
 import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
 
-import { expandTo18Decimals, getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
+import { expandTo18Decimals } from './shared/utilities'
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
@@ -38,18 +36,11 @@ const royaltyBase=10
 const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
 // let marketplaceTokenId1 = mintedNFT[0]
 let marketplaceTokenId1:any;
-let marketplaceTokenId2 =  mintedNFT[1]
-let auctionTokenId =  mintedNFT[2]
 let listingId1:any;
 let listingId2:any;
-let zeroPrice=0;
 let price1=1000;
-let price2=10000;
-let price3=50050;
-let insurancAmount=10;
+let insuranceAmount=10;
 let minimumBid=10;
-let wrongPrice=10;
-let lastbidding=minimumBid;
 let duration=60*60*15; // 15 hours
 let isForSale=false;
 let forSalePrice=10000;
@@ -142,7 +133,7 @@ describe('StartFi marketPlace : special Offers with fixed prices', () => {
       offers[0]._listqualifyPercentageBase,
       offers[0].  _feeBase)
   })
-  it('No duplicated special offer alowed', async () => {
+  it('No duplicated special offer allowed', async () => {
     await expect(marketPlace.connect(admin).addOffer(offers[0].wallet,  
       offers[0]. _delistAfter,
       offers[0]. _fee, // 2.5% fees
@@ -557,7 +548,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -692,7 +683,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -705,7 +696,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
   })
  
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -848,7 +839,7 @@ describe('StartFi marketPlace : special Offers with Auction then delist', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(

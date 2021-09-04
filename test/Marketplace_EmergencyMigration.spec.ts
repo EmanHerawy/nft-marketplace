@@ -5,11 +5,9 @@ import { ecsign } from 'ethereumjs-util'
 const { MaxUint256 } = constants
 import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
 
-import { expandTo18Decimals, getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
-import { hexlify } from 'ethers/lib/utils'
 /**
  * scenario : StartFi team might need to update the protocol terms or pause the platform if any vulnerability has been found to secure our user,
  * to tackle this  we only allow our service only if the contract is not paused 
@@ -21,41 +19,27 @@ import { hexlify } from 'ethers/lib/utils'
 
  */
 chai.use(solidity)
-const name = 'StartFiToken'
-const symbol = 'STFI'
-const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = 100000000//expandTo18Decimals(10)
-let token: Contract
 let NFT: Contract
 let marketPlace: Contract
 let reputation: Contract
 let stakes: Contract
 
-const   _feeFraction = 25; // 2.5% fees
-const   _feeBase = 10;
+
  
 const royaltyShare=25
 const royaltyBase=10
 const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
 // let marketplaceTokenId1 = mintedNFT[0]
 let marketplaceTokenId1:any;
-let marketplaceTokenId2 =  mintedNFT[1]
-let auctionTokenId =  mintedNFT[2]
 const   listqualifyPercentage = 10;
 const   listqualifyPercentageBase = 10;
 let listingId1:any;
 let listingId2:any;
 let listingId3:any;
-let listingId4:any;
-let listingId5:any;
- let zeroPrice=0;
 let price1=1000;
-let price2=10000;
-let price3=50050;
 let insurancAmount=10;
 let minimumBid=10;
-let wrongPrice=10;
-let lastbidding=minimumBid;
 let duration=60*60*15; // 15 hours
 let isForSale=false;
 let forSalePrice=10000;
