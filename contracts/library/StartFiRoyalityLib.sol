@@ -14,14 +14,14 @@ library StartFiRoyalityLib {
      *@param _tokenId token id
      *@param _value  token price
      *@return issuer original issuer address
-     *@return _royaltyAmount  the issuer total amount of tokens that he should recieve based on his share
+     *@return royaltyAmount  the issuer total amount of tokens that he should recieve based on his share
      */
     function _getRoyaltyInfo(
         address _NFTContract,
         uint256 _tokenId,
         uint256 _value
-    ) internal view returns (address issuer, uint256 _royaltyAmount) {
-        (issuer, _royaltyAmount) = IERC721Royalty(_NFTContract).royaltyInfo(_tokenId, _value);
+    ) internal view returns (address issuer, uint256 royaltyAmount) {
+        (issuer, royaltyAmount) = IERC721Royalty(_NFTContract).royaltyInfo(_tokenId, _value);
     }
 
     /**

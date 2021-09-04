@@ -50,12 +50,12 @@ contract ERC721Royalty is IERC721Royalty {
         external
         view
         override
-        returns (address issuer, uint256 _royaltyAmount)
+        returns (address issuer, uint256 royaltyAmount)
     {
         issuer = tokenIdToIssuer[_tokenId];
         if (issuer != address(0)) {
             Base memory _base = _issuerPercentage[_tokenId][issuer];
-            _royaltyAmount = StartFiFinanceLib._calcFees(_value, uint256(_base.share), uint256(_base.shareSeparator));
+            royaltyAmount = StartFiFinanceLib._calcFees(_value, uint256(_base.share), uint256(_base.shareSeparator));
         }
     }
 
