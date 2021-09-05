@@ -5,7 +5,7 @@ import { ecsign } from 'ethereumjs-util'
 const { MaxUint256 } = constants
 import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
 
-import { expandTo18Decimals, getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
+import {  getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
@@ -42,9 +42,6 @@ import { hexlify } from 'ethers/lib/utils'
  * 
  */
 chai.use(solidity)
-const name = 'StartFiToken'
-const symbol = 'STFI'
-const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = 100000000//expandTo18Decimals(10)
 let token: Contract
 let NFT: Contract
@@ -58,20 +55,12 @@ const   _feeBase = 10;
 const royaltyShare=25
 const royaltyBase=10
 const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
-// let marketplaceTokenId1 = mintedNFT[0]
 let marketplaceTokenId1:any;
-let marketplaceTokenId2 =  mintedNFT[1]
-let auctionTokenId =  mintedNFT[2]
 let listingId1:any;
-let listingId2:any;
 let zeroPrice=0;
 let price1=1000;
-let price2=10000;
-let price3=50050;
-let insurancAmount=10;
+let insuranceAmount=10;
 let minimumBid=10;
-let wrongPrice=10;
-let lastbidding=minimumBid;
 let duration=60*60*15; // 15 hours
 let isForSale=false;
 let forSalePrice=10000;
@@ -120,9 +109,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
     await NFT.mintWithRoyalty(issuer.address, baseUri, royaltyShare, royaltyBase)
     const eventFilter = await NFT.filters.Transfer(null, null )
     const events = await NFT.queryFilter(eventFilter)
-    marketplaceTokenId1=(events[events.length - 1] as any).args[2].toNumber()
-     console.log(marketplaceTokenId1,'marketplaceTokenId1');
-    
+    marketplaceTokenId1=(events[events.length - 1] as any).args[2].toNumber()    
   })
 
 
@@ -132,7 +119,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       marketplaceTokenId1,
 
       zeroPrice,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -144,7 +131,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -163,7 +150,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       zeroPrice,
       duration)).to.be.revertedWith(
@@ -175,7 +162,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       forSalePrice,
       60*60)).to.be.revertedWith(
@@ -200,7 +187,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -224,7 +211,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
 
   })
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -334,7 +321,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
       marketplaceTokenId1,
 
       zeroPrice,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -346,7 +333,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -365,7 +352,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       zeroPrice,
       duration)).to.be.revertedWith(
@@ -377,7 +364,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       zeroPrice,
       60*60)).to.be.revertedWith(
@@ -402,7 +389,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -430,7 +417,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
 
   })
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -548,7 +535,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
       marketplaceTokenId1,
 
       zeroPrice,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -560,7 +547,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -579,7 +566,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       zeroPrice,
       duration)).to.be.revertedWith(
@@ -591,7 +578,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       zeroPrice,
       60*60)).to.be.revertedWith(
@@ -616,7 +603,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -644,7 +631,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
 
   })
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -766,7 +753,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
       marketplaceTokenId1,
 
       zeroPrice,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -778,7 +765,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.be.revertedWith(
@@ -797,7 +784,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       zeroPrice,
       duration)).to.be.revertedWith(
@@ -809,7 +796,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       zeroPrice,
       60*60)).to.be.revertedWith(
@@ -834,7 +821,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -865,7 +852,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
 
   })
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -941,8 +928,8 @@ const listingDetails = await marketPlace.getListingDetails(listingId1);
     const newAdminStakeAllowance = await marketPlace.getStakeAllowance(admin.address)
     const newSellerStakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
     //50 to admin , 50 % to auction creator , bidder loses qualify amount
-const fineAmount:number=Math.round(insurancAmount/2)
-    expect(newBidderStakeAllowance).to.eq(BigNumber.from(bidderStakeAllowance - insurancAmount))
+const fineAmount:number=Math.round(insuranceAmount/2)
+    expect(newBidderStakeAllowance).to.eq(BigNumber.from(bidderStakeAllowance - insuranceAmount))
     expect(newAdminStakeAllowance).to.eq(BigNumber.from(adminStakeAllowance + fineAmount))
     expect(newSellerStakeAllowance).to.eq(BigNumber.from(sellerStakeAllowance + fineAmount))
  
@@ -995,7 +982,7 @@ describe('StartFi marketPlace : create auction and buy WithPremit', () => {
         marketplaceTokenId1,
 
         minimumBid,
-        insurancAmount,
+        insuranceAmount,
         !isForSale,
         forSalePrice,
         duration,
@@ -1072,7 +1059,7 @@ describe('StartFi marketPlace : create auction and bid and fulfill WithPremit', 
         marketplaceTokenId1,
 
         minimumBid,
-        insurancAmount,
+        insuranceAmount,
         isForSale,
         zeroPrice,
         duration,
@@ -1087,7 +1074,7 @@ describe('StartFi marketPlace : create auction and bid and fulfill WithPremit', 
     listingId1=(events[events.length - 1] as any).args[0]
   })
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')
@@ -1191,7 +1178,7 @@ forSalePrice=price1
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -1282,7 +1269,7 @@ forSalePrice=price1
       marketplaceTokenId1,
 
       minimumBid,
-      insurancAmount,
+      insuranceAmount,
       !isForSale,
       forSalePrice,
       duration)).to.emit(
@@ -1294,7 +1281,7 @@ forSalePrice=price1
     listingId1=(events[events.length - 1] as any).args[0]
   })
   it('deposit stakes', async () => {
-    const stakeAmount = insurancAmount;
+    const stakeAmount = insuranceAmount;
     
     await expect(token.approve(stakes.address, stakeAmount))
       .to.emit(token, 'Approval')

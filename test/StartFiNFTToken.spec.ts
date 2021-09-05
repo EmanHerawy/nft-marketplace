@@ -76,7 +76,7 @@ let walletNftBalance=0
       share,separator
     ))
       .to.emit(token, 'Transfer') 
-      const info:{ issuer:string, _royaltyAmount:BigNumber} = await token.royaltyInfo(
+      const info:{ issuer:string, royaltyAmount:BigNumber} = await token.royaltyInfo(
         walletNftBalance,
         itemPrice
      );
@@ -85,7 +85,7 @@ let walletNftBalance=0
       await expect(info.issuer)
         .to.eq( wallet.address);
         // we have to convert it to string because the expected number is big ' 18 decimals' and js couldn't handle
-      await expect(info._royaltyAmount.toString())
+      await expect(info.royaltyAmount.toString())
         .to.eq(royaltyAmount.toString() );
       
     });

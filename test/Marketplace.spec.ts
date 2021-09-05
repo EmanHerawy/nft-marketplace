@@ -5,7 +5,7 @@ import { ecsign } from 'ethereumjs-util'
 const { MaxUint256 } = constants
 import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
 
-import { expandTo18Decimals, getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
+import {  getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'

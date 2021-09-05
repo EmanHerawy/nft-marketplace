@@ -27,7 +27,7 @@ contract MarketPlaceListing {
         uint256 endPrice;
         address seller;
         address buyer;
-        bool bedEnabeled;
+        bool iseBdEnabeled;
         bool isSellForEnabled;
         // only if bed and sell for enabled
         uint256 releaseTime;
@@ -59,7 +59,7 @@ contract MarketPlaceListing {
       * @return endPrice purchase price
       * @return seller  nft seller address
       * @return buyer  nft buyer address
-      * @return bedEnabeled true if auction enabled  
+      * @return iseBdEnabeled true if auction enabled  
       * @return isSellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
       * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
@@ -77,7 +77,7 @@ contract MarketPlaceListing {
             uint256 endPrice,
             address seller,
             address buyer,
-            bool bedEnabeled,
+            bool iseBdEnabeled,
             bool isSellForEnabled,
             uint256 releaseTime,
             uint256 disputeTime,
@@ -92,7 +92,7 @@ contract MarketPlaceListing {
         endPrice = _tokenListings[listingId].endPrice;
         seller = _tokenListings[listingId].seller;
         buyer = _tokenListings[listingId].buyer;
-        bedEnabeled = _tokenListings[listingId].bedEnabeled;
+        iseBdEnabeled = _tokenListings[listingId].iseBdEnabeled;
         isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
         disputeTime = _tokenListings[listingId].disputeTime;

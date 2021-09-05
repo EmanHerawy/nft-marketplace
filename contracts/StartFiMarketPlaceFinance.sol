@@ -157,7 +157,7 @@ contract StartFiMarketPlaceFinance {
      * @param donomirator  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
      */
-    function _changeListinsurancAmount(uint256 numerator, uint256 donomirator) internal returns (uint256 percentage) {
+    function _changeListInsuranceAmount(uint256 numerator, uint256 donomirator) internal returns (uint256 percentage) {
         percentage = StartFiFinanceLib._calcShare(numerator, donomirator);
         require(percentage <= 4 ether && percentage >= 1 ether, 'Percentage should be from 1-4 %');
 
