@@ -1,5 +1,13 @@
+## Contract to get audited 
+==========================
+
+- Startfi Marketplace contract eip-2612 support
+- Startfi ERC721 token with royalty and eip-2612 support
+- Sratfi ERC20 token with eip-2612 support 
+- StartFi Token Distribution
 ## StartFi core contracts 
 ==========================
+
 - Startfi Marketplace contract eip-2612 support
 - Startfi ERC721 token with royalty and eip-2612 support
 - Sratfi ERC20 token with eip-2612 support 
