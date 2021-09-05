@@ -15,11 +15,7 @@ import { hexlify } from 'ethers/lib/utils'
  * 
  */
 chai.use(solidity)
-const name = 'StartFiToken'
-const symbol = 'STFI'
-const TOTAL_SUPPLY = expandTo18Decimals(100000000)
 const TEST_AMOUNT = 100000000//expandTo18Decimals(10)
-let token: Contract
 let NFT: Contract
 let marketPlace: Contract
 let reputation: Contract
@@ -33,11 +29,9 @@ const   listqualifyPercentage = 10;
 const   listqualifyPercentageBase = 10;
 const royaltyShare=25
 const royaltyBase=10
-const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
-// let marketplaceTokenId1 = mintedNFT[0]
-let marketplaceTokenId1:any;
-let listingId1:any;
-let listingId2:any;
+let marketplaceTokenId1:string;
+let listingId1:string;
+let listingId2:string;
 let price1=1000;
 let insuranceAmount=10;
 let minimumBid=10;
@@ -51,7 +45,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
  return price*(share/_base);
 
 }
-describe('StartFi marketPlace : special Offers with fixed prices', () => {
+describe('StartFi marketPlace Sprciall offers : special Offers with fixed prices', () => {
   const provider = new MockProvider()
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
@@ -339,7 +333,6 @@ describe('StartFi marketPlace : special Offers with fixed prices issuer deList w
     const oldReserves = await stakes.getReserves(issuer.address)
 
     const stakeAmount =  calcFees(price1, offers[0]. _listqualifyPercentage, offers[0]. _listqualifyPercentageBase);
-    console.log(stakeAmount,'stakeAmount');
     const stakeToIncrease = stakeAmount-oldReserves.toNumber();
     await expect(token.approve(stakes.address, stakeToIncrease))
       .to.emit(token, 'Approval')
@@ -392,7 +385,6 @@ it('Can not delist already de listed item ', async () => {
  })
 it('non owner can not delist ', async () => {
   const stakeAmount =  calcFees(price1, offers[0]. _listqualifyPercentage, offers[0]. _listqualifyPercentageBase);
-  console.log(stakeAmount,'stakeAmount');
   
   await expect(token.approve(stakes.address, stakeAmount))
     .to.emit(token, 'Approval')
@@ -424,9 +416,7 @@ it('Should delist item without losing stakes', async () => {
 
 
   const stakeAllowance = await stakes.getReserves(issuer.address)
- 
 const listingDetails = await marketPlace.getListingDetails(listingId2);
-console.log(stakeAllowance,'listingDetails');
 
   await provider.send('evm_increaseTime', [listingDetails.releaseTime.toNumber()]); 
   await provider.send('evm_mine',[]);
@@ -435,7 +425,6 @@ console.log(stakeAllowance,'listingDetails');
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( issuer.address)
 
     const newStakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-    console.log(newStakeAllowance,'newStakeAllowance');
     
     expect(newStakeAllowance.toNumber()).to.eq(stakeAllowance)
  
