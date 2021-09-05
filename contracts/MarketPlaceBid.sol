@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity >=0.8.0;
+pragma solidity 0.8.7;
 pragma abicoder v2;
 
 /**
@@ -111,13 +111,7 @@ contract MarketPlaceBid {
     ) internal returns (bool) {
         // where bid winner is the last bidder updated
         bidToListing[listingId] = WinningBid(bidId, bidder);
-        listingBids[listingId][bidder] = Bid(
-            bidId,
-            tokenAddress,
-            tokenId,
-            bidPrice,
-            false
-        );
+        listingBids[listingId][bidder] = Bid(bidId, tokenAddress, tokenId, bidPrice, false);
         return true;
     }
 }

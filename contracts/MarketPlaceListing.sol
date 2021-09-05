@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity >=0.8.0;
+pragma solidity 0.8.7;
 pragma abicoder v2;
 
 /**
@@ -12,7 +12,8 @@ contract MarketPlaceListing {
     // all fees are in perentage
 
     // delist after 6 month
-    uint256 public delistAfter = 6 * 30 days; 
+    uint256 public delistAfter = 6 * 30 days;
+    uint256 public fulfillDuration = 3 days;
 
     constructor() {}
 
@@ -26,11 +27,12 @@ contract MarketPlaceListing {
         uint256 endPrice;
         address seller;
         address buyer;
-        bool bedEnabeled;
-        bool sellForEnabled;
+        bool iseBdEnabeled;
+        bool isSellForEnabled;
         // only if bed and sell for enabled
         uint256 releaseTime;
-        uint256 qualifyAmount;
+        uint256 disputeTime; // only in auction
+        uint256 insurancAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
         uint256 sellFor;
         ListingStatus status;
     }
@@ -57,10 +59,11 @@ contract MarketPlaceListing {
       * @return endPrice purchase price
       * @return seller  nft seller address
       * @return buyer  nft buyer address
-      * @return bedEnabeled true if auction enabled  
-      * @return sellForEnabled true if auction enable direct selling
+      * @return iseBdEnabeled true if auction enabled  
+      * @return isSellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
-      * @return qualifyAmount  amount of token locked as qualify for any bidder wants bid 
+      * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
+      * @return insurancAmount  amount of token locked as qualify for any bidder wants bid 
       * @return sellFor if sell for enabled for auction, this should be more than zero
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
      */
@@ -74,10 +77,11 @@ contract MarketPlaceListing {
             uint256 endPrice,
             address seller,
             address buyer,
-            bool bedEnabeled,
-            bool sellForEnabled,
+            bool iseBdEnabeled,
+            bool isSellForEnabled,
             uint256 releaseTime,
-            uint256 qualifyAmount,
+            uint256 disputeTime,
+            uint256 insurancAmount,
             uint256 sellFor,
             uint256 status
         )
@@ -88,10 +92,11 @@ contract MarketPlaceListing {
         endPrice = _tokenListings[listingId].endPrice;
         seller = _tokenListings[listingId].seller;
         buyer = _tokenListings[listingId].buyer;
-        bedEnabeled = _tokenListings[listingId].bedEnabeled;
-        sellForEnabled = _tokenListings[listingId].sellForEnabled;
+        iseBdEnabeled = _tokenListings[listingId].iseBdEnabeled;
+        isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
-        qualifyAmount = _tokenListings[listingId].qualifyAmount;
+        disputeTime = _tokenListings[listingId].disputeTime;
+        insurancAmount = _tokenListings[listingId].insurancAmount;
         sellFor = _tokenListings[listingId].sellFor;
         status = uint256(_tokenListings[listingId].status);
     }
@@ -106,6 +111,8 @@ contract MarketPlaceListing {
      * @param seller seller address
      * @param tokenId token id
      * @param listingPrice min price
+     * @param insurancAmount  amount of token locked as insurance from the seller 
+
      * @param releaseTime  time to delist for free
      * @return true if it's done
      */
@@ -115,6 +122,7 @@ contract MarketPlaceListing {
         address seller,
         uint256 tokenId,
         uint256 listingPrice,
+        uint256 insurancAmount,
         uint256 releaseTime
     ) internal returns (bool) {
         _tokenListings[listId] = Listing(
@@ -128,6 +136,7 @@ contract MarketPlaceListing {
             false,
             releaseTime,
             0,
+            insurancAmount,
             0,
             ListingStatus.OnMarket
         );
@@ -142,10 +151,10 @@ contract MarketPlaceListing {
      * @param seller seller address
      * @param tokenId token id
      * @param listingPrice min price
-     * @param sellForEnabled true if auction enable direct selling
-     * @param sellFor  price  to sell with if sellForEnabled=true
+     * @param isSellForEnabled true if auction enable direct selling
+     * @param sellFor  price  to sell with if isSellForEnabled=true
      * @param releaseTime  when auction ends
-     * @param qualifyAmount  amount of token locked as qualify for any bidder wants bid
+     * @param insurancAmount  amount of token locked as qualify for any bidder wants bid
      * @return true if it's done
      */
     function _creatAuction(
@@ -154,10 +163,10 @@ contract MarketPlaceListing {
         address seller,
         uint256 tokenId,
         uint256 listingPrice,
-        bool sellForEnabled,
+        bool isSellForEnabled,
         uint256 sellFor,
         uint256 releaseTime,
-        uint256 qualifyAmount
+        uint256 insurancAmount
     ) internal returns (bool) {
         _tokenListings[listId] = Listing(
             tokenAddress,
@@ -167,9 +176,10 @@ contract MarketPlaceListing {
             seller,
             address(0),
             true,
-            sellForEnabled,
+            isSellForEnabled,
             releaseTime,
-            qualifyAmount,
+            releaseTime + fulfillDuration,
+            insurancAmount,
             sellFor,
             ListingStatus.onAuction
         );
@@ -185,16 +195,6 @@ contract MarketPlaceListing {
         if (buyer != address(0)) {
             _tokenListings[listId].buyer = buyer;
         }
-    }
-
-    /**
-     *  @notice  all conditions and checks are made prior to this function
-     * @dev  delist an item by mark status as canceled
-     * @param listingId listing id
-     *
-     */
-    function _deList(bytes32 listingId) internal {
-        _tokenListings[listingId].status = ListingStatus.Canceled;
     }
 
     /**

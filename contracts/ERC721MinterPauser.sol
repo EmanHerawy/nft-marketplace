@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.7;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol';
+import '@openzeppelin/contracts/access/AccessControlEnumerable.sol';
 
 /**
  * @dev {ERC721} token, including:
@@ -23,17 +23,11 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
  * roles, as well as the default admin role, which will let it grant both minter
  * and pauser roles to other accounts.
  */
-contract ERC721MinterPauser is
-    Context,
-    AccessControlEnumerable,
-    ERC721Enumerable,
-    ERC721Burnable,
-    ERC721Pausable
-{
+contract ERC721MinterPauser is Context, AccessControlEnumerable, ERC721Enumerable, ERC721Burnable, ERC721Pausable {
     using Strings for uint256;
 
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
+    bytes32 public constant PAUSER_ROLE = keccak256('PAUSER_ROLE');
 
     // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
@@ -73,10 +67,7 @@ contract ERC721MinterPauser is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function pause() public virtual {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "ERC721MinterPauser: must have pauser role to pause"
-        );
+        require(hasRole(PAUSER_ROLE, _msgSender()), 'ERC721MinterPauser: must have pauser role to pause');
         _pause();
     }
 
@@ -90,10 +81,7 @@ contract ERC721MinterPauser is
      * - the caller must have the `PAUSER_ROLE`.
      */
     function unpause() public virtual {
-        require(
-            hasRole(PAUSER_ROLE, _msgSender()),
-            "ERC721MinterPauser: must have pauser role to unpause"
-        );
+        require(hasRole(PAUSER_ROLE, _msgSender()), 'ERC721MinterPauser: must have pauser role to unpause');
         _unpause();
     }
 
@@ -121,17 +109,8 @@ contract ERC721MinterPauser is
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-        require(
-            _exists(tokenId),
-            "ERC721URIStorage: URI query for nonexistent token"
-        );
+    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
+        require(_exists(tokenId), 'ERC721URIStorage: URI query for nonexistent token');
 
         string memory _tokenURI = _tokenURIs[tokenId];
         string memory base = _baseURI();
@@ -155,14 +134,8 @@ contract ERC721MinterPauser is
      *
      * - `tokenId` must exist.
      */
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
-    {
-        require(
-            _exists(tokenId),
-            "ERC721URIStorage: URI set of nonexistent token"
-        );
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI) internal virtual {
+        require(_exists(tokenId), 'ERC721URIStorage: URI set of nonexistent token');
         _tokenURIs[tokenId] = _tokenURI;
     }
 
