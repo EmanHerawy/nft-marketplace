@@ -946,7 +946,7 @@ it('Should not dispute item not on auction', async () => {
 
   })
 
-describe('StartFi marketPlace : create auction and buy WithPremit', () => {
+describe('StartFi marketPlace : create auction and buy WithPermit', () => {
   const provider = new MockProvider()
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
@@ -977,7 +977,7 @@ describe('StartFi marketPlace : create auction and buy WithPremit', () => {
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
 
     await expect(
-      await marketPlace.createAuctionWithPremit(
+      await marketPlace.createAuctionWithPermit(
         NFT.address,
         marketplaceTokenId1,
 
@@ -1009,7 +1009,7 @@ describe('StartFi marketPlace : create auction and buy WithPremit', () => {
 
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(user1.privateKey.slice(2), 'hex'))
      await expect(
-      await marketPlace.connect(user1).buyNowWithPremit(
+      await marketPlace.connect(user1).buyNowWithPermit(
        listingId1,
        forSalePrice,
         deadline,
@@ -1023,7 +1023,7 @@ describe('StartFi marketPlace : create auction and buy WithPremit', () => {
       })
 
 })
-describe('StartFi marketPlace : create auction and bid and fulfill WithPremit', () => {
+describe('StartFi marketPlace : create auction and bid and fulfill WithPermit', () => {
   const provider = new MockProvider()
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
@@ -1054,7 +1054,7 @@ describe('StartFi marketPlace : create auction and bid and fulfill WithPremit', 
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
 
     await expect(
-      await marketPlace.createAuctionWithPremit(
+      await marketPlace.createAuctionWithPermit(
         NFT.address,
         marketplaceTokenId1,
 
@@ -1111,7 +1111,7 @@ describe('StartFi marketPlace : create auction and bid and fulfill WithPremit', 
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(user1.privateKey.slice(2), 'hex'))
 
     await expect(
-      await marketPlace.connect(user1).fulfillBidWithPremit(
+      await marketPlace.connect(user1).fulfillBidWithPermit(
        listingId1,
         deadline,
         v,

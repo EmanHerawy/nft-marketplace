@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.7;
-import './interface/IERC721Premit.sol';
+import './interface/IERC721Permit.sol';
 import './library/StartFiSignatureLib.sol';
 
 /**
@@ -9,7 +9,7 @@ import './library/StartFiSignatureLib.sol';
  *@title  ERC721 Royalty
  * [ desc ] : erc721 with reoylaty support interface
  */
-abstract contract ERC721Premit is IERC721Premit {
+abstract contract ERC721Permit is IERC721Permit {
     bytes32 public DOMAIN_SEPARATOR;
 
     /// @dev Records current ERC2612 nonce for account. This value must be included whenever signature is generated for {permit}.
@@ -111,7 +111,7 @@ abstract contract ERC721Premit is IERC721Premit {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsPremit() public pure returns (bytes4 interfaceId) {
-        return type(IERC721Premit).interfaceId;
+    function supportsPermit() public pure returns (bytes4 interfaceId) {
+        return type(IERC721Permit).interfaceId;
     }
 }
