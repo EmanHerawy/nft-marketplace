@@ -20,7 +20,6 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     event ChangeUtilityToken(address utiltiyToken);
     event ChangeFulfillDuration(uint256 duration);
     event ChangeListInsuranceAmount(uint256 newFees, uint256 newBase);
-    event ChangeDelistAfter(uint256 duration);
     event ChangeMarketPlaceName(string Name);
     event ChangeFees(uint256 newFees, uint256 newBase);
     event UpdateAdminWallet(address newWallet);
@@ -57,38 +56,22 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     /**
      * @dev only called by `owner` to change the name and `whenPaused`
      *@param wallet marketplace reputation contract
-     *@param _delistAfter marketplace reputation contract
      *@param _fee marketplace reputation contract
-     *@param _listqualifyPercentage marketplace reputation contract
-     *@param _listqualifyPercentage marketplace reputation contract
+
      *@param feeBase marketplace reputation contract
      *
      */
     function addOffer(
         address wallet,
-        uint256 _delistAfter,
         uint256 _fee, // 2.5% fees
-        uint256 _listqualifyPercentage,
-        uint256 _listqualifyPercentageBase,
         uint256 feeBase
     ) external onlyOwner whenNotPaused {
         _addOffer(
             wallet,
-            _delistAfter,
             _fee, // 2.5% fees
-            _listqualifyPercentage,
-            _listqualifyPercentageBase,
             feeBase
         );
-        emit NewOffer(
-            _msgSender(),
-            wallet,
-            _delistAfter,
-            _fee,
-            _listqualifyPercentage,
-            _listqualifyPercentageBase,
-            feeBase
-        );
+        emit NewOffer(_msgSender(), wallet, _fee, feeBase);
     }
 
     /**
@@ -142,16 +125,6 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     {
         percentage = _changeListInsuranceAmount(newFees, newBase);
         emit ChangeListInsuranceAmount(newFees, newBase);
-    }
-
-    /**
-     * @dev only called by `owner` to change the name and `whenPaused`
-     *@param duration duration
-     *
-     */
-    function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
-        _changeDelistAfter(duration);
-        emit ChangeDelistAfter(duration);
     }
 
     /**

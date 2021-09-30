@@ -11,8 +11,6 @@ pragma abicoder v2;
 contract MarketPlaceListing {
     // all fees are in perentage
 
-    // delist after 6 month
-    uint256 public delistAfter = 6 * 30 days;
     uint256 public fulfillDuration = 3 days;
 
     constructor() {}
@@ -111,9 +109,7 @@ contract MarketPlaceListing {
      * @param seller seller address
      * @param tokenId token id
      * @param listingPrice min price
-     * @param insurancAmount  amount of token locked as insurance from the seller 
 
-     * @param releaseTime  time to delist for free
      * @return true if it's done
      */
     function _listOnMarketPlace(
@@ -121,9 +117,7 @@ contract MarketPlaceListing {
         address tokenAddress,
         address seller,
         uint256 tokenId,
-        uint256 listingPrice,
-        uint256 insurancAmount,
-        uint256 releaseTime
+        uint256 listingPrice
     ) internal returns (bool) {
         _tokenListings[listId] = Listing(
             tokenAddress,
@@ -134,9 +128,9 @@ contract MarketPlaceListing {
             address(0),
             false,
             false,
-            releaseTime,
+            block.timestamp,
             0,
-            insurancAmount,
+            0,
             0,
             ListingStatus.OnMarket
         );
@@ -195,15 +189,5 @@ contract MarketPlaceListing {
         if (buyer != address(0)) {
             _tokenListings[listId].buyer = buyer;
         }
-    }
-
-    /**
-     *  @notice  all conditions and checks are made prior to this function
-     * @dev  change the duration of which user can delist thier nfts for free after it
-     * @param duration in seconds , eg 30 days in desconds
-     *
-     */
-    function _changeDelistAfter(uint256 duration) internal {
-        delistAfter = duration;
     }
 }

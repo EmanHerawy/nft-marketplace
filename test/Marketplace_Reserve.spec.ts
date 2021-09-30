@@ -36,12 +36,11 @@ import { tokenFixture } from './shared/fixtures'
     * bid on auction 2 , status : non winner bidder //10
     * bid on auction 2 , status :  non winner bidder//10
     * bid on auction 4 , status : winner bidder , not fulfill ,  dispute   //0
- * user 4 has listed on marketplace , insurance amount  is 10 
-    * expected result after free reserves 
+  * expected result after free reserves 
     * user 1  total ,40 , after freeing reserves 0
     * user 2 total , 40  , after freeing reserves 10
     * user 3 40 , after freeing reserves 10
-    * user  10+40 = 50 , after freeing reserves 10
+    * user   40 = 40 , after freeing reserves 0
  * 
  */
 chai.use(solidity)
@@ -58,8 +57,7 @@ const royaltyBase=10
 const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
 // let marketplaceTokenId1 = mintedNFT[0]
 let marketplaceTokenId1:any;
-const   listqualifyPercentage = 10;
-const   listqualifyPercentageBase = 10;
+ 
 let listingId1:any;
 let listingId2:any;
 let listingId3:any;
@@ -72,13 +70,6 @@ let minimumBid=10;
 let duration=60*60*15; // 15 hours
 let isForSale=false;
 let forSalePrice=10000;
-const calcFees=(price:number,share:number,base:number):number=>{
-
-  // round decimal to the nearst value
-  const _base = base * 100;
- return price*(share/_base);
-
-}
 
   describe('StartFi marketPlace: let users to free their stakes for auction they lose', () => {
    
@@ -154,22 +145,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
         .withArgs(wallet.address, marketPlace.address, mintedNFT[3])
       expect(await NFT.getApproved(mintedNFT[3])).to.eq(marketPlace.address)
     })
-    it('deposit stakes', async () => {
-      const stakeAmount =  calcFees(price1,listqualifyPercentage,listqualifyPercentageBase);
-      console.log(stakeAmount,'stakeAmount');
-      
-      await expect(token.approve(stakes.address, stakeAmount))
-        .to.emit(token, 'Approval')
-        .withArgs(wallet.address, stakes.address, stakeAmount)
-      expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
-  
-      await stakes.deposit(user4.address, stakeAmount)
-      const reserves = await stakes.getReserves(user4.address)
-      expect(reserves.toNumber()).to.eq(stakeAmount)
-  
-      const stakeAllowance = await marketPlace.getStakeAllowance(user4.address)
-      expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
-    })
+ 
 
     it('create 4 auctions and 1 list', async () => {
       await expect(marketPlace.connect(user4).listOnMarketplace(NFT.address, marketplaceTokenId1, price1)).to.emit(
@@ -271,7 +247,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
   
       await stakes.deposit(user4.address, stakeAmount*4)
         reserves = await stakes.getReserves(user4.address)
-      expect(reserves.toNumber()).to.eq(stakeAmount*4 +10)// user 4 has deposited 10 to list
+      expect(reserves.toNumber()).to.eq(stakeAmount*4 )
   
 
     })
@@ -345,10 +321,10 @@ const calcFees=(price:number,share:number,base:number):number=>{
       expect(await marketPlace.getUserReserved(user3.address)).to.eq(expectedReserves)
        // check balance 
     })
-    it('user 4 reserves should be after freeing reserves =10', async () => {
+    it('user 4 reserves should be after freeing reserves =0', async () => {
      
       await expect(marketPlace.connect(user4).freeReserves()).to.emit(marketPlace, 'UserReservesFree')
-      const expectedReserves= BigNumber.from(10)
+      const expectedReserves= BigNumber.from(0)
       expect(await marketPlace.getUserReserved(user4.address)).to.eq(expectedReserves)
        // check balance 
     })

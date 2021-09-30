@@ -17,7 +17,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
     //
     uint256 public listingId;
-    // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved ,
+    // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted ,  item  disputed , user free reserved ,
     ///
     event ListOnMarketplace(
         bytes32 listId,
@@ -25,19 +25,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         address buyer,
         uint256 tokenId,
         uint256 listingPrice,
-        uint256 releaseTime,
-        uint256 insurancAmount,
         uint256 timestamp
     );
-    event DeListOffMarketplace(
-        bytes32 listId,
-        address nFTContract,
-        address owner,
-        uint256 tokenId,
-        uint256 fineFees,
-        uint256 releaseTime,
-        uint256 timestamp
-    );
+    event DeListOffMarketplace(bytes32 listId, address nFTContract, address owner, uint256 tokenId, uint256 timestamp);
     event MigrateEmergency(
         bytes32 listId,
         address nFTContract,
@@ -181,68 +171,16 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 tokenId,
         uint256 listingPrice
     ) public whenNotPaused isNotZero(listingPrice) returns (bytes32 listId) {
-        uint256 releaseTime;
-        uint256 listQualifyAmount;
-        if (offerTerms[_msgSender()].fee != 0) {
-            releaseTime = StartFiFinanceLib._calcSum(block.timestamp, offerTerms[_msgSender()].delistAfter);
-            listQualifyAmount = StartFiFinanceLib._calcFees(
-                listingPrice,
-                offerTerms[_msgSender()].listqualifyPercentage,
-                offerTerms[_msgSender()].listqualifyPercentageBase
-            );
-        } else {
-            releaseTime = StartFiFinanceLib._calcSum(block.timestamp, delistAfter);
-            listQualifyAmount = StartFiFinanceLib._calcFees(
-                listingPrice,
-                listqualifyPercentage,
-                listqualifyPercentageBase
-            );
-        }
         listingId++;
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingId));
-        // check that sender is qualified
-        // should not be less than 1 USD
-        if (listQualifyAmount < stfiUsdt) {
-            listQualifyAmount = stfiUsdt;
-        }
-        require(
-            getStakeAllowance(
-                _msgSender() /*, 0*/
-            ) >= listQualifyAmount,
-            'Not enough reserves'
-        );
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingId));
+
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
         // transfer token to contract
 
-        // update reserved
-        _updateUserReserves(_msgSender(), listQualifyAmount, true);
-        bytes32[] storage listings = userListing[_msgSender()];
-        listings.push(listId);
-        userListing[_msgSender()] = listings;
         // list
-        require(
-            _listOnMarketPlace(
-                listId,
-                nFTContract,
-                _msgSender(),
-                tokenId,
-                listingPrice,
-                listQualifyAmount,
-                releaseTime
-            ),
-            "Couldn't list the item"
-        );
-        emit ListOnMarketplace(
-            listId,
-            nFTContract,
-            _msgSender(),
-            tokenId,
-            listingPrice,
-            releaseTime,
-            listQualifyAmount,
-            block.timestamp
-        );
+        require(_listOnMarketPlace(listId, nFTContract, _msgSender(), tokenId, listingPrice), "Couldn't list the item");
+        emit ListOnMarketplace(listId, nFTContract, _msgSender(), tokenId, listingPrice, block.timestamp);
         require(
             _excuteTransfer(_msgSender(), nFTContract, tokenId, address(this), address(0), 0, 0, 0, false),
             "NFT token couldn't be transfered"
@@ -441,9 +379,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 ) >= insurancAmount,
                 'Not enough reserves'
             );
-            bytes32[] storage listings = userListing[_msgSender()];
+            bytes32[] storage listings = userBids[_msgSender()];
             listings.push(listingId);
-            userListing[_msgSender()] = listings;
+            userBids[_msgSender()] = listings;
             // update user reserves
             // reserve Zero couldn't be at any case
             require(_updateUserReserves(_msgSender(), insurancAmount, true) > 0, 'Reserve Zero is not allowed');
@@ -616,7 +554,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     // delist
 
     /**
-    ** Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost while the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPremit`]  might lose the insurance amount if they decided to delist the items before the greed time stated in the contract `delistAfter`
+    ** Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost as well as the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPremit`]  
     - Only buyers can delist their own items 
     - Auction items can't delisted until the auction ended
     **
@@ -629,54 +567,28 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      */
     function deList(bytes32 listingId) external whenNotPaused returns (address _NFTContract, uint256 tokenId) {
         ListingStatus status = _tokenListings[listingId].status;
-        address buyer = _tokenListings[listingId].buyer;
-        address _owner = _tokenListings[listingId].seller;
-        _NFTContract = _tokenListings[listingId].nFTContract;
-        uint256 releaseTime = _tokenListings[listingId].releaseTime;
-        tokenId = _tokenListings[listingId].tokenId;
-        require(_owner == _msgSender(), 'Caller is not the owner');
-        require(buyer == address(0), 'Already bought token');
-        uint256 timeToDelistAuction = StartFiFinanceLib._calcSum(releaseTime, fulfillDuration);
 
         require(
             status == ListingStatus.OnMarket || status == ListingStatus.onAuction,
-            'Already bought or canceled token'
-        );
-        require(
-            (timeToDelistAuction <= block.timestamp && status == ListingStatus.onAuction) ||
-                (status == ListingStatus.OnMarket),
-            "Can't delist"
+            'Item is not on Auction or Listed for sale'
         );
 
-        // if realse time < now , pay
-        if (status != ListingStatus.onAuction) {
-            if (releaseTime > block.timestamp) {
-                // if it's not auction ? pay,
+        address buyer = _tokenListings[listingId].buyer;
+        address _owner = _tokenListings[listingId].seller;
+        require(_owner == _msgSender(), 'Caller is not the owner');
+        require(buyer == address(0), 'Already bought token');
+        _NFTContract = _tokenListings[listingId].nFTContract;
+        tokenId = _tokenListings[listingId].tokenId;
 
-                //TODO: deduct the fine from his stake contract
-
-                require(
-                    _deduct(_owner, _adminWallet, _tokenListings[listingId].insurancAmount),
-                    "couldn't deduct the fine"
-                );
-            }
-            // update user reserves
-            // reserve nigative couldn't be at any case
-
-            _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false);
+        if (status == ListingStatus.onAuction) {
+            uint256 releaseTime = _tokenListings[listingId].releaseTime;
+            uint256 timeToDelistAuction = StartFiFinanceLib._calcSum(releaseTime, fulfillDuration);
+            require((timeToDelistAuction <= block.timestamp), 'Not the time to Delist auction');
         }
 
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
-        emit DeListOffMarketplace(
-            listingId,
-            _NFTContract,
-            _owner,
-            tokenId,
-            _tokenListings[listingId].insurancAmount,
-            releaseTime,
-            block.timestamp
-        );
+        emit DeListOffMarketplace(listingId, _NFTContract, _owner, tokenId, block.timestamp);
         // trnasfer token
 
         require(
@@ -728,7 +640,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 royaltyAmount;
         uint256 fees;
         uint256 netPrice;
-        uint256 ListingQualAmount = _tokenListings[listingId].insurancAmount;
         // transfer price
         if (offerTerms[seller].fee != 0) {
             (issuer, royaltyAmount, fees, netPrice) = StartFiFinanceLib._getListingFinancialInfo(
@@ -746,11 +657,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _feeFraction,
                 _feeBase
             );
-        }
-
-        // free reserves for seller
-        if (_tokenListings[listingId].status == ListingStatus.OnMarket) {
-            _updateUserReserves(seller, ListingQualAmount, false);
         }
 
         // finish listing
@@ -891,35 +797,33 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         // iterate over the listng key map
         // if it's sold, canceled,  free if he is participating on this listing
         uint256 lastReserves = userReserves[_msgSender()];
-        bytes32[] memory listings = userListing[_msgSender()];
-        delete userListing[_msgSender()];
-        bytes32[] storage newListings = userListing[_msgSender()];
+        bytes32[] memory currentUserBids = userBids[_msgSender()];
+        delete userBids[_msgSender()];
+        bytes32[] storage newUserBids = userBids[_msgSender()];
 
         // loop
-        for (uint256 index = 0; index < listings.length; index++) {
+
+        // loop
+        for (uint256 index = 0; index < currentUserBids.length; index++) {
             /**
              * we want to free stakes bidders do in auctions with the following scenarios
              * - bidder is not the winner and the auction is ended ( bought, fulfilled , dispute) , free
              *- auction is finished, is not the winner bidder and winner bidder and auction creator have not fulfilled or disputed , free
              */
-            if (_tokenListings[listings[index]].status == ListingStatus.onAuction) {
+            if (_tokenListings[currentUserBids[index]].status == ListingStatus.onAuction) {
                 if (
-                    _tokenListings[listings[index]].disputeTime < block.timestamp &&
-                    bidToListing[listings[index]].bidder != _msgSender()
+                    _tokenListings[currentUserBids[index]].disputeTime < block.timestamp &&
+                    bidToListing[currentUserBids[index]].bidder != _msgSender()
                 ) {
                     // free
                 } else {
-                    newListings.push(listings[index]);
-                    curentReserves = _tokenListings[listings[index]].insurancAmount;
+                    newUserBids.push(currentUserBids[index]);
+                    curentReserves += _tokenListings[currentUserBids[index]].insurancAmount;
                 }
-            } else if (_tokenListings[listings[index]].status == ListingStatus.OnMarket) {
-                newListings.push(listings[index]);
-                uint256 listQualifyAmount = _tokenListings[listings[index]].insurancAmount;
-
-                curentReserves += listQualifyAmount;
             }
         }
-        userListing[_msgSender()] = newListings;
+
+        userBids[_msgSender()] = newUserBids;
         require(_setUserReserves(_msgSender(), curentReserves), 'set reserve faild');
         emit UserReservesFree(_msgSender(), lastReserves, curentReserves, block.timestamp);
     }
@@ -1000,14 +904,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             status == ListingStatus.OnMarket || status == ListingStatus.onAuction,
             'Already bought or canceled token'
         );
-
-        // if realse time < now , pay
-        if (status == ListingStatus.OnMarket) {
-            // update user reserves
-            // reserve nigative couldn't be at any case
-
-            _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false);
-        }
 
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);

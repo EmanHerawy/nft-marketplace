@@ -35,7 +35,7 @@ All payments are done via STFI and no other tokens or coins are supported to pay
 
 - [`listOnMarketplace`]: Users who want to list their NFT for sale with fixed price call this function 
     - user MUST approve contract to transfer the NFT     
-    - user MUST have enough stakes used as insurance to not delist the item before the duration stated in the smart contract , if they decided to delist before that time, they lose this insurance. the required insurance amount is a percentage  based on the listing price.
+
 - [`listOnMarketplaceWithPremit`]: Users who want to list their NFT for sale with fixed price call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`listOnMarketplace`] internally
  ![add-item-for-sale](https://user-images.githubusercontent.com/10674070/134208929-6499ac39-4bba-40fd-8df2-b7d823a1232f.png)
 
@@ -77,7 +77,7 @@ All payments are done via STFI and no other tokens or coins are supported to pay
 - [`buyNowWithPremit`]:Users who want to buy an NFT from the marketplace whether it's fixed price or auction with `sellForEnabled = true` can this call this function without sending prior transaction to `approve` the marketplace to transfer STFI tokens. This function call`permit` [`eip-2612`] then call [`buyNow`] internally.
 ![buy-item](https://user-images.githubusercontent.com/10674070/134209164-2c33cb88-42be-488a-9018-a0ebae98c956.png)
 
-- [`deList`]: Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost while the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPremit`]  might lose the insurance amount if they decided to delist the items before the greed time stated in the contract `delistAfter`
+- [`deList`]: Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost as well as  the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPremit`]  ted in the contract `delistAfter`
     - Only buyers can delist their own items 
     - Auction items can't delisted until the auction ended
 ![delist-item](https://user-images.githubusercontent.com/10674070/134209183-c2a5b5c1-bbe9-48a2-8518-f08f364ac6fa.png)
@@ -114,7 +114,7 @@ users need to stake STFI to list or bid in the marketplace , these tokens needs 
 ![change-marketplace-name](https://user-images.githubusercontent.com/10674070/134209731-361201fc-7ba3-467d-ade5-a8c3cf9d39dc.png)
 ![change-fulfill-duration](https://user-images.githubusercontent.com/10674070/134209770-83babf4d-8400-4532-b8a9-fcd7d11b570f.png)
 ![change-fees](https://user-images.githubusercontent.com/10674070/134209801-e1990dd0-83ad-493b-8b0e-21c2166cdebc.png)
-![change-delist-duration](https://user-images.githubusercontent.com/10674070/134209887-f821b3b1-a330-4d46-9cf5-07c0143077da.png)
+
 ![chainge-reputation-contract](https://user-images.githubusercontent.com/10674070/134209904-5bd1b920-446f-44e9-a4a9-96e2eb9e6b33.png)
 ![add-offer](https://user-images.githubusercontent.com/10674070/134209941-b90d03e1-8c9b-4220-be81-977cfdaf8987.png)
 
