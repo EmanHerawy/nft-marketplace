@@ -46,6 +46,11 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
 
         _;
     }
+    modifier notZeroAddress(address newAddress) {
+        require(newAddress != address(0), 'Zero address is not allowed');
+
+        _;
+    }
 
     /******************************************* state functions go here ********************************************************* */
 
@@ -91,7 +96,12 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      *@param _reputationContract marketplace reputation contract
      *
      */
-    function changeReputationContract(address _reputationContract) external onlyOwner whenPaused {
+    function changeReputationContract(address _reputationContract)
+        external
+        notZeroAddress(_reputationContract)
+        onlyOwner
+        whenPaused
+    {
         _changeReputationContract(_reputationContract);
         emit ChangeReputationContract(_reputationContract);
     }
@@ -101,7 +111,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      *@param _token token address
      *
      */
-    function changeUtilityToken(address _token) external onlyOwner whenPaused {
+    function changeUtilityToken(address _token) external notZeroAddress(_token) onlyOwner whenPaused {
         _changeUtilityToken(_token);
         emit ChangeUtilityToken(_token);
     }
@@ -201,9 +211,8 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      * - the caller must be the admin.
      * - the `newWallet` must not be empty.
      */
-    function updateAdminWallet(address newWallet) external {
+    function updateAdminWallet(address newWallet) external notZeroAddress(newWallet) {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'UnAuthorized caller');
-        require(newWallet != address(0), 'Zero address is not allowed');
         _adminWallet = newWallet;
         _setupRole(DEFAULT_ADMIN_ROLE, newWallet);
         emit UpdateAdminWallet(newWallet);
