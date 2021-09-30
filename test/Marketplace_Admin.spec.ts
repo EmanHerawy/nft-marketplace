@@ -193,7 +193,10 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
       .to.emit(marketPlace, 'ChangeMarketPlaceName')
       .withArgs('new STFI marketplace')
   })
-
+  it('Should set marketCap when paused', async () => {
+    const transactionRecipe = await marketPlace.setUsdCap(5)
+    expect(transactionRecipe.from).equal(wallet.address)
+  })
   it('Admin should change name:revert not the owner ', async () => {
     await expect(marketPlace.connect(user1).changeMarketPlaceName('new STFI marketplace')).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
@@ -218,11 +221,12 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
       .to.emit(marketPlace, 'UpdateAdminWallet')
       .withArgs(user1.address)
   })
-
-  it('Should set marketCap', async () => {
-    const transactionRecipe = await marketPlace.setUsdCap(5)
-    expect(transactionRecipe.from).equal(wallet.address)
+    it('Should not set marketCap when unpaused', async () => {
+     await expect(marketPlace.setUsdCap(5)).to.revertedWith('Pausable: not paused')
   })
+
+
+
   it('Should set STFI price', async () => {
     const transactionRecipe = await marketPlace.setPrice(23)
     expect(transactionRecipe.from).equal(wallet.address)
