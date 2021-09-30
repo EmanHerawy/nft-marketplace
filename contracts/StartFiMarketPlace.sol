@@ -523,10 +523,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         // update user reserves
         // reserve nigative couldn't be at any case
-        require(
-            _updateUserReserves(winnerBidder, _tokenListings[listingId].insurancAmount, false) >= 0,
-            'negative reserve is not allowed'
-        );
+
+        _updateUserReserves(winnerBidder, _tokenListings[listingId].insurancAmount, false);
 
         // TODO: add reputation points to both seller and buyer
         _addreputationPoints(seller, winnerBidder, bidPrice);
@@ -661,10 +659,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             }
             // update user reserves
             // reserve nigative couldn't be at any case
-            require(
-                _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false) >= 0,
-                'negative reserve is not allowed'
-            );
+
+            _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false);
         }
 
         // finish listing
@@ -751,7 +747,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
         // free reserves for seller
         if (_tokenListings[listingId].status == ListingStatus.OnMarket) {
-            require(_updateUserReserves(seller, ListingQualAmount, false) >= 0, 'negative reserve is not allowed');
+            _updateUserReserves(seller, ListingQualAmount, false);
         }
 
         // finish listing
@@ -847,8 +843,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
         require(_deduct(winnerBidder, seller, remaining), "Marketplace: couldn't deduct the fine for the admin wallet");
 
-        require(_updateUserReserves(winnerBidder, insurancAmount, false) >= 0, 'negative reserve is not allowed');
-
+        _updateUserReserves(winnerBidder, insurancAmount, false);
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
         // if bid time is less than 15 min, increase by 15 min
@@ -1007,10 +1002,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         if (status == ListingStatus.OnMarket) {
             // update user reserves
             // reserve nigative couldn't be at any case
-            require(
-                _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false) >= 0,
-                'negative reserve is not allowed'
-            );
+
+            _updateUserReserves(_msgSender(), _tokenListings[listingId].insurancAmount, false);
         }
 
         // finish listing
