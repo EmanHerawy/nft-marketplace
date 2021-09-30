@@ -1,0 +1,676 @@
+{
+  "address": "0xffEA8f772D129eF0A0AFd98b4c31814fe8579C09",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BURNER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MINTER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burnReputation",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "seller",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "calcAndMintintReputation",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "index",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRoleMember",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleMemberCount",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "getUserReputation",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "mintReputation",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xa4b1f048c37e616db35e18ec1bc33f4faeb332cdd234b6d0fc9d43c1fa397396",
+  "receipt": {
+    "to": null,
+    "from": "0x93458421DE0DC7D149A59FF0DaA41AB8C01aCF40",
+    "contractAddress": "0xffEA8f772D129eF0A0AFd98b4c31814fe8579C09",
+    "transactionIndex": 5,
+    "gasUsed": "1190618",
+    "logsBloom": "0x00000004000010000000000000000000400000000000000000000020000000000000080000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000200020000000000000000000800000000000000000000000000001000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000004000001000000000000000040000000000000000000000000000001000000000000100000000000020000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x6f18023bc0525de104a1439ae7fed899c5a9d84fe8e642b955b948e9f6592653",
+    "transactionHash": "0xa4b1f048c37e616db35e18ec1bc33f4faeb332cdd234b6d0fc9d43c1fa397396",
+    "logs": [
+      {
+        "transactionIndex": 5,
+        "blockNumber": 11104521,
+        "transactionHash": "0xa4b1f048c37e616db35e18ec1bc33f4faeb332cdd234b6d0fc9d43c1fa397396",
+        "address": "0xffEA8f772D129eF0A0AFd98b4c31814fe8579C09",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x00000000000000000000000093458421de0dc7d149a59ff0daa41ab8c01acf40",
+          "0x00000000000000000000000093458421de0dc7d149a59ff0daa41ab8c01acf40"
+        ],
+        "data": "0x",
+        "logIndex": 2,
+        "blockHash": "0x6f18023bc0525de104a1439ae7fed899c5a9d84fe8e642b955b948e9f6592653"
+      },
+      {
+        "transactionIndex": 5,
+        "blockNumber": 11104521,
+        "transactionHash": "0xa4b1f048c37e616db35e18ec1bc33f4faeb332cdd234b6d0fc9d43c1fa397396",
+        "address": "0xffEA8f772D129eF0A0AFd98b4c31814fe8579C09",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+          "0x00000000000000000000000093458421de0dc7d149a59ff0daa41ab8c01acf40",
+          "0x00000000000000000000000093458421de0dc7d149a59ff0daa41ab8c01acf40"
+        ],
+        "data": "0x",
+        "logIndex": 3,
+        "blockHash": "0x6f18023bc0525de104a1439ae7fed899c5a9d84fe8e642b955b948e9f6592653"
+      },
+      {
+        "transactionIndex": 5,
+        "blockNumber": 11104521,
+        "transactionHash": "0xa4b1f048c37e616db35e18ec1bc33f4faeb332cdd234b6d0fc9d43c1fa397396",
+        "address": "0xffEA8f772D129eF0A0AFd98b4c31814fe8579C09",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848",
+          "0x00000000000000000000000093458421de0dc7d149a59ff0daa41ab8c01acf40",
+          "0x00000000000000000000000093458421de0dc7d149a59ff0daa41ab8c01acf40"
+        ],
+        "data": "0x",
+        "logIndex": 4,
+        "blockHash": "0x6f18023bc0525de104a1439ae7fed899c5a9d84fe8e642b955b948e9f6592653"
+      }
+    ],
+    "blockNumber": 11104521,
+    "cumulativeGasUsed": "1454854",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "aee37ec5b576732f7c85fdf26fc1c9b9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"BURNER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MINTER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"burnReputation\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"balance\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"seller\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"totalAmount\",\"type\":\"uint256\"}],\"name\":\"calcAndMintintReputation\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"index\",\"type\":\"uint256\"}],\"name\":\"getRoleMember\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleMemberCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getUserReputation\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"balance\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"mintReputation\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"balance\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"Eman Herawy, StartFi Team\",\"kind\":\"dev\",\"methods\":{\"burnReputation(address,uint256)\":{\"details\":\"this function is to burn reputation points for the \\\"to\\\"\",\"params\":{\"amount\":\": points to be subtract to the \\\" to \\\" balance\",\"to\":\": reciepiant address\"},\"returns\":{\"balance\":\": \\\"to\\\" current reputation balance\"}},\"calcAndMintintReputation(address,address,uint256)\":{\"details\":\"this function is to mint reputation points for the \\\"to\\\"\",\"params\":{\"buyer\":\": buyer address\",\"seller\":\": buyer address\",\"totalAmount\":\": price\"},\"returns\":{\"_0\":\"true if it's passed : \\\"to\\\" current reputation balance\"}},\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"getRoleMember(bytes32,uint256)\":{\"details\":\"Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information.\"},\"getRoleMemberCount(bytes32)\":{\"details\":\"Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role.\"},\"grantRole(bytes32,address)\":{\"details\":\"Overload {grantRole} to track enumerable memberships\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"mintReputation(address,uint256)\":{\"details\":\"this function is to mint reputation points for the \\\"to\\\"\",\"params\":{\"amount\":\": points to be added to the \\\" to \\\" balance\",\"to\":\": reciepiant address\"},\"returns\":{\"balance\":\": \\\"to\\\" current reputation balance\"}},\"renounceRole(bytes32,address)\":{\"details\":\"Overload {renounceRole} to track enumerable memberships\"},\"revokeRole(bytes32,address)\":{\"details\":\"Overload {revokeRole} to track enumerable memberships\"},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"title\":\"StartFi Reputation contract desc contract to mamange the reputation for startfi users\",\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"burnReputation(address,uint256)\":{\"notice\":\"only called by caller in the burner role\"},\"calcAndMintintReputation(address,address,uint256)\":{\"notice\":\"only called by caller in the minter role\"},\"mintReputation(address,uint256)\":{\"notice\":\"only called by caller in the minter role\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/StartFiReputation.sol\":\"StartFiReputation\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/AccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\nimport \\\"../utils/Strings.sol\\\";\\nimport \\\"../utils/introspection/ERC165.sol\\\";\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC165 detection.\\n */\\ninterface IAccessControl {\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n    function grantRole(bytes32 role, address account) external;\\n    function revokeRole(bytes32 role, address account) external;\\n    function renounceRole(bytes32 role, address account) external;\\n}\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it.\\n */\\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\\n    struct RoleData {\\n        mapping (address => bool) members;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping (bytes32 => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     *\\n     * _Available since v3.1._\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call, an admin role\\n     * bearer except when using {_setupRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with a standardized message including the required role.\\n     *\\n     * The format of the revert reason is given by the following regular expression:\\n     *\\n     *  /^AccessControl: account (0x[0-9a-f]{20}) is missing role (0x[0-9a-f]{32})$/\\n     *\\n     * _Available since v4.1._\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role, _msgSender());\\n        _;\\n    }\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId\\n            || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view override returns (bool) {\\n        return _roles[role].members[account];\\n    }\\n\\n    /**\\n     * @dev Revert with a standard message if `account` is missing `role`.\\n     *\\n     * The format of the revert reason is given by the following regular expression:\\n     *\\n     *  /^AccessControl: account (0x[0-9a-f]{20}) is missing role (0x[0-9a-f]{32})$/\\n     */\\n    function _checkRole(bytes32 role, address account) internal view {\\n        if(!hasRole(role, account)) {\\n            revert(string(abi.encodePacked(\\n                \\\"AccessControl: account \\\",\\n                Strings.toHexString(uint160(account), 20),\\n                \\\" is missing role \\\",\\n                Strings.toHexString(uint256(role), 32)\\n            )));\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view override returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual override onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `account`.\\n     */\\n    function renounceRole(bytes32 role, address account) public virtual override {\\n        require(account == _msgSender(), \\\"AccessControl: can only renounce roles for self\\\");\\n\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event. Note that unlike {grantRole}, this function doesn't perform any\\n     * checks on the calling account.\\n     *\\n     * [WARNING]\\n     * ====\\n     * This function should only be called from the constructor when setting\\n     * up the initial roles for the system.\\n     *\\n     * Using this function in any other way is effectively circumventing the admin\\n     * system imposed by {AccessControl}.\\n     * ====\\n     */\\n    function _setupRole(bytes32 role, address account) internal virtual {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        emit RoleAdminChanged(role, getRoleAdmin(role), adminRole);\\n        _roles[role].adminRole = adminRole;\\n    }\\n\\n    function _grantRole(bytes32 role, address account) private {\\n        if (!hasRole(role, account)) {\\n            _roles[role].members[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n        }\\n    }\\n\\n    function _revokeRole(bytes32 role, address account) private {\\n        if (hasRole(role, account)) {\\n            _roles[role].members[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x98fac37221212c8f126f198d262a4df86394bd1a9969f61e40739fe8ac013dd8\",\"license\":\"MIT\"},\"@openzeppelin/contracts/access/AccessControlEnumerable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./AccessControl.sol\\\";\\nimport \\\"../utils/structs/EnumerableSet.sol\\\";\\n\\n/**\\n * @dev External interface of AccessControlEnumerable declared to support ERC165 detection.\\n */\\ninterface IAccessControlEnumerable {\\n    function getRoleMember(bytes32 role, uint256 index) external view returns (address);\\n    function getRoleMemberCount(bytes32 role) external view returns (uint256);\\n}\\n\\n/**\\n * @dev Extension of {AccessControl} that allows enumerating the members of each role.\\n */\\nabstract contract AccessControlEnumerable is IAccessControlEnumerable, AccessControl {\\n    using EnumerableSet for EnumerableSet.AddressSet;\\n\\n    mapping (bytes32 => EnumerableSet.AddressSet) private _roleMembers;\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControlEnumerable).interfaceId\\n            || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns one of the accounts that have `role`. `index` must be a\\n     * value between 0 and {getRoleMemberCount}, non-inclusive.\\n     *\\n     * Role bearers are not sorted in any particular way, and their ordering may\\n     * change at any point.\\n     *\\n     * WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure\\n     * you perform all queries on the same block. See the following\\n     * https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post]\\n     * for more information.\\n     */\\n    function getRoleMember(bytes32 role, uint256 index) public view override returns (address) {\\n        return _roleMembers[role].at(index);\\n    }\\n\\n    /**\\n     * @dev Returns the number of accounts that have `role`. Can be used\\n     * together with {getRoleMember} to enumerate all bearers of a role.\\n     */\\n    function getRoleMemberCount(bytes32 role) public view override returns (uint256) {\\n        return _roleMembers[role].length();\\n    }\\n\\n    /**\\n     * @dev Overload {grantRole} to track enumerable memberships\\n     */\\n    function grantRole(bytes32 role, address account) public virtual override {\\n        super.grantRole(role, account);\\n        _roleMembers[role].add(account);\\n    }\\n\\n    /**\\n     * @dev Overload {revokeRole} to track enumerable memberships\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual override {\\n        super.revokeRole(role, account);\\n        _roleMembers[role].remove(account);\\n    }\\n\\n    /**\\n     * @dev Overload {renounceRole} to track enumerable memberships\\n     */\\n    function renounceRole(bytes32 role, address account) public virtual override {\\n        super.renounceRole(role, account);\\n        _roleMembers[role].remove(account);\\n    }\\n\\n    /**\\n     * @dev Overload {_setupRole} to track enumerable memberships\\n     */\\n    function _setupRole(bytes32 role, address account) internal virtual override {\\n        super._setupRole(role, account);\\n        _roleMembers[role].add(account);\\n    }\\n}\\n\",\"keccak256\":\"0x0d616363c1a1e6f9f489303f94df0cbe606826ab4944d315c3801a07f9b8d4ee\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Strings.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev String operations.\\n */\\nlibrary Strings {\\n    bytes16 private constant alphabet = \\\"0123456789abcdef\\\";\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` decimal representation.\\n     */\\n    function toString(uint256 value) internal pure returns (string memory) {\\n        // Inspired by OraclizeAPI's implementation - MIT licence\\n        // https://github.com/oraclize/ethereum-api/blob/b42146b063c7d6ee1358846c198246239e9360e8/oraclizeAPI_0.4.25.sol\\n\\n        if (value == 0) {\\n            return \\\"0\\\";\\n        }\\n        uint256 temp = value;\\n        uint256 digits;\\n        while (temp != 0) {\\n            digits++;\\n            temp /= 10;\\n        }\\n        bytes memory buffer = new bytes(digits);\\n        while (value != 0) {\\n            digits -= 1;\\n            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));\\n            value /= 10;\\n        }\\n        return string(buffer);\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.\\n     */\\n    function toHexString(uint256 value) internal pure returns (string memory) {\\n        if (value == 0) {\\n            return \\\"0x00\\\";\\n        }\\n        uint256 temp = value;\\n        uint256 length = 0;\\n        while (temp != 0) {\\n            length++;\\n            temp >>= 8;\\n        }\\n        return toHexString(value, length);\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.\\n     */\\n    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {\\n        bytes memory buffer = new bytes(2 * length + 2);\\n        buffer[0] = \\\"0\\\";\\n        buffer[1] = \\\"x\\\";\\n        for (uint256 i = 2 * length + 1; i > 1; --i) {\\n            buffer[i] = alphabet[value & 0xf];\\n            value >>= 4;\\n        }\\n        require(value == 0, \\\"Strings: hex length insufficient\\\");\\n        return string(buffer);\\n    }\\n\\n}\\n\",\"keccak256\":\"0x456e9b3a2bfe189b5249857f624f4139e59331db518483b456c4e587a20552e0\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n *\\n * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0x5718c5df9bd67ac68a796961df938821bb5dc0cd4c6118d77e9145afb187409b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0xa28007762d9da9db878dd421960c8cb9a10471f47ab5c1b3309bfe48e9e79ff4\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/structs/EnumerableSet.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Library for managing\\n * https://en.wikipedia.org/wiki/Set_(abstract_data_type)[sets] of primitive\\n * types.\\n *\\n * Sets have the following properties:\\n *\\n * - Elements are added, removed, and checked for existence in constant time\\n * (O(1)).\\n * - Elements are enumerated in O(n). No guarantees are made on the ordering.\\n *\\n * ```\\n * contract Example {\\n *     // Add the library methods\\n *     using EnumerableSet for EnumerableSet.AddressSet;\\n *\\n *     // Declare a set state variable\\n *     EnumerableSet.AddressSet private mySet;\\n * }\\n * ```\\n *\\n * As of v3.3.0, sets of type `bytes32` (`Bytes32Set`), `address` (`AddressSet`)\\n * and `uint256` (`UintSet`) are supported.\\n */\\nlibrary EnumerableSet {\\n    // To implement this library for multiple types with as little code\\n    // repetition as possible, we write it in terms of a generic Set type with\\n    // bytes32 values.\\n    // The Set implementation uses private functions, and user-facing\\n    // implementations (such as AddressSet) are just wrappers around the\\n    // underlying Set.\\n    // This means that we can only create new EnumerableSets for types that fit\\n    // in bytes32.\\n\\n    struct Set {\\n        // Storage of set values\\n        bytes32[] _values;\\n\\n        // Position of the value in the `values` array, plus 1 because index 0\\n        // means a value is not in the set.\\n        mapping (bytes32 => uint256) _indexes;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function _add(Set storage set, bytes32 value) private returns (bool) {\\n        if (!_contains(set, value)) {\\n            set._values.push(value);\\n            // The value is stored at length-1, but we add 1 to all indexes\\n            // and use 0 as a sentinel value\\n            set._indexes[value] = set._values.length;\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function _remove(Set storage set, bytes32 value) private returns (bool) {\\n        // We read and store the value's index to prevent multiple reads from the same storage slot\\n        uint256 valueIndex = set._indexes[value];\\n\\n        if (valueIndex != 0) { // Equivalent to contains(set, value)\\n            // To delete an element from the _values array in O(1), we swap the element to delete with the last one in\\n            // the array, and then remove the last element (sometimes called as 'swap and pop').\\n            // This modifies the order of the array, as noted in {at}.\\n\\n            uint256 toDeleteIndex = valueIndex - 1;\\n            uint256 lastIndex = set._values.length - 1;\\n\\n            // When the value to delete is the last one, the swap operation is unnecessary. However, since this occurs\\n            // so rarely, we still do the swap anyway to avoid the gas cost of adding an 'if' statement.\\n\\n            bytes32 lastvalue = set._values[lastIndex];\\n\\n            // Move the last value to the index where the value to delete is\\n            set._values[toDeleteIndex] = lastvalue;\\n            // Update the index for the moved value\\n            set._indexes[lastvalue] = valueIndex; // Replace lastvalue's index to valueIndex\\n\\n            // Delete the slot where the moved value was stored\\n            set._values.pop();\\n\\n            // Delete the index for the deleted slot\\n            delete set._indexes[value];\\n\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function _contains(Set storage set, bytes32 value) private view returns (bool) {\\n        return set._indexes[value] != 0;\\n    }\\n\\n    /**\\n     * @dev Returns the number of values on the set. O(1).\\n     */\\n    function _length(Set storage set) private view returns (uint256) {\\n        return set._values.length;\\n    }\\n\\n   /**\\n    * @dev Returns the value stored at position `index` in the set. O(1).\\n    *\\n    * Note that there are no guarantees on the ordering of values inside the\\n    * array, and it may change when more values are added or removed.\\n    *\\n    * Requirements:\\n    *\\n    * - `index` must be strictly less than {length}.\\n    */\\n    function _at(Set storage set, uint256 index) private view returns (bytes32) {\\n        require(set._values.length > index, \\\"EnumerableSet: index out of bounds\\\");\\n        return set._values[index];\\n    }\\n\\n    // Bytes32Set\\n\\n    struct Bytes32Set {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _add(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(Bytes32Set storage set, bytes32 value) internal returns (bool) {\\n        return _remove(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(Bytes32Set storage set, bytes32 value) internal view returns (bool) {\\n        return _contains(set._inner, value);\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(Bytes32Set storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n   /**\\n    * @dev Returns the value stored at position `index` in the set. O(1).\\n    *\\n    * Note that there are no guarantees on the ordering of values inside the\\n    * array, and it may change when more values are added or removed.\\n    *\\n    * Requirements:\\n    *\\n    * - `index` must be strictly less than {length}.\\n    */\\n    function at(Bytes32Set storage set, uint256 index) internal view returns (bytes32) {\\n        return _at(set._inner, index);\\n    }\\n\\n    // AddressSet\\n\\n    struct AddressSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(AddressSet storage set, address value) internal returns (bool) {\\n        return _add(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(AddressSet storage set, address value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(AddressSet storage set, address value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(uint256(uint160(value))));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values in the set. O(1).\\n     */\\n    function length(AddressSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n   /**\\n    * @dev Returns the value stored at position `index` in the set. O(1).\\n    *\\n    * Note that there are no guarantees on the ordering of values inside the\\n    * array, and it may change when more values are added or removed.\\n    *\\n    * Requirements:\\n    *\\n    * - `index` must be strictly less than {length}.\\n    */\\n    function at(AddressSet storage set, uint256 index) internal view returns (address) {\\n        return address(uint160(uint256(_at(set._inner, index))));\\n    }\\n\\n\\n    // UintSet\\n\\n    struct UintSet {\\n        Set _inner;\\n    }\\n\\n    /**\\n     * @dev Add a value to a set. O(1).\\n     *\\n     * Returns true if the value was added to the set, that is if it was not\\n     * already present.\\n     */\\n    function add(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _add(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Removes a value from a set. O(1).\\n     *\\n     * Returns true if the value was removed from the set, that is if it was\\n     * present.\\n     */\\n    function remove(UintSet storage set, uint256 value) internal returns (bool) {\\n        return _remove(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns true if the value is in the set. O(1).\\n     */\\n    function contains(UintSet storage set, uint256 value) internal view returns (bool) {\\n        return _contains(set._inner, bytes32(value));\\n    }\\n\\n    /**\\n     * @dev Returns the number of values on the set. O(1).\\n     */\\n    function length(UintSet storage set) internal view returns (uint256) {\\n        return _length(set._inner);\\n    }\\n\\n   /**\\n    * @dev Returns the value stored at position `index` in the set. O(1).\\n    *\\n    * Note that there are no guarantees on the ordering of values inside the\\n    * array, and it may change when more values are added or removed.\\n    *\\n    * Requirements:\\n    *\\n    * - `index` must be strictly less than {length}.\\n    */\\n    function at(UintSet storage set, uint256 index) internal view returns (uint256) {\\n        return uint256(_at(set._inner, index));\\n    }\\n}\\n\",\"keccak256\":\"0x4878ef6c288f4cef3c2a288d32cc548c648831cc55503ad3d9a581ed3b93aad9\",\"license\":\"MIT\"},\"contracts/StartFiReputation.sol\":{\"content\":\"// SPDX-License-Identifier: AGPL-3.0-or-later\\n\\npragma solidity 0.8.7;\\n\\nimport '@openzeppelin/contracts/access/AccessControlEnumerable.sol';\\n\\n/**\\n * @author Eman Herawy, StartFi Team\\n *@title  StartFi Reputation contract\\n * desc contract to mamange the reputation for startfi users\\n */\\ncontract StartFiReputation is Context, AccessControlEnumerable {\\n    bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');\\n    bytes32 public constant BURNER_ROLE = keccak256('BURNER_ROLE');\\n    mapping(address => uint256) private userReputation;\\n\\n    constructor() {\\n        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());\\n\\n        _setupRole(MINTER_ROLE, _msgSender());\\n        _setupRole(BURNER_ROLE, _msgSender());\\n    }\\n\\n    /**\\n     * @dev this function is to mint reputation points for the \\\"to\\\"\\n     * @notice only called by caller in the minter role\\n     * @param to : reciepiant address\\n     * @param amount : points to be added to the \\\" to \\\" balance\\n     * @return balance : \\\"to\\\" current reputation balance\\n     */\\n    function mintReputation(address to, uint256 amount) external returns (uint256 balance) {\\n        require(hasRole(MINTER_ROLE, _msgSender()), 'StartFiReputation: must have minter role to mint');\\n        balance = userReputation[to] + amount;\\n        _setReputation(to, balance);\\n    }\\n\\n    /**\\n     * @dev this function is to mint reputation points for the \\\"to\\\"\\n     * @notice only called by caller in the minter role\\n     * @param buyer : buyer address\\n     * @param seller : buyer address\\n     * @param totalAmount : price\\n     * @return true if it's passed : \\\"to\\\" current reputation balance\\n     */\\n    function calcAndMintintReputation(\\n        address buyer,\\n        address seller,\\n        uint256 totalAmount\\n    ) external returns (bool) {\\n        require(hasRole(MINTER_ROLE, _msgSender()), 'StartFiReputation: must have minter role to mint');\\n        uint256 amount = totalAmount / 2;\\n        uint256 buyerBalance = userReputation[buyer] + amount;\\n        uint256 sellerBalance = userReputation[seller] + amount;\\n        _setReputation(buyer, buyerBalance);\\n        _setReputation(seller, sellerBalance);\\n        return true;\\n    }\\n\\n    /**\\n     * @dev this function is to burn reputation points for the \\\"to\\\"\\n     * @notice only called by caller in the burner role\\n     * @param to : reciepiant address\\n     * @param amount : points to be subtract to the \\\" to \\\" balance\\n     * @return balance : \\\"to\\\" current reputation balance\\n     */\\n\\n    function burnReputation(address to, uint256 amount) external returns (uint256 balance) {\\n        require(hasRole(BURNER_ROLE, _msgSender()), 'StartFiReputation: must have burn role to burn reputation');\\n        require(userReputation[to] >= amount, 'StartFiReputation: Not enought balance');\\n        balance = userReputation[to] - amount;\\n        _setReputation(to, balance);\\n    }\\n\\n    function _setReputation(address to, uint256 amount) internal {\\n        userReputation[to] = amount;\\n    }\\n\\n    function getUserReputation(address user) external view returns (uint256 balance) {\\n        balance = userReputation[user];\\n    }\\n}\\n\",\"keccak256\":\"0xebe10c7d8a130d2393c80ac76579efabd368545680b0eec5bc34bf93b0e537c9\",\"license\":\"AGPL-3.0-or-later\"}},\"version\":1}",
+  "bytecode": "0x60806040523480156200001157600080fd5b506200001f6000336200007d565b6200004b7f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6336200007d565b620000777f3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a848336200007d565b620001e2565b620000948282620000c060201b6200061e1760201c565b6000828152600160209081526040909120620000bb9183906200062c620000d0821b17901c565b505050565b620000cc8282620000f0565b5050565b6000620000e7836001600160a01b03841662000190565b90505b92915050565b6000828152602081815260408083206001600160a01b038516845290915290205460ff16620000cc576000828152602081815260408083206001600160a01b03851684529091529020805460ff191660011790556200014c3390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b6000818152600183016020526040812054620001d957508154600181810184556000848152602080822090930184905584548482528286019093526040902091909155620000ea565b506000620000ea565b610f7d80620001f26000396000f3fe608060405234801561001057600080fd5b50600436106100f55760003560e01c80639010d07c11610097578063baccbfdb11610066578063baccbfdb14610221578063ca15c8731461024a578063d53913931461025d578063d547741f1461028457600080fd5b80639010d07c146101c857806391d14854146101f3578063943ccab814610206578063a217fddf1461021957600080fd5b80632ede8cc8116100d35780632ede8cc81461017a5780632f2ff15d1461018d57806336568abe146101a2578063684f7b0e146101b557600080fd5b806301ffc9a7146100fa578063248a9ca314610122578063282c51f314610153575b600080fd5b61010d610108366004610d16565b610297565b60405190151581526020015b60405180910390f35b610145610130366004610caf565b60009081526020819052604090206001015490565b604051908152602001610119565b6101457f3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a84881565b61010d610188366004610c49565b6102c2565b6101a061019b366004610cc8565b6103a5565b005b6101a06101b0366004610cc8565b6103cc565b6101456101c3366004610c85565b6103ee565b6101db6101d6366004610cf4565b610549565b6040516001600160a01b039091168152602001610119565b61010d610201366004610cc8565b610568565b610145610214366004610c85565b610591565b610145600081565b61014561022f366004610c2e565b6001600160a01b031660009081526002602052604090205490565b610145610258366004610caf565b6105fd565b6101457f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a681565b6101a0610292366004610cc8565b610614565b60006001600160e01b03198216635a05180f60e01b14806102bc57506102bc82610641565b92915050565b60006102ee7f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a633610568565b6103135760405162461bcd60e51b815260040161030a90610de8565b60405180910390fd5b6000610320600284610e50565b6001600160a01b03861660009081526002602052604081205491925090610348908390610e38565b6001600160a01b03861660009081526002602052604081205491925090610370908490610e38565b6001600160a01b0397881660009081526002602052604080822094909455969097168652509093209390935550600192915050565b6103af8282610676565b60008281526001602052604090206103c7908261062c565b505050565b6103d6828261069c565b60008281526001602052604090206103c79082610716565b600061041a7f3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a84833610568565b61048c5760405162461bcd60e51b815260206004820152603960248201527f5374617274466952657075746174696f6e3a206d75737420686176652062757260448201527f6e20726f6c6520746f206275726e2072657075746174696f6e00000000000000606482015260840161030a565b6001600160a01b0383166000908152600260205260409020548211156105035760405162461bcd60e51b815260206004820152602660248201527f5374617274466952657075746174696f6e3a204e6f7420656e6f756768742062604482015265616c616e636560d01b606482015260840161030a565b6001600160a01b038316600090815260026020526040902054610527908390610e91565b6001600160a01b038416600090815260026020526040902081905590506102bc565b6000828152600160205260408120610561908361072b565b9392505050565b6000918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b60006105bd7f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a633610568565b6105d95760405162461bcd60e51b815260040161030a90610de8565b6001600160a01b038316600090815260026020526040902054610527908390610e38565b60008181526001602052604081206102bc90610737565b6103d68282610741565b6106288282610767565b5050565b6000610561836001600160a01b0384166107eb565b60006001600160e01b03198216637965db0b60e01b14806102bc57506301ffc9a760e01b6001600160e01b03198316146102bc565b600082815260208190526040902060010154610692813361083a565b6103c78383610767565b6001600160a01b038116331461070c5760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201526e103937b632b9903337b91039b2b63360891b606482015260840161030a565b610628828261089e565b6000610561836001600160a01b038416610903565b600061056183836109f0565b60006102bc825490565b60008281526020819052604090206001015461075d813361083a565b6103c7838361089e565b6107718282610568565b610628576000828152602081815260408083206001600160a01b03851684529091529020805460ff191660011790556107a73390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b6000818152600183016020526040812054610832575081546001818101845560008481526020808220909301849055845484825282860190935260409020919091556102bc565b5060006102bc565b6108448282610568565b6106285761085c816001600160a01b03166014610a76565b610867836020610a76565b604051602001610878929190610d40565b60408051601f198184030181529082905262461bcd60e51b825261030a91600401610db5565b6108a88282610568565b15610628576000828152602081815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b600081815260018301602052604081205480156109e6576000610927600183610e91565b855490915060009061093b90600190610e91565b9050600086600001828154811061095457610954610f1b565b906000526020600020015490508087600001848154811061097757610977610f1b565b6000918252602080832090910192909255828152600189019091526040902084905586548790806109aa576109aa610f05565b600190038181906000526020600020016000905590558660010160008781526020019081526020016000206000905560019450505050506102bc565b60009150506102bc565b81546000908210610a4e5760405162461bcd60e51b815260206004820152602260248201527f456e756d657261626c655365743a20696e646578206f7574206f6620626f756e604482015261647360f01b606482015260840161030a565b826000018281548110610a6357610a63610f1b565b9060005260206000200154905092915050565b60606000610a85836002610e72565b610a90906002610e38565b67ffffffffffffffff811115610aa857610aa8610f31565b6040519080825280601f01601f191660200182016040528015610ad2576020820181803683370190505b509050600360fc1b81600081518110610aed57610aed610f1b565b60200101906001600160f81b031916908160001a905350600f60fb1b81600181518110610b1c57610b1c610f1b565b60200101906001600160f81b031916908160001a9053506000610b40846002610e72565b610b4b906001610e38565b90505b6001811115610bc3576f181899199a1a9b1b9c1cb0b131b232b360811b85600f1660108110610b7f57610b7f610f1b565b1a60f81b828281518110610b9557610b95610f1b565b60200101906001600160f81b031916908160001a90535060049490941c93610bbc81610ed8565b9050610b4e565b5083156105615760405162461bcd60e51b815260206004820181905260248201527f537472696e67733a20686578206c656e67746820696e73756666696369656e74604482015260640161030a565b80356001600160a01b0381168114610c2957600080fd5b919050565b600060208284031215610c4057600080fd5b61056182610c12565b600080600060608486031215610c5e57600080fd5b610c6784610c12565b9250610c7560208501610c12565b9150604084013590509250925092565b60008060408385031215610c9857600080fd5b610ca183610c12565b946020939093013593505050565b600060208284031215610cc157600080fd5b5035919050565b60008060408385031215610cdb57600080fd5b82359150610ceb60208401610c12565b90509250929050565b60008060408385031215610d0757600080fd5b50508035926020909101359150565b600060208284031215610d2857600080fd5b81356001600160e01b03198116811461056157600080fd5b7f416363657373436f6e74726f6c3a206163636f756e7420000000000000000000815260008351610d78816017850160208801610ea8565b7001034b99036b4b9b9b4b733903937b6329607d1b6017918401918201528351610da9816028840160208801610ea8565b01602801949350505050565b6020815260008251806020840152610dd4816040850160208701610ea8565b601f01601f19169190910160400192915050565b60208082526030908201527f5374617274466952657075746174696f6e3a206d7573742068617665206d696e60408201526f1d195c881c9bdb19481d1bc81b5a5b9d60821b606082015260800190565b60008219821115610e4b57610e4b610eef565b500190565b600082610e6d57634e487b7160e01b600052601260045260246000fd5b500490565b6000816000190483118215151615610e8c57610e8c610eef565b500290565b600082821015610ea357610ea3610eef565b500390565b60005b83811015610ec3578181015183820152602001610eab565b83811115610ed2576000848401525b50505050565b600081610ee757610ee7610eef565b506000190190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052603160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052604160045260246000fdfea26469706673582212205a7fbd8dd78168f659a17b3e850a2d422ac389dc2bea99550e94a0997a5d880f64736f6c63430008070033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100f55760003560e01c80639010d07c11610097578063baccbfdb11610066578063baccbfdb14610221578063ca15c8731461024a578063d53913931461025d578063d547741f1461028457600080fd5b80639010d07c146101c857806391d14854146101f3578063943ccab814610206578063a217fddf1461021957600080fd5b80632ede8cc8116100d35780632ede8cc81461017a5780632f2ff15d1461018d57806336568abe146101a2578063684f7b0e146101b557600080fd5b806301ffc9a7146100fa578063248a9ca314610122578063282c51f314610153575b600080fd5b61010d610108366004610d16565b610297565b60405190151581526020015b60405180910390f35b610145610130366004610caf565b60009081526020819052604090206001015490565b604051908152602001610119565b6101457f3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a84881565b61010d610188366004610c49565b6102c2565b6101a061019b366004610cc8565b6103a5565b005b6101a06101b0366004610cc8565b6103cc565b6101456101c3366004610c85565b6103ee565b6101db6101d6366004610cf4565b610549565b6040516001600160a01b039091168152602001610119565b61010d610201366004610cc8565b610568565b610145610214366004610c85565b610591565b610145600081565b61014561022f366004610c2e565b6001600160a01b031660009081526002602052604090205490565b610145610258366004610caf565b6105fd565b6101457f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a681565b6101a0610292366004610cc8565b610614565b60006001600160e01b03198216635a05180f60e01b14806102bc57506102bc82610641565b92915050565b60006102ee7f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a633610568565b6103135760405162461bcd60e51b815260040161030a90610de8565b60405180910390fd5b6000610320600284610e50565b6001600160a01b03861660009081526002602052604081205491925090610348908390610e38565b6001600160a01b03861660009081526002602052604081205491925090610370908490610e38565b6001600160a01b0397881660009081526002602052604080822094909455969097168652509093209390935550600192915050565b6103af8282610676565b60008281526001602052604090206103c7908261062c565b505050565b6103d6828261069c565b60008281526001602052604090206103c79082610716565b600061041a7f3c11d16cbaffd01df69ce1c404f6340ee057498f5f00246190ea54220576a84833610568565b61048c5760405162461bcd60e51b815260206004820152603960248201527f5374617274466952657075746174696f6e3a206d75737420686176652062757260448201527f6e20726f6c6520746f206275726e2072657075746174696f6e00000000000000606482015260840161030a565b6001600160a01b0383166000908152600260205260409020548211156105035760405162461bcd60e51b815260206004820152602660248201527f5374617274466952657075746174696f6e3a204e6f7420656e6f756768742062604482015265616c616e636560d01b606482015260840161030a565b6001600160a01b038316600090815260026020526040902054610527908390610e91565b6001600160a01b038416600090815260026020526040902081905590506102bc565b6000828152600160205260408120610561908361072b565b9392505050565b6000918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b60006105bd7f9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a633610568565b6105d95760405162461bcd60e51b815260040161030a90610de8565b6001600160a01b038316600090815260026020526040902054610527908390610e38565b60008181526001602052604081206102bc90610737565b6103d68282610741565b6106288282610767565b5050565b6000610561836001600160a01b0384166107eb565b60006001600160e01b03198216637965db0b60e01b14806102bc57506301ffc9a760e01b6001600160e01b03198316146102bc565b600082815260208190526040902060010154610692813361083a565b6103c78383610767565b6001600160a01b038116331461070c5760405162461bcd60e51b815260206004820152602f60248201527f416363657373436f6e74726f6c3a2063616e206f6e6c792072656e6f756e636560448201526e103937b632b9903337b91039b2b63360891b606482015260840161030a565b610628828261089e565b6000610561836001600160a01b038416610903565b600061056183836109f0565b60006102bc825490565b60008281526020819052604090206001015461075d813361083a565b6103c7838361089e565b6107718282610568565b610628576000828152602081815260408083206001600160a01b03851684529091529020805460ff191660011790556107a73390565b6001600160a01b0316816001600160a01b0316837f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45050565b6000818152600183016020526040812054610832575081546001818101845560008481526020808220909301849055845484825282860190935260409020919091556102bc565b5060006102bc565b6108448282610568565b6106285761085c816001600160a01b03166014610a76565b610867836020610a76565b604051602001610878929190610d40565b60408051601f198184030181529082905262461bcd60e51b825261030a91600401610db5565b6108a88282610568565b15610628576000828152602081815260408083206001600160a01b0385168085529252808320805460ff1916905551339285917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45050565b600081815260018301602052604081205480156109e6576000610927600183610e91565b855490915060009061093b90600190610e91565b9050600086600001828154811061095457610954610f1b565b906000526020600020015490508087600001848154811061097757610977610f1b565b6000918252602080832090910192909255828152600189019091526040902084905586548790806109aa576109aa610f05565b600190038181906000526020600020016000905590558660010160008781526020019081526020016000206000905560019450505050506102bc565b60009150506102bc565b81546000908210610a4e5760405162461bcd60e51b815260206004820152602260248201527f456e756d657261626c655365743a20696e646578206f7574206f6620626f756e604482015261647360f01b606482015260840161030a565b826000018281548110610a6357610a63610f1b565b9060005260206000200154905092915050565b60606000610a85836002610e72565b610a90906002610e38565b67ffffffffffffffff811115610aa857610aa8610f31565b6040519080825280601f01601f191660200182016040528015610ad2576020820181803683370190505b509050600360fc1b81600081518110610aed57610aed610f1b565b60200101906001600160f81b031916908160001a905350600f60fb1b81600181518110610b1c57610b1c610f1b565b60200101906001600160f81b031916908160001a9053506000610b40846002610e72565b610b4b906001610e38565b90505b6001811115610bc3576f181899199a1a9b1b9c1cb0b131b232b360811b85600f1660108110610b7f57610b7f610f1b565b1a60f81b828281518110610b9557610b95610f1b565b60200101906001600160f81b031916908160001a90535060049490941c93610bbc81610ed8565b9050610b4e565b5083156105615760405162461bcd60e51b815260206004820181905260248201527f537472696e67733a20686578206c656e67746820696e73756666696369656e74604482015260640161030a565b80356001600160a01b0381168114610c2957600080fd5b919050565b600060208284031215610c4057600080fd5b61056182610c12565b600080600060608486031215610c5e57600080fd5b610c6784610c12565b9250610c7560208501610c12565b9150604084013590509250925092565b60008060408385031215610c9857600080fd5b610ca183610c12565b946020939093013593505050565b600060208284031215610cc157600080fd5b5035919050565b60008060408385031215610cdb57600080fd5b82359150610ceb60208401610c12565b90509250929050565b60008060408385031215610d0757600080fd5b50508035926020909101359150565b600060208284031215610d2857600080fd5b81356001600160e01b03198116811461056157600080fd5b7f416363657373436f6e74726f6c3a206163636f756e7420000000000000000000815260008351610d78816017850160208801610ea8565b7001034b99036b4b9b9b4b733903937b6329607d1b6017918401918201528351610da9816028840160208801610ea8565b01602801949350505050565b6020815260008251806020840152610dd4816040850160208701610ea8565b601f01601f19169190910160400192915050565b60208082526030908201527f5374617274466952657075746174696f6e3a206d7573742068617665206d696e60408201526f1d195c881c9bdb19481d1bc81b5a5b9d60821b606082015260800190565b60008219821115610e4b57610e4b610eef565b500190565b600082610e6d57634e487b7160e01b600052601260045260246000fd5b500490565b6000816000190483118215151615610e8c57610e8c610eef565b500290565b600082821015610ea357610ea3610eef565b500390565b60005b83811015610ec3578181015183820152602001610eab565b83811115610ed2576000848401525b50505050565b600081610ee757610ee7610eef565b506000190190565b634e487b7160e01b600052601160045260246000fd5b634e487b7160e01b600052603160045260246000fd5b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052604160045260246000fdfea26469706673582212205a7fbd8dd78168f659a17b3e850a2d422ac389dc2bea99550e94a0997a5d880f64736f6c63430008070033",
+  "devdoc": {
+    "author": "Eman Herawy, StartFi Team",
+    "kind": "dev",
+    "methods": {
+      "burnReputation(address,uint256)": {
+        "details": "this function is to burn reputation points for the \"to\"",
+        "params": {
+          "amount": ": points to be subtract to the \" to \" balance",
+          "to": ": reciepiant address"
+        },
+        "returns": {
+          "balance": ": \"to\" current reputation balance"
+        }
+      },
+      "calcAndMintintReputation(address,address,uint256)": {
+        "details": "this function is to mint reputation points for the \"to\"",
+        "params": {
+          "buyer": ": buyer address",
+          "seller": ": buyer address",
+          "totalAmount": ": price"
+        },
+        "returns": {
+          "_0": "true if it's passed : \"to\" current reputation balance"
+        }
+      },
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "getRoleMember(bytes32,uint256)": {
+        "details": "Returns one of the accounts that have `role`. `index` must be a value between 0 and {getRoleMemberCount}, non-inclusive. Role bearers are not sorted in any particular way, and their ordering may change at any point. WARNING: When using {getRoleMember} and {getRoleMemberCount}, make sure you perform all queries on the same block. See the following https://forum.openzeppelin.com/t/iterating-over-elements-on-enumerableset-in-openzeppelin-contracts/2296[forum post] for more information."
+      },
+      "getRoleMemberCount(bytes32)": {
+        "details": "Returns the number of accounts that have `role`. Can be used together with {getRoleMember} to enumerate all bearers of a role."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Overload {grantRole} to track enumerable memberships"
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "mintReputation(address,uint256)": {
+        "details": "this function is to mint reputation points for the \"to\"",
+        "params": {
+          "amount": ": points to be added to the \" to \" balance",
+          "to": ": reciepiant address"
+        },
+        "returns": {
+          "balance": ": \"to\" current reputation balance"
+        }
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Overload {renounceRole} to track enumerable memberships"
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Overload {revokeRole} to track enumerable memberships"
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "title": "StartFi Reputation contract desc contract to mamange the reputation for startfi users",
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "burnReputation(address,uint256)": {
+        "notice": "only called by caller in the burner role"
+      },
+      "calcAndMintintReputation(address,address,uint256)": {
+        "notice": "only called by caller in the minter role"
+      },
+      "mintReputation(address,uint256)": {
+        "notice": "only called by caller in the minter role"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 62,
+        "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)57_storage)"
+      },
+      {
+        "astId": 403,
+        "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+        "label": "_roleMembers",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_bytes32,t_struct(AddressSet)3846_storage)"
+      },
+      {
+        "astId": 8794,
+        "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+        "label": "userReputation",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_bytes32)dyn_storage": {
+        "base": "t_bytes32",
+        "encoding": "dynamic_array",
+        "label": "bytes32[]",
+        "numberOfBytes": "32"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_mapping(t_bytes32,t_struct(AddressSet)3846_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct EnumerableSet.AddressSet)",
+        "numberOfBytes": "32",
+        "value": "t_struct(AddressSet)3846_storage"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)57_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)57_storage"
+      },
+      "t_mapping(t_bytes32,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_struct(AddressSet)3846_storage": {
+        "encoding": "inplace",
+        "label": "struct EnumerableSet.AddressSet",
+        "members": [
+          {
+            "astId": 3845,
+            "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+            "label": "_inner",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_struct(Set)3571_storage"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(RoleData)57_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControl.RoleData",
+        "members": [
+          {
+            "astId": 54,
+            "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+            "label": "members",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 56,
+            "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(Set)3571_storage": {
+        "encoding": "inplace",
+        "label": "struct EnumerableSet.Set",
+        "members": [
+          {
+            "astId": 3566,
+            "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+            "label": "_values",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_array(t_bytes32)dyn_storage"
+          },
+          {
+            "astId": 3570,
+            "contract": "contracts/StartFiReputation.sol:StartFiReputation",
+            "label": "_indexes",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_mapping(t_bytes32,t_uint256)"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

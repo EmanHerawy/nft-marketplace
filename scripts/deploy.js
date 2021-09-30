@@ -22,7 +22,7 @@ console.log(owner,'owner');
   const StartFiToken = await hre.ethers.getContractFactory("StartFiToken");
   const StartFiRoyaltyNFT = await hre.ethers.getContractFactory("StartFiRoyaltyNFT");
   const StartFiStakes = await hre.ethers.getContractFactory("StartFiStakes");
-  const StartFiNFTPayment = await hre.ethers.getContractFactory("StartFiNFTPayment");
+  // const StartFiNFTPayment = await hre.ethers.getContractFactory("StartFiNFTPayment");
   const StartFiReputation = await hre.ethers.getContractFactory("StartFiReputation");
   const StartFiMarketPlace = await hre.ethers.getContractFactory("StartFiMarketPlace");
 
@@ -43,9 +43,9 @@ console.log(owner,'owner');
   await startFiStakes.deployed();
   console.log("startFiStakes deployed to:", startFiStakes.address);
 
-const startFiNFTPayment=  await StartFiNFTPayment.deploy(startFiNFT.address, startFiToken.address);
-await startFiNFTPayment.deployed();
-console.log("startFiNFTPayment deployed to:", startFiNFTPayment.address);
+// const startFiNFTPayment=  await StartFiNFTPayment.deploy(startFiNFT.address, startFiToken.address);
+// await startFiNFTPayment.deployed();
+// console.log("startFiNFTPayment deployed to:", startFiNFTPayment.address);
 
 
 const startfiMarketPlace=  await StartFiMarketPlace.deploy("Test ERC721",  startFiToken.address,startFiStakes.address,startfiReputation.address);
@@ -54,11 +54,11 @@ console.log("startfiMarketPlace deployed to:", startfiMarketPlace.address);
 
    // add to minter role 
    await startfiReputation.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",startFiNFT.address)
-   await startFiNFT.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",startFiNFTPayment.address)
+  //  await startFiNFT.grantRole("0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",startFiNFTPayment.address)
        await startFiStakes.setMarketplace(startfiMarketPlace.address);
- await startFiToken.approve(startFiNFTPayment.address,100);
- await startFiNFTPayment.MintNFTWithRoyalty(owner,"test",20,10);
- await startFiNFTPayment.MintNFTWithoutRoyalty(owner,"test");
+//  await startFiToken.approve(startFiNFTPayment.address,100);
+//  await startFiNFTPayment.MintNFTWithRoyalty(owner,"test",20,10);
+//  await startFiNFTPayment.MintNFTWithoutRoyalty(owner,"test");
  // add stakes 
  await startFiToken.approve(startFiStakes.address,5000);
 
