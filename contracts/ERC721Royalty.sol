@@ -34,6 +34,7 @@ contract ERC721Royalty is IERC721Royalty {
         uint8 share,
         uint8 separator
     ) internal {
+        require(share > 0 && separator > 0, 'separator and Share values must be more than zero');
         tokenIdToIssuer[_tokenId] = issuer;
         _issuerPercentage[_tokenId][issuer] = Base(share, separator);
     }
