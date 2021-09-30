@@ -15,7 +15,8 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
  */
 contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
-    // TODO: to be updated ( using value or percentage?? develop function to ready and update the value)
+    //
+    uint256 public listingId;
     // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted , item delist with deduct , item  disputed , user free reserved ,
     ///
     event ListOnMarketplace(
@@ -197,7 +198,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 listqualifyPercentageBase
             );
         }
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
+        listingId++;
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingId));
         // check that sender is qualified
         // should not be less than 1 USD
         if (listQualifyAmount < stfiUsdt) {
@@ -310,7 +312,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(insurancAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime));
+        listingId++;
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingId));
         if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
