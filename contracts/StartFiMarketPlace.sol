@@ -636,7 +636,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         tokenId = _tokenListings[listingId].tokenId;
         require(_owner == _msgSender(), 'Caller is not the owner');
         require(buyer == address(0), 'Already bought token');
-        uint256 timeToDelistAuction = StartFiFinanceLib._calcSum(releaseTime, 3 days);
+        uint256 timeToDelistAuction = StartFiFinanceLib._calcSum(releaseTime, fulfillDuration);
 
         require(
             status == ListingStatus.OnMarket || status == ListingStatus.onAuction,
