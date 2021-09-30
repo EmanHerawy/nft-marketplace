@@ -960,11 +960,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      *  @dev only called by `owner` to update the cap
      * @param _usdCap  the new fees value to be stored
      */
-    function setUsdCap(uint256 _usdCap) external {
-        require(hasRole(OWNER_ROLE, _msgSender()), 'StartFiMarketPlace: UnAuthorized caller');
-
+    function setUsdCap(uint256 _usdCap) external onlyOwner whenPaused {
         _setCap(_usdCap);
-        // set
     }
 
     /**
