@@ -38,12 +38,6 @@ describe('StartFi Marketplace Lisitng', () => {
   // it('Should create auction for item', async () => {
   //   const createAuction = await marketPlace._creatAuction(NFT.address, tokenId, 10, 11, true, 11, 1000000000)
   //   expect(createAuction.from).to.eq(wallet.address)
-  // }) // _changeDelistAfter
-  // it('should delist item from marketplace', async () => {
-  //   const result = await marketPlace._tokenListings(0)
-  //   console.log('listiiiiingggg', result)
-  //   /*     const createAuction = await marketPlace._delist()
-  //   expect(createAuction.from).to.eq(wallet.address) */
   // })
   /*   it('should delist item from marketplace', async () => {
     const createAuction = await marketPlace._delist(NFT.address, tokenId, 10, 11, true, 11, 1000000000)

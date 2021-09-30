@@ -11,9 +11,7 @@ import { tokenFixture } from './shared/fixtures'
  * 1- Admin can change:
  * -- Used contracts: reputation and utility contracts
  * -- Fulfill bid duration
- * -- List qualify amount
- * -- Delist fees percentage
- * -- Time to delist
+
  * -- Bid penalty percentage
  * -- Marketplace name
  * -- Marketplace fees
@@ -137,42 +135,19 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
     await expect(marketPlace.changeFulfillDuration(twoDays / 3)).to.revertedWith('Invalid duration')
   })
 
-  it('Admin should change qualify amount', async () => {
-    await expect(marketPlace.changeListInsuranceAmount(30,10))
-      .to.emit(marketPlace, 'ChangeListInsuranceAmount')
-      .withArgs(30,10)
-  })
+ 
 
-  it('Admin should change  qualify amount :revert not the owner ', async () => {
-    await expect(marketPlace.connect(user1).changeListInsuranceAmount(30,10)).to.revertedWith(
-      'StartFiMarketPlaceAdmin: caller is not the owner'
-    )
-  })
 
-  it('Admin should change  qualify amount :revert not paused ', async () => {
-    await marketPlace.unpause()
-    await expect(marketPlace.changeListInsuranceAmount(30, 10)).to.revertedWith('Pausable: not paused')
-  })
 
  
-  it('Admin should change delist after duration', async () => {
-    await marketPlace.pause()
-    await expect(marketPlace.changeDelistAfter(twoDays)).to.emit(marketPlace, 'ChangeDelistAfter').withArgs(twoDays)
-  })
 
-  it('Admin should change delist after duration:revert not the owner ', async () => {
-    await expect(marketPlace.connect(user1).changeDelistAfter(twoDays)).to.revertedWith(
-      'StartFiMarketPlaceAdmin: caller is not the owner'
-    )
-  })
 
-  it('Admin should change delist after duration:revert not paused ', async () => {
-    await marketPlace.unpause()
-    await expect(marketPlace.changeDelistAfter(twoDays)).to.revertedWith('Pausable: not paused')
-  })
+
+
+ 
 
   it('Admin should change fees', async () => {
-    await marketPlace.pause()
+    
     await expect(marketPlace.changeFees(30,10)).to.emit(marketPlace, 'ChangeFees').withArgs(30,10)
   })
 
@@ -193,7 +168,10 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
       .to.emit(marketPlace, 'ChangeMarketPlaceName')
       .withArgs('new STFI marketplace')
   })
-
+  it('Should set marketCap when paused', async () => {
+    const transactionRecipe = await marketPlace.setUsdCap(5)
+    expect(transactionRecipe.from).equal(wallet.address)
+  })
   it('Admin should change name:revert not the owner ', async () => {
     await expect(marketPlace.connect(user1).changeMarketPlaceName('new STFI marketplace')).to.revertedWith(
       'StartFiMarketPlaceAdmin: caller is not the owner'
@@ -218,11 +196,12 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
       .to.emit(marketPlace, 'UpdateAdminWallet')
       .withArgs(user1.address)
   })
-
-  it('Should set marketCap', async () => {
-    const transactionRecipe = await marketPlace.setUsdCap(5)
-    expect(transactionRecipe.from).equal(wallet.address)
+    it('Should not set marketCap when unpaused', async () => {
+     await expect(marketPlace.setUsdCap(5)).to.revertedWith('Pausable: not paused')
   })
+
+
+
   it('Should set STFI price', async () => {
     const transactionRecipe = await marketPlace.setPrice(23)
     expect(transactionRecipe.from).equal(wallet.address)

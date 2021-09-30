@@ -20,7 +20,6 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     event ChangeUtilityToken(address utiltiyToken);
     event ChangeFulfillDuration(uint256 duration);
     event ChangeListInsuranceAmount(uint256 newFees, uint256 newBase);
-    event ChangeDelistAfter(uint256 duration);
     event ChangeMarketPlaceName(string Name);
     event ChangeFees(uint256 newFees, uint256 newBase);
     event UpdateAdminWallet(address newWallet);
@@ -46,44 +45,33 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
 
         _;
     }
+    modifier notZeroAddress(address newAddress) {
+        require(newAddress != address(0), 'Zero address is not allowed');
+
+        _;
+    }
 
     /******************************************* state functions go here ********************************************************* */
 
     /**
      * @dev only called by `owner` to change the name and `whenPaused`
      *@param wallet marketplace reputation contract
-     *@param _delistAfter marketplace reputation contract
      *@param _fee marketplace reputation contract
-     *@param _listqualifyPercentage marketplace reputation contract
-     *@param _listqualifyPercentage marketplace reputation contract
+
      *@param feeBase marketplace reputation contract
      *
      */
     function addOffer(
         address wallet,
-        uint256 _delistAfter,
         uint256 _fee, // 2.5% fees
-        uint256 _listqualifyPercentage,
-        uint256 _listqualifyPercentageBase,
         uint256 feeBase
     ) external onlyOwner whenNotPaused {
         _addOffer(
             wallet,
-            _delistAfter,
             _fee, // 2.5% fees
-            _listqualifyPercentage,
-            _listqualifyPercentageBase,
             feeBase
         );
-        emit NewOffer(
-            _msgSender(),
-            wallet,
-            _delistAfter,
-            _fee,
-            _listqualifyPercentage,
-            _listqualifyPercentageBase,
-            feeBase
-        );
+        emit NewOffer(_msgSender(), wallet, _fee, feeBase);
     }
 
     /**
@@ -91,7 +79,12 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      *@param _reputationContract marketplace reputation contract
      *
      */
-    function changeReputationContract(address _reputationContract) external onlyOwner whenPaused {
+    function changeReputationContract(address _reputationContract)
+        external
+        notZeroAddress(_reputationContract)
+        onlyOwner
+        whenPaused
+    {
         _changeReputationContract(_reputationContract);
         emit ChangeReputationContract(_reputationContract);
     }
@@ -101,7 +94,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      *@param _token token address
      *
      */
-    function changeUtilityToken(address _token) external onlyOwner whenPaused {
+    function changeUtilityToken(address _token) external notZeroAddress(_token) onlyOwner whenPaused {
         _changeUtilityToken(_token);
         emit ChangeUtilityToken(_token);
     }
@@ -132,16 +125,6 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     {
         percentage = _changeListInsuranceAmount(newFees, newBase);
         emit ChangeListInsuranceAmount(newFees, newBase);
-    }
-
-    /**
-     * @dev only called by `owner` to change the name and `whenPaused`
-     *@param duration duration
-     *
-     */
-    function changeDelistAfter(uint256 duration) external onlyOwner whenPaused {
-        _changeDelistAfter(duration);
-        emit ChangeDelistAfter(duration);
     }
 
     /**
@@ -201,9 +184,8 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      * - the caller must be the admin.
      * - the `newWallet` must not be empty.
      */
-    function updateAdminWallet(address newWallet) external {
+    function updateAdminWallet(address newWallet) external notZeroAddress(newWallet) {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), 'UnAuthorized caller');
-        require(newWallet != address(0), 'Zero address is not allowed');
         _adminWallet = newWallet;
         _setupRole(DEFAULT_ADMIN_ROLE, newWallet);
         emit UpdateAdminWallet(newWallet);

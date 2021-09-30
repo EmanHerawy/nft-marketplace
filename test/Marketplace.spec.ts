@@ -50,8 +50,7 @@ let stakes: Contract
 
 const   _feeFraction = 25; // 2.5% fees
 const   _feeBase = 10;
-const   listqualifyPercentage = 10;
-const   listqualifyPercentageBase = 10;
+
 const royaltyShare=25
 const royaltyBase=10
 const mintedNFT=[0,1,2,3,4,5,6,7,8,9];
@@ -119,27 +118,8 @@ describe('StartFi marketPlace', () => {
       'Zero Value is not allowed'
     )
   })
-  it('ListOnMarketplace: Not enough reserves', async () => {
-    await expect(marketPlace.connect(issuer).listOnMarketplace(NFT.address, marketplaceTokenId1, price1)).to.be.revertedWith(
-      'Not enough reserves'
-    )
-  })
-  it('deposit stakes', async () => {
-    const stakeAmount =  calcFees(price1,listqualifyPercentage,listqualifyPercentageBase);
-    console.log(stakeAmount,'stakeAmount');
-    
-    await expect(token.approve(stakes.address, stakeAmount))
-      .to.emit(token, 'Approval')
-      .withArgs(wallet.address, stakes.address, stakeAmount)
-    expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
 
-    await stakes.deposit(issuer.address, stakeAmount)
-    const reserves = await stakes.getReserves(issuer.address)
-    expect(reserves.toNumber()).to.eq(stakeAmount)
 
-    const stakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-    expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
-  })
   it('list on marketplace should not be allowed if marketplace is not approved', async () => {
     await expect(marketPlace.connect(issuer).listOnMarketplace(NFT.address, marketplaceTokenId1, price1)).to.be.revertedWith(
       'Marketplace is not allowed to transfer your token'
@@ -181,25 +161,14 @@ describe('StartFi marketPlace', () => {
 // check balance 
   })
   it('Can not delist already bought item ', async () => {
-   await expect(marketPlace.connect(issuer).deList(listingId1)).to.revertedWith('Already bought token')
+   await expect(marketPlace.connect(issuer).deList(listingId1)).to.revertedWith('Item is not on Auction or Listed for sale')
         
   })
 // delist and lost reserves
-it('Should delist item and lose stakes', async () => {
-  const stakeAmount =  calcFees(price1,listqualifyPercentage,listqualifyPercentageBase);
-  console.log(stakeAmount,'stakeAmount');
-  
-  // await expect(token.approve(stakes.address, stakeAmount))
-  //   .to.emit(token, 'Approval')
-  //   .withArgs(wallet.address, stakes.address, stakeAmount)
-  // expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
+it('Should delist item', async () => {
 
-  // await stakes.deposit(issuer.address, stakeAmount)
-  const reserves = await stakes.getReserves(issuer.address)
-  expect(reserves.toNumber()).to.eq(stakeAmount)
 
-  const stakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-  expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
+ 
    await expect(NFT.transferFrom(wallet.address,issuer.address, marketplaceTokenId2))
   .to.emit(NFT, 'Transfer')
   .withArgs(wallet.address, issuer.address, marketplaceTokenId2)
@@ -218,34 +187,16 @@ it('Should delist item and lose stakes', async () => {
     .to.emit(marketPlace, 'DeListOffMarketplace')
     expect(await NFT.ownerOf(marketplaceTokenId2)).to.eq( issuer.address)
 
-    const newStakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-    expect(newStakeAllowance.toNumber()).to.eq(0)
-    const eventFilter2 = await marketPlace.filters.DeListOffMarketplace(null, null )
-    const events2 = await marketPlace.queryFilter(eventFilter2)
-    const fineAmount=(events2[events2.length - 1] as any).args[4].toNumber()
-    const remaining=(events2[events2.length - 1] as any).args[5].toNumber()
-     console.log(fineAmount,remaining,'events2 marketplaceTokenId1');
-    
+   
 })
 it('Can not delist already de listed item ', async () => {
-  await expect(marketPlace.connect(issuer).deList(listingId2)).to.revertedWith('Already bought or canceled token')
+  await expect(marketPlace.connect(issuer).deList(listingId2)).to.revertedWith('Item is not on Auction or Listed for sale')
        
  })
 it('non owner can not delist ', async () => {
-  const stakeAmount =  calcFees(price1,listqualifyPercentage,listqualifyPercentageBase);
-  console.log(stakeAmount,'stakeAmount');
+ 
   
-  await expect(token.approve(stakes.address, stakeAmount))
-    .to.emit(token, 'Approval')
-    .withArgs(wallet.address, stakes.address, stakeAmount)
-  expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
-
-  await stakes.deposit(issuer.address, stakeAmount)
-  const reserves = await stakes.getReserves(issuer.address)
-  expect(reserves.toNumber()).to.eq(stakeAmount)
-
-  const stakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-  expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
+  
   await expect(NFT.connect(issuer).approve(marketPlace.address, marketplaceTokenId2))
     .to.emit(NFT, 'Approval')
     .withArgs(issuer.address, marketPlace.address, marketplaceTokenId2)
@@ -260,29 +211,6 @@ it('non owner can not delist ', async () => {
   await expect(marketPlace.connect(wallet).deList(listingId2)).to.revertedWith('Caller is not the owner')
       
 })
-// delist
-it('Should delist item without losing stakes', async () => {
-
-
-  const stakeAllowance = await stakes.getReserves(issuer.address)
- 
-const listingDetails = await marketPlace.getListingDetails(listingId2);
-console.log(stakeAllowance,'listingDetails');
-
-  await provider.send('evm_increaseTime', [listingDetails.releaseTime.toNumber()]); 
-  await provider.send('evm_mine',[]);
-  await expect(marketPlace.connect(issuer).deList(listingId2))
-    .to.emit(marketPlace, 'DeListOffMarketplace')
-    expect(await NFT.ownerOf(marketplaceTokenId2)).to.eq( issuer.address)
-
-    const newStakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-    console.log(newStakeAllowance,'newStakeAllowance');
-    
-    expect(newStakeAllowance.toNumber()).to.eq(stakeAllowance)
- 
-    
-})
-
 
   })
 
@@ -309,23 +237,7 @@ describe('StartFi marketPlace : WithPermit', () => {
    await token.transfer(user3.address,TEST_AMOUNT );
   })
 
-  it('deposit stakes', async () => {
-    const stakeAmount =  calcFees(price1,listqualifyPercentage,listqualifyPercentageBase);
-    console.log(stakeAmount,'stakeAmount');
-    
-    await expect(token.approve(stakes.address, stakeAmount))
-      .to.emit(token, 'Approval')
-      .withArgs(wallet.address, stakes.address, stakeAmount)
-    expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
 
-    await stakes.deposit(wallet.address, stakeAmount)
-    const reserves = await stakes.getReserves(wallet.address)
-    expect(reserves.toNumber()).to.eq(stakeAmount)
-
-    const stakeAllowance = await marketPlace.getStakeAllowance(wallet.address)
-    expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
-
-  })
   // it('Should list on marketplace:permit', async () => {
   //    await expect(
   //    await marketPlace._supportPermit(NFT.address)
@@ -432,27 +344,7 @@ price1=500000;
       'Zero Value is not allowed'
     )
   })
-  it('ListOnMarketplace: Not enough reserves', async () => {
-    await expect(marketPlace.connect(issuer).listOnMarketplace(NFT.address, marketplaceTokenId1, price1)).to.be.revertedWith(
-      'Not enough reserves'
-    )
-  })
-  it('deposit stakes', async () => {
-    const stakeAmount =  calcFees(price1,listqualifyPercentage,listqualifyPercentageBase);
-    console.log(stakeAmount,'stakeAmount');
-    
-    await expect(token.approve(stakes.address, stakeAmount))
-      .to.emit(token, 'Approval')
-      .withArgs(wallet.address, stakes.address, stakeAmount)
-    expect(await token.allowance(wallet.address, stakes.address)).to.eq(stakeAmount)
 
-    await stakes.deposit(issuer.address, stakeAmount)
-    const reserves = await stakes.getReserves(issuer.address)
-    expect(reserves.toNumber()).to.eq(stakeAmount)
-
-    const stakeAllowance = await marketPlace.getStakeAllowance(issuer.address)
-    expect(stakeAllowance.toNumber()).to.eq(stakeAmount)
-  })
   it('list on marketplace should not be allowed if marketplace is not approved', async () => {
     await expect(marketPlace.connect(issuer).listOnMarketplace(NFT.address, marketplaceTokenId1, price1)).to.be.revertedWith(
       'Marketplace is not allowed to transfer your token'

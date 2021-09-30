@@ -254,7 +254,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
 // check balance 
   })
  it('Can not delist already bought item ', async () => {
-   await expect(marketPlace.connect(issuer).deList(listingId1)).to.revertedWith('Already bought token')
+   await expect(marketPlace.connect(issuer).deList(listingId1)).to.revertedWith('Item is not on Auction or Listed for sale')
         
   })
 
