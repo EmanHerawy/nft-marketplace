@@ -16,7 +16,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
     //
-    uint256 public listingId;
+    uint256 public listingCounter;
     // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted ,  item  disputed , user free reserved ,
     ///
     event ListOnMarketplace(
@@ -171,8 +171,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 tokenId,
         uint256 listingPrice
     ) public whenNotPaused isNotZero(listingPrice) returns (bytes32 listId) {
-        listingId++;
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingId));
+        listingCounter++;
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingCounter));
 
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
@@ -250,8 +250,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(insurancAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
-        listingId++;
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingId));
+        listingCounter++;
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingCounter));
         if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
