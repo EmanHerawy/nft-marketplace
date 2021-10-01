@@ -16,7 +16,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
     //
-    uint256 public listingId;
+    uint256 public listingCounter;
     // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted ,  item  disputed , user free reserved ,
     ///
     event ListOnMarketplace(
@@ -171,8 +171,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 tokenId,
         uint256 listingPrice
     ) public whenNotPaused isNotZero(listingPrice) returns (bytes32 listId) {
-        listingId++;
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingId));
+        listingCounter++;
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingCounter));
 
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
@@ -204,7 +204,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      Users who want to list their NFT for sale with fixed price call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`listOnMarketplace`] internally
      **
      */
-    function listOnMarketplaceWithPermit(
+    function listOnMarketplaceWithPremit(
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice,
@@ -213,7 +213,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 r,
         bytes32 s
     ) external returns (bytes32 listId) {
-        require(_permitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
+        require(_premitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
         listId = listOnMarketplace(nFTContract, tokenId, listingPrice);
     }
 
@@ -250,8 +250,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(insurancAmount >= stfiUsdt, 'Invalid Auction qualify Amount');
 
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
-        listingId++;
-        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingId));
+        listingCounter++;
+        listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingCounter));
         if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
@@ -317,7 +317,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      Users who want to list their NFT as auction for bidding with/without allowing direct sale call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`createAuction`] internally.
      **
      */
-    function createAuctionWithPermit(
+    function createAuctionWithPremit(
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice,
@@ -330,12 +330,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 r,
         bytes32 s
     ) external returns (bytes32 listId) {
-        require(_permitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
+        require(_premitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
         listId = createAuction(nFTContract, tokenId, listingPrice, insurancAmount, isSellForEnabled, sellFor, duration);
     }
 
     /**
-    ** Users who interested in a certain auction, can bid on it by calling this   function.Bidder don't pay / transfer SFTI on bidding. Only when win the auction [`the auction is ended and this bidder is the last one to bid`], bidder pays by calling [`fulfillBid`] OR [`buyNowWithPermit`]
+    ** Users who interested in a certain auction, can bid on it by calling this   function.Bidder don't pay / transfer SFTI on bidding. Only when win the auction [`the auction is ended and this bidder is the last one to bid`], bidder pays by calling [`fulfillBid`] OR [`buyNowWithPremit`]
     - user MUST have enough stakes used as insurance; grantee and punishment mechanism for malicious bidder. If the bidder don't pay in the  
     - Bidders can bid as much as they wants , insurance is taken once in the first participation 
     - the bid price MUST be more than the last bid , if this is the first bid, the bid price MUST be more than or equal the minimum bid the auction creator state
@@ -536,7 +536,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return tokenId token id
 
      */
-    function fulfillBidWithPermit(
+    function fulfillBidWithPremit(
         bytes32 listingId,
         uint256 deadline,
         uint8 v,
@@ -700,7 +700,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
   
  
      */
-    function buyNowWithPermit(
+    function buyNowWithPremit(
         bytes32 listingId,
         uint256 price,
         uint256 deadline,
