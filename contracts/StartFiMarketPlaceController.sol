@@ -4,7 +4,7 @@ pragma solidity 0.8.7;
 pragma abicoder v2;
 import './interface/IStartFiReputation.sol';
 import './interface/IERC20.sol';
-import './interface/IERC721Premit.sol';
+import './interface/IERC721Permit.sol';
 import './interface/IStartFiStakes.sol';
 import './MarketPlaceBase.sol';
 import './MarketPlaceListing.sol';
@@ -71,7 +71,7 @@ contract StartFiMarketPlaceController is
   
      * @return true when done, false if not
      */
-    function _premitNFT(
+    function _permitNFT(
         address _NFTContract,
         address target,
         uint256 tokenId,
@@ -80,8 +80,8 @@ contract StartFiMarketPlaceController is
         bytes32 r,
         bytes32 s
     ) internal returns (bool) {
-        if (_supportPremit(_NFTContract)) {
-            return IERC721Premit(_NFTContract).permit(target, address(this), tokenId, deadline, v, r, s);
+        if (_supportPermit(_NFTContract)) {
+            return IERC721Permit(_NFTContract).permit(target, address(this), tokenId, deadline, v, r, s);
         } else {
             return false;
         }

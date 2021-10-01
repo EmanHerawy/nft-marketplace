@@ -5,7 +5,7 @@ import '@openzeppelin/contracts/utils/Counters.sol';
 
 import './ERC721MinterPauser.sol';
 
-import './ERC721Premit.sol';
+import './ERC721Permit.sol';
 import './ERC721Royalty.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
@@ -15,7 +15,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
  * [ desc ] : NFT contract with Royalty option
  *
  */
-contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, ReentrancyGuard {
+contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Permit, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIdTracker;
 
@@ -23,7 +23,7 @@ contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
         string memory name,
         string memory symbol,
         string memory baseTokenURI
-    ) ERC721MinterPauser(name, symbol, baseTokenURI) ERC721Premit(name) {}
+    ) ERC721MinterPauser(name, symbol, baseTokenURI) ERC721Permit(name) {}
 
     /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
@@ -142,7 +142,7 @@ contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Premit, R
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721MinterPauser) returns (bool) {
         return
-            interfaceId == supportsRoyalty() || interfaceId == supportsPremit() || super.supportsInterface(interfaceId);
+            interfaceId == supportsRoyalty() || interfaceId == supportsPermit() || super.supportsInterface(interfaceId);
     }
 
     // adding nonReentrant guard , https://www.paradigm.xyz/2021/08/the-dangers-of-surprising-code/

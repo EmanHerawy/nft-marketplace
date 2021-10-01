@@ -30,9 +30,9 @@ contract MarketPlaceBase is ERC721Holder {
      * @param _NFTContract NFT contract address
      * @return true if this NFT contract support royalty, false if not
      */
-    function _supportPremit(address _NFTContract) internal view returns (bool) {
-        try IERC721(_NFTContract).supportsInterface(PREMIT_INTERFACE) returns (bool isPremitSupported) {
-            return isPremitSupported;
+    function _supportPermit(address _NFTContract) internal view returns (bool) {
+        try IERC721(_NFTContract).supportsInterface(PREMIT_INTERFACE) returns (bool isPermitSupported) {
+            return isPermitSupported;
         } catch {
             return false;
         }

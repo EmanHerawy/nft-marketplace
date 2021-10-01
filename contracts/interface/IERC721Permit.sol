@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.7;
 
-interface IERC721Premit {
+interface IERC721Permit {
     function permit(
         address target,
         address spender,

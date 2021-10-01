@@ -114,8 +114,8 @@ let walletNftBalance=0
      expect(await token.supportsRoyalty())
     .to.eq('0x2a55205a' );
         })
-  it('Contract must support Premit', async () => {
-     expect(await token.supportsPremit())
+  it('Contract must support Permit', async () => {
+     expect(await token.supportsPermit())
     .to.eq('0xd505accf' );
         })
         it('permit', async () => {

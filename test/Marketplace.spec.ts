@@ -216,7 +216,7 @@ it('non owner can not delist ', async () => {
 
 
 
-describe('StartFi marketPlace : WithPremit', () => {
+describe('StartFi marketPlace : WithPermit', () => {
   const provider = new MockProvider()
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
@@ -240,7 +240,7 @@ describe('StartFi marketPlace : WithPremit', () => {
 
   // it('Should list on marketplace:permit', async () => {
   //    await expect(
-  //    await marketPlace._supportPremit(NFT.address)
+  //    await marketPlace._supportPermit(NFT.address)
   //   ).to.eql(true)
   // })
   it('Should list on marketplace:permit', async () => {
@@ -256,7 +256,7 @@ describe('StartFi marketPlace : WithPremit', () => {
     )
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
     await expect(
-      await marketPlace.listOnMarketplaceWithPremit(
+      await marketPlace.listOnMarketplaceWithPermit(
         NFT.address,
         marketplaceTokenId2,
         price1,
@@ -284,7 +284,7 @@ describe('StartFi marketPlace : WithPremit', () => {
 
     const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(user1.privateKey.slice(2), 'hex'))
      await expect(
-      await marketPlace.connect(user1).buyNowWithPremit(
+      await marketPlace.connect(user1).buyNowWithPermit(
        listingId1,
        price1,
         deadline,
