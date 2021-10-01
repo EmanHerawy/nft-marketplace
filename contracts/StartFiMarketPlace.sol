@@ -204,7 +204,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      Users who want to list their NFT for sale with fixed price call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`listOnMarketplace`] internally
      **
      */
-    function listOnMarketplaceWithPremit(
+    function listOnMarketplaceWithPermit(
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice,
@@ -213,7 +213,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 r,
         bytes32 s
     ) external returns (bytes32 listId) {
-        require(_premitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
+        require(_permitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
         listId = listOnMarketplace(nFTContract, tokenId, listingPrice);
     }
 
@@ -317,7 +317,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      Users who want to list their NFT as auction for bidding with/without allowing direct sale call this function without sending prior transaction to `approve` the marketplace to transfer NFT. This function call`permit` [`eip-2612`] then call [`createAuction`] internally.
      **
      */
-    function createAuctionWithPremit(
+    function createAuctionWithPermit(
         address nFTContract,
         uint256 tokenId,
         uint256 listingPrice,
@@ -330,12 +330,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         bytes32 r,
         bytes32 s
     ) external returns (bytes32 listId) {
-        require(_premitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
+        require(_permitNFT(nFTContract, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
         listId = createAuction(nFTContract, tokenId, listingPrice, insurancAmount, isSellForEnabled, sellFor, duration);
     }
 
     /**
-    ** Users who interested in a certain auction, can bid on it by calling this   function.Bidder don't pay / transfer SFTI on bidding. Only when win the auction [`the auction is ended and this bidder is the last one to bid`], bidder pays by calling [`fulfillBid`] OR [`buyNowWithPremit`]
+    ** Users who interested in a certain auction, can bid on it by calling this   function.Bidder don't pay / transfer SFTI on bidding. Only when win the auction [`the auction is ended and this bidder is the last one to bid`], bidder pays by calling [`fulfillBid`] OR [`buyNowWithPermit`]
     - user MUST have enough stakes used as insurance; grantee and punishment mechanism for malicious bidder. If the bidder don't pay in the  
     - Bidders can bid as much as they wants , insurance is taken once in the first participation 
     - the bid price MUST be more than the last bid , if this is the first bid, the bid price MUST be more than or equal the minimum bid the auction creator state
@@ -536,7 +536,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
      * @return tokenId token id
 
      */
-    function fulfillBidWithPremit(
+    function fulfillBidWithPermit(
         bytes32 listingId,
         uint256 deadline,
         uint8 v,
@@ -554,7 +554,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     // delist
 
     /**
-    ** Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost as well as the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPremit`]  
+    ** Users who no longer want to keep their NFT in our marketplace can easly call this function to get their NFT back. Unsuccessful auction creators need to call it as well to get their nft back with no cost as well as the item added via [`listOnMarketplace`] or [`listOnMarketplaceWithPermit`]  
     - Only buyers can delist their own items 
     - Auction items can't delisted until the auction ended
     **
@@ -700,7 +700,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
   
  
      */
-    function buyNowWithPremit(
+    function buyNowWithPermit(
         bytes32 listingId,
         uint256 price,
         uint256 deadline,
