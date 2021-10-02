@@ -814,7 +814,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
              */
             if (_tokenListings[currentUserBids[index]].status == ListingStatus.onAuction) {
                 if (
-                    _tokenListings[currentUserBids[index]].disputeTime < block.timestamp &&
+                    _tokenListings[currentUserBids[index]].releaseTime < block.timestamp &&
                     bidToListing[currentUserBids[index]].bidder != _msgSender()
                 ) {
                     // free
