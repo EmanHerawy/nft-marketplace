@@ -737,8 +737,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         tokenId = _tokenListings[listingId].tokenId;
         uint256 insurancAmount = _tokenListings[listingId].insurancAmount;
         uint256 timeToDispute = _tokenListings[listingId].disputeTime;
-        require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
+         require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
         require(timeToDispute <= block.timestamp, 'Marketplace: Can not dispute before time');
+        require(unpauseTimestamp+fulfillDuration<block.timestamp,"Contract has justed unpaused, please give the bidder time to fulfill");
+
         require(_tokenListings[listingId].status == ListingStatus.onAuction, 'Marketplace: Item is not on Auction');
         if (listingBids[listingId][winnerBidder].bidPrice > stfiCap) {
             require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
