@@ -173,7 +173,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     ) public whenNotPaused isNotZero(listingPrice) returns (bytes32 listId) {
         listingCounter++;
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingCounter));
-
+        listings.push(listId);
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
         // transfer token to contract
@@ -252,6 +252,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listingCounter++;
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingCounter));
+         listings.push(listId);
         if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
@@ -737,9 +738,12 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         tokenId = _tokenListings[listingId].tokenId;
         uint256 insurancAmount = _tokenListings[listingId].insurancAmount;
         uint256 timeToDispute = _tokenListings[listingId].disputeTime;
-         require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
+        require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
         require(timeToDispute <= block.timestamp, 'Marketplace: Can not dispute before time');
-        require(unpauseTimestamp+fulfillDuration<block.timestamp,"Contract has justed unpaused, please give the bidder time to fulfill");
+        require(
+            unpauseTimestamp + fulfillDuration < block.timestamp,
+            'Contract has justed unpaused, please give the bidder time to fulfill'
+        );
 
         require(_tokenListings[listingId].status == ListingStatus.onAuction, 'Marketplace: Item is not on Auction');
         if (listingBids[listingId][winnerBidder].bidPrice > stfiCap) {
