@@ -804,6 +804,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     * emit : UserReservesFree
      */
     function freeListingReserves(bytes32 listingId, address bidder) public returns (uint256 curentReserves) {
+        require(
+            listingBids[listingId][bidder].nFTContract != address(0),
+            'Bidder is not participating in this auction'
+        );
         require(listingBids[listingId][bidder].isStakeReserved, 'Already released');
         require(_tokenListings[listingId].releaseTime < block.timestamp, "Can't free stakes for running auction");
         require(
@@ -830,7 +834,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(
             _tokenListings[listingId].status == ListingStatus.onAuction ||
                 _tokenListings[listingId].status == ListingStatus.OnMarket,
-            'StartFiMarketplace: Invalid ITem'
+            'StartFiMarketplace: Invalid item'
         );
         /**
        we have the following scenario : 
