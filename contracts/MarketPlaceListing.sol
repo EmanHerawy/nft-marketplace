@@ -121,7 +121,7 @@ contract MarketPlaceListing {
       * @return sellFor if sell for enabled for auction, this should be more than zero
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
      */
-    function getListingDetails(uint256 index)
+    function getListingDetailsByIndex(uint256 index)
         external
         view
         returns (

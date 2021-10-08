@@ -809,7 +809,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             'Bidder is not participating in this auction'
         );
         require(listingBids[listingId][bidder].isStakeReserved, 'Already released');
-        require(_tokenListings[listingId].releaseTime < block.timestamp, "Can't free stakes for running auction");
+        require(_tokenListings[listingId].releaseTime < block.timestamp, "Can not free stakes for running auction");
         require(
             bidToListing[listingId].bidder != bidder,
             'Winner bidder can  only  free stakes by fulfilling the auction'
