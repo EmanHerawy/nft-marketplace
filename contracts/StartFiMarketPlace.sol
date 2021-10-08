@@ -252,7 +252,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listingCounter++;
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingCounter));
-         listings.push(listId);
+        listings.push(listId);
         if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
@@ -380,9 +380,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 ) >= insurancAmount,
                 'Not enough reserves'
             );
-            bytes32[] storage listings = userBids[_msgSender()];
-            listings.push(listingId);
-            userBids[_msgSender()] = listings;
+
             // update user reserves
             // reserve Zero couldn't be at any case
             require(_updateUserReserves(_msgSender(), insurancAmount, true) > 0, 'Reserve Zero is not allowed');
@@ -453,7 +451,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _feeBase
             );
         }
-
+        listingBids[listingId][_msgSender()].isStakeReserved = false;
         listingBids[listingId][_msgSender()].isPurchased = true;
         _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
         // transfer price
@@ -757,7 +755,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             "Marketplace: couldn't deduct the fine for the admin wallet"
         );
         require(_deduct(winnerBidder, seller, remaining), "Marketplace: couldn't deduct the fine for the admin wallet");
-
+        listingBids[listingId][winnerBidder].isStakeReserved = false;
         _updateUserReserves(winnerBidder, insurancAmount, false);
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
@@ -782,56 +780,43 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
     }
 
+    /**internal function called to free the bidder on hold token */
+
+    function _freeListingReserves(bytes32 listingId, address bidder) private returns (uint256 curentReserves) {
+        uint256 lastReserves = userReserves[bidder];
+        _updateUserReserves(bidder, _tokenListings[listingId].insurancAmount, false);
+        listingBids[listingId][bidder].isStakeReserved = false;
+        curentReserves = userReserves[bidder];
+        emit UserReservesFree(bidder, lastReserves, curentReserves, block.timestamp);
+    }
+
     /**
-    ** users need to stake STFI to list or bid in the marketplace , these tokens needs to set free if the auction is no longer active and user can use these stakes to bid , list or even to withdraw tokens thus, function to free tokens reserved to items of market 
- *  in order to keep track of the on hold stakes.  
- * we store user on-hold stakes in a map `userReserves` 
- * to get user on-hold reserves call  getUserReserved on marketplace
- * to get the number of stakes that not on hold, call  userReserves on marketplace , this function subtract the user stakes in staking contract from the on-hold stakes on marketplace
-*This function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
-   - Only users can free their own reserves 
+    ** users need to stake STFI to bid in the marketplace , these tokens needs to set free if the auction is no longer active and user can use these stakes to bid  thus, function to free tokens reserved to listing of market 
+ *  in order to let user batch free many lisiting , they can call `freeBatchReserves`
+ * called by user/ third actors only when s/he wants rather than force the check & updates with every transaction which might be very costly .
+   -  
    ** 
     * @dev called by user through dapps when his/her wants to free his reserved tokens which are no longer in active auction .
-    *  @notice this function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
-  
+    *  @notice called by user or on behalf of the user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
+     * @param listingId listing idbehalf
+     * @param bidder bidder address
     * @return curentReserves user reserves after freeing the unused reservd
     * emit : UserReservesFree
      */
+    function freeListingReserves(bytes32 listingId, address bidder) public returns (uint256 curentReserves) {
+        require(listingBids[listingId][bidder].isStakeReserved, 'Already released');
+        require(_tokenListings[listingId].releaseTime < block.timestamp, "Can't free stakes for running auction");
+        require(
+            bidToListing[listingId].bidder != bidder,
+            'Winner bidder can  only  free stakes by fulfilling the auction'
+        );
+        return _freeListingReserves(listingId, bidder);
+    }
 
-    function freeReserves() external returns (uint256 curentReserves) {
-        // TODo: Check allternative for gas consumptions
-        // iterate over the listng key map
-        // if it's sold, canceled,  free if he is participating on this listing
-        uint256 lastReserves = userReserves[_msgSender()];
-        bytes32[] memory currentUserBids = userBids[_msgSender()];
-        delete userBids[_msgSender()];
-        bytes32[] storage newUserBids = userBids[_msgSender()];
-
-        // loop
-
-        // loop
-        for (uint256 index = 0; index < currentUserBids.length; index++) {
-            /**
-             * we want to free stakes bidders do in auctions with the following scenarios
-             * - bidder is not the winner and the auction is ended ( bought, fulfilled , dispute) , free
-             *- auction is finished, is not the winner bidder and winner bidder and auction creator have not fulfilled or disputed , free
-             */
-            if (_tokenListings[currentUserBids[index]].status == ListingStatus.onAuction) {
-                if (
-                    _tokenListings[currentUserBids[index]].releaseTime < block.timestamp &&
-                    bidToListing[currentUserBids[index]].bidder != _msgSender()
-                ) {
-                    // free
-                } else {
-                    newUserBids.push(currentUserBids[index]);
-                    curentReserves += _tokenListings[currentUserBids[index]].insurancAmount;
-                }
-            }
+    function freeBatchReserves(bytes32[] memory listingIds, address bidder) external {
+        for (uint256 index = 0; index < listingIds.length; index++) {
+            freeListingReserves(listingIds[index], bidder);
         }
-
-        userBids[_msgSender()] = newUserBids;
-        require(_setUserReserves(_msgSender(), curentReserves), 'set reserve faild');
-        emit UserReservesFree(_msgSender(), lastReserves, curentReserves, block.timestamp);
     }
 
     /**
