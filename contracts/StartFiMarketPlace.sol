@@ -21,9 +21,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     ///
     event ListOnMarketplace(
         bytes32 listId,
-        address nFTContract,
+        address indexed nFTContract,
         address buyer,
-        uint256 tokenId,
+        uint256 indexed tokenId,
         uint256 listingPrice,
         uint256 timestamp
     );
@@ -40,9 +40,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     event CreateAuction(
         bytes32 listId,
-        address nFTContract,
+        address indexed nFTContract,
         address seller,
-        uint256 tokenId,
+        uint256 indexed tokenId,
         uint256 listingPrice,
         bool isSellForEnabled,
         uint256 sellFor,
@@ -53,17 +53,25 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     event BidOnAuction(
         bytes32 bidId,
-        bytes32 listingId,
+        bytes32 indexed listingId,
         address tokenAddress,
         address bidder,
         uint256 tokenId,
         uint256 bidPrice,
         uint256 timestamp
     );
+    event DAOFreeList(
+        bytes32 indexed listingId,
+        address tokenAddress,
+        uint256 tokenId,
+        address seller,
+        address bidder,
+        uint256 timestamp
+    );
 
     event FulfillBid(
         bytes32 bidId,
-        bytes32 listingId,
+        bytes32 indexed listingId,
         address tokenAddress,
         address bidder,
         uint256 tokenId,
@@ -77,7 +85,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     event DisputeAuction(
         bytes32 bidId,
-        bytes32 listingId,
+        bytes32 indexed listingId,
         address tokenAddress,
         address bidder,
         uint256 tokenId,
@@ -89,7 +97,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     );
 
     event BuyNow(
-        bytes32 listId,
+        bytes32 indexed listId,
         address nFTContract,
         address buyer,
         uint256 tokenId,
@@ -103,7 +111,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 timestamp
     );
     event UserReservesFree(address user, uint256 lastReserves, uint256 newReserves, uint256 timestamp);
-    event ApproveDeal(bytes32 listId, address approver, uint256 timestamp);
+    event ApproveDeal(bytes32 indexed listId, address approver, uint256 timestamp);
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -809,12 +817,33 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             'Bidder is not participating in this auction'
         );
         require(listingBids[listingId][bidder].isStakeReserved, 'Already released');
-        require(_tokenListings[listingId].releaseTime < block.timestamp, "Can not free stakes for running auction");
+        require(_tokenListings[listingId].releaseTime < block.timestamp, 'Can not free stakes for running auction');
         require(
             bidToListing[listingId].bidder != bidder,
             'Winner bidder can  only  free stakes by fulfilling the auction'
         );
         return _freeListingReserves(listingId, bidder);
+    }
+
+    /**
+    @dev if the deal exceeded the cap and the KYC 
+     emit DAOFreeList
+     */
+    function daoFreeUnApprovedDeal(bytes32 listingId) external onlyDAO {
+        address winnerBidder = bidToListing[listingId].bidder;
+        address seller = _tokenListings[listingId].seller;
+        address _NFTContract = _tokenListings[listingId].nFTContract;
+        uint256 tokenId = _tokenListings[listingId].tokenId;
+        require(!kycedDeals[listingId], 'StartfiMarketplace: Deal is already get approved');
+
+        require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
+        require(_tokenListings[listingId].releaseTime <= block.timestamp, 'Marketplace: Auction is running');
+
+        require(_tokenListings[listingId].status == ListingStatus.onAuction, 'Marketplace: Item is not on Auction');
+        _finalizeListing(listingId, address(0), ListingStatus.Canceled);
+        _freeListingReserves(listingId, winnerBidder);
+        require(_safeNFTTransfer(_NFTContract, tokenId, address(this), seller), "NFT token couldn't be transfered");
+        emit DAOFreeList(listingId, _NFTContract, tokenId, seller, winnerBidder, block.timestamp);
     }
 
     function freeBatchReserves(bytes32[] memory listingIds, address bidder) external {
