@@ -28,7 +28,6 @@ contract StartFiMarketPlaceController is
 {
     /******************************************* decalrations go here ********************************************************* */
 
-    mapping(address => bytes32[]) internal userBids;
 
     /******************************************* constructor goes here ********************************************************* */
 

@@ -41,7 +41,14 @@ import { tokenFixture } from './shared/fixtures'
     * user 2 total , 40  , after freeing reserves 10
     * user 3 40 , after freeing reserves 10
     * user   40 = 40 , after freeing reserves 0
- * 
+ * checks 
+ *   
+  // user can't free already released token
+    // user cna't free running auction 
+    // user cna't free  auction bidder is not prticipating in 
+    // winner biddr can't free his token from free reserve
+    // user can free reserves via releaseBatchReserves
+    // user can free reserves via releaseListingReserves
  */
 chai.use(solidity)
 
@@ -251,6 +258,8 @@ let forSalePrice=10000;
   
 
     })
+
+  
    
     it('Should  bid on item with price equal or more than the mini bid price', async () => {
       // auction 1
@@ -282,7 +291,13 @@ let forSalePrice=10000;
     
   
     })
-    it('go in time where auction is ended, auction 1  is fulfilled and 4 is disputed, the rest no actions ', async () => {
+
+        it('users  can not free reserves in active auctions  ', async () => {
+      await expect(marketPlace.releaseListingReserves(listingId2,user2.address)).to.revertedWith ('Can not release stakes for running auction')
+        })
+    
+    
+    it('go in time where auctions  ended, auction 1  is fulfilled and 4 is disputed, the rest no actions ', async () => {
       const listingDetails = await marketPlace.getListingDetails(listingId2);
        
         await provider.send('evm_increaseTime', [listingDetails.releaseTime.toNumber()]); 
@@ -297,10 +312,16 @@ let forSalePrice=10000;
   
     })
  
-  
-  
-    it('user 1 reserves should be after freeing reserves =0', async () => {
-      await expect(marketPlace.connect(user1).freeReserves()).to.emit(marketPlace, 'UserReservesFree')
+      it('users  can not free reserves in auction already released by fulfilling auction  ', async () => {
+      await expect(marketPlace.releaseListingReserves(listingId2,user1.address)).to.revertedWith ('Already released')
+        })
+      it('users  can not free reserves in auction s/he win, they have to fulfill  ', async () => {
+      await expect(marketPlace.releaseListingReserves(listingId3,user2.address)).to.revertedWith ('Winner bidder can  only  release stakes by fulfilling the auction')
+        })
+    
+    
+    it('user 1 can call releaseBatchReserves and reserves should be after freeing reserves =0', async () => {
+      await expect(marketPlace.releaseBatchReserves([listingId3,listingId4,listingId5],user1.address)).to.emit(marketPlace, 'UserReservesRelease')
 
    
       const expectedReserves= BigNumber.from(0)
@@ -309,27 +330,31 @@ let forSalePrice=10000;
     })
     it('user 2 reserves should be after freeing reserves =10', async () => {
      
-      await expect(marketPlace.connect(user2).freeReserves()).to.emit(marketPlace, 'UserReservesFree')
+      await expect(marketPlace.releaseListingReserves(listingId2,user2.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId4,user2.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId5,user2.address)).to.emit(marketPlace, 'UserReservesRelease')
       const expectedReserves= BigNumber.from(10)
       expect(await marketPlace.getUserReserved(user2.address)).to.eq(expectedReserves)
        // check balance 
     })
     it('user 3 reserves should be after freeing reserves =10', async () => {
      
-      await expect(marketPlace.connect(user3).freeReserves()).to.emit(marketPlace, 'UserReservesFree')
+      await expect(marketPlace.releaseBatchReserves([listingId3,listingId2,listingId5],user3.address)).to.emit(marketPlace, 'UserReservesRelease')
       const expectedReserves= BigNumber.from(10)
       expect(await marketPlace.getUserReserved(user3.address)).to.eq(expectedReserves)
        // check balance 
     })
     it('user 4 reserves should be after freeing reserves =0', async () => {
      
-      await expect(marketPlace.connect(user4).freeReserves()).to.emit(marketPlace, 'UserReservesFree')
+      await expect(marketPlace.releaseBatchReserves([listingId3,listingId4,listingId2],user4.address)).to.emit(marketPlace, 'UserReservesRelease')
       const expectedReserves= BigNumber.from(0)
       expect(await marketPlace.getUserReserved(user4.address)).to.eq(expectedReserves)
        // check balance 
     })
 
- 
+       it('user  can not free reserves in auction s/he is not participating on  ', async () => {
+      await expect(marketPlace.connect(user1).releaseListingReserves(listingId1,admin.address)).to.revertedWith ('Bidder is not participating in this auction')
+    })
   
   })
 
