@@ -189,7 +189,7 @@ forSalePrice=price1
   })
 
     it('DAO Should not free auction with no bids', async () => {
-    await expect(marketPlace.connect(admin).daoFreeUnApprovedDeal(listingId1)).to.revertedWith('Marketplace: Auction has no bids')
+    await expect(marketPlace.connect(admin).daoReleaseRejectedDeal(listingId1)).to.revertedWith('Marketplace: Auction has no bids')
 
     })
   
@@ -210,7 +210,7 @@ forSalePrice=price1
   
   
     it('DAO Should not free auction with no bids', async () => {
-    await expect(marketPlace.connect(admin).daoFreeUnApprovedDeal(listingId1)).to.revertedWith('Marketplace: Auction is running')
+    await expect(marketPlace.connect(admin).daoReleaseRejectedDeal(listingId1)).to.revertedWith('Marketplace: Auction is running')
 
     })
   
@@ -232,7 +232,7 @@ forSalePrice=price1
     expect(transactionRecipe.from).equal(admin.address)
   })
     it('DAO Should not free approved auction ', async () => {
-    await expect(marketPlace.connect(admin).daoFreeUnApprovedDeal(listingId1)).to.revertedWith('StartfiMarketplace: Deal is already get approved')
+    await expect(marketPlace.connect(admin).daoReleaseRejectedDeal(listingId1)).to.revertedWith('StartfiMarketplace: Deal is already get approved')
   })
   it('Should  fulfill approved auction  even after allowing token to pay', async () => {
     const winnerBid= await marketPlace.winnerBid(listingId1)
@@ -246,11 +246,11 @@ forSalePrice=price1
   
     await expect(token.connect(user1).approve(marketPlace.address, winnerBid.bidPrice)).to.emit(token, 'Approval')
     await expect(marketPlace.connect(user1).fulfillBid(listingId2)).to.emit(marketPlace,  'FulfillBid')
-    await expect(marketPlace.connect(admin).daoFreeUnApprovedDeal(listingId2)).to.revertedWith('Marketplace: Item is not on Auction')
+    await expect(marketPlace.connect(admin).daoReleaseRejectedDeal(listingId2)).to.revertedWith('Marketplace: Item is not on Auction')
 
   })
  it('DAO Should  free stakes for item with KYC failed', async () => {
-      await expect(marketPlace.connect(admin).daoFreeUnApprovedDeal(listingId0)).to.emit(marketPlace,  'DAOFreeList')
+      await expect(marketPlace.connect(admin).daoReleaseRejectedDeal(listingId0)).to.emit(marketPlace,  'DAOReleaseList')
 
   })
   })
