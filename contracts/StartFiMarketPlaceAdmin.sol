@@ -16,7 +16,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
     bytes32 public constant PRICE_FEEDER_ROLE = keccak256('PRICE_FEEDER_ROLE');
     bytes32 public constant DAO_ROLE = keccak256('DAO_ROLE');
     address _adminWallet;
-    uint256 public unpauseTimestamp=block.timestamp;
+    uint256 public unpauseTimestamp = block.timestamp;
     /******************************************* events goes here ********************************************************* */
     event ChangeReputationContract(address reputationContract);
     event ChangeUtilityToken(address utiltiyToken);
@@ -37,10 +37,10 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
         _setupRole(DEFAULT_ADMIN_ROLE, ownerAddress);
 
         _setupRole(OWNER_ROLE, ownerAddress);
-    // we are assigned it to the owner for now until the chainlink price feed contract gets finished. once finished we will remove owner from this role 
+        // we are assigned it to the owner for now until the chainlink price feed contract gets finished. once finished we will remove owner from this role
 
         _setupRole(PRICE_FEEDER_ROLE, ownerAddress);
-        // we are assigned it to the owner for now until the contract gets finished. once finished we will remove owner from this role 
+        // we are assigned it to the owner for now until the contract gets finished. once finished we will remove owner from this role
         _setupRole(DAO_ROLE, ownerAddress);
         _adminWallet = ownerAddress;
     }
@@ -182,7 +182,7 @@ abstract contract StartFiMarketPlaceAdmin is AccessControlEnumerable, Pausable, 
      * - the caller must be the owner.
      */
     function unpause() external virtual onlyOwner whenPaused {
-        unpauseTimestamp=block.timestamp;
+        unpauseTimestamp = block.timestamp;
         _unpause();
     }
 

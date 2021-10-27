@@ -120,7 +120,7 @@ contract MarketPlaceBid {
         // where bid winner is the last bidder updated
         bidToListing[listingId] = WinningBid(bidId, bidder);
         // set isStakeReserved as true by default as the contract doesn't call this fucntion unless required checks have been done and met
-        listingBids[listingId][bidder] = Bid(bidId, tokenAddress, tokenId, bidPrice, false,true);
+        listingBids[listingId][bidder] = Bid(bidId, tokenAddress, tokenId, bidPrice, false, true);
         return true;
     }
 }
