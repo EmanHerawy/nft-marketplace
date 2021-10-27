@@ -35,7 +35,8 @@ testnet_aurora: {
 },
 bsc_test: {
   url: 'https://data-seed-prebsc-1-s1.binance.org:8545',
-  accounts: [privateKey],
+  accounts: [privateKey], 
+
   saveDeployments: true,
   chainId: 97,
   gasPrice: 120 * 1000000000
@@ -47,11 +48,45 @@ bsc: {
   chainId: 56,
   gasPrice: 120 * 1000000000
 },
-testnet_matic: {
+xDai: {
+  url: 'https://rpc.xdaichain.com',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 0x64,
+  gasPrice: 120 * 1000000000
+},
+FTM: {
+  url: 'https://rpc.fantom.network',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 250,
+  gasPrice: 120 * 1000000000
+},
+heco: {
+  url: 'https://http-mainnet.hecochain.com/',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 128,
+  gasPrice: 120 * 1000000000
+},
+heco_test: {
+  url: 'https://http-testnet.hecochain.com',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 256
+},
+matic_test: {
   url: 'https://rpc-mumbai.matic.today',
   accounts: [privateKey],
   saveDeployments: true,
   chainId: 80001,
+  gasPrice: 120 * 1000000000
+},
+matic: {
+  url: 'https://rpc-mainnet.matic.network',
+  accounts: [privateKey],
+  saveDeployments: true,
+  chainId: 137,
   gasPrice: 120 * 1000000000
 },
  
