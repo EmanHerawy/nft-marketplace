@@ -206,7 +206,5 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
     const transactionRecipe = await marketPlace.setPrice(23)
     expect(transactionRecipe.from).equal(wallet.address)
   })
-  it('Should UserReservesFree', async () => {
-    await expect(marketPlace.freeReserves()).to.emit(marketPlace, 'UserReservesFree')
-  })
+
 })

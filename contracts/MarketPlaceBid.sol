@@ -18,6 +18,7 @@ contract MarketPlaceBid {
         uint256 tokenId;
         uint256 bidPrice;
         bool isPurchased;
+        bool isStakeReserved; // ture till the bidder free
     }
     struct WinningBid {
         bytes32 bidId;
@@ -39,6 +40,7 @@ contract MarketPlaceBid {
      * @return tokenId nft token id
      * @return bidPrice bid price
      * @return isPurchased true if purchased
+     * @return isStakeReserved true if the reserve is free
      */
     function winnerBid(bytes32 listingId)
         external
@@ -49,7 +51,8 @@ contract MarketPlaceBid {
             address nFTContract,
             uint256 tokenId,
             uint256 bidPrice,
-            bool isPurchased
+            bool isPurchased,
+            bool isStakeReserved
         )
     {
         bidId = bidToListing[listingId].bidId;
@@ -58,6 +61,7 @@ contract MarketPlaceBid {
         tokenId = listingBids[listingId][bidder].tokenId;
         bidPrice = listingBids[listingId][bidder].bidPrice;
         isPurchased = listingBids[listingId][bidder].isPurchased;
+        isStakeReserved = listingBids[listingId][bidder].isStakeReserved;
     }
 
     /**
@@ -69,6 +73,8 @@ contract MarketPlaceBid {
      * @return nFTContract  nft contract address
      * @return tokenId nft token id
      * @return bidPrice bid price
+     * @return isPurchased true if purchased
+     * @return isStakeReserved true if the reserve is free
      */
     function getAuctionBidDetails(bytes32 listingId, address bidder)
         external
@@ -78,7 +84,8 @@ contract MarketPlaceBid {
             address nFTContract,
             uint256 tokenId,
             uint256 bidPrice,
-            bool isPurchased
+            bool isPurchased,
+            bool isStakeReserved
         )
     {
         bidId = listingBids[listingId][bidder].bidId;
@@ -86,6 +93,7 @@ contract MarketPlaceBid {
         tokenId = listingBids[listingId][bidder].tokenId;
         bidPrice = listingBids[listingId][bidder].bidPrice;
         isPurchased = listingBids[listingId][bidder].isPurchased;
+        isStakeReserved = listingBids[listingId][bidder].isStakeReserved;
     }
 
     /******************************************* change state functions go here ********************************************************* */
@@ -111,7 +119,8 @@ contract MarketPlaceBid {
     ) internal returns (bool) {
         // where bid winner is the last bidder updated
         bidToListing[listingId] = WinningBid(bidId, bidder);
-        listingBids[listingId][bidder] = Bid(bidId, tokenAddress, tokenId, bidPrice, false);
+        // set isStakeReserved as true by default as the contract doesn't call this fucntion unless required checks have been done and met
+        listingBids[listingId][bidder] = Bid(bidId, tokenAddress, tokenId, bidPrice, false, true);
         return true;
     }
 }

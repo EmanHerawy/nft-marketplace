@@ -17,13 +17,13 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     /******************************************* decalrations go here ********************************************************* */
     //
     uint256 public listingCounter;
-    // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted ,  item  disputed , user free reserved ,
+    // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted ,  item  disputed , user release reserved ,
     ///
     event ListOnMarketplace(
         bytes32 listId,
-        address nFTContract,
+        address indexed nFTContract,
         address buyer,
-        uint256 tokenId,
+        uint256 indexed tokenId,
         uint256 listingPrice,
         uint256 timestamp
     );
@@ -40,9 +40,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     event CreateAuction(
         bytes32 listId,
-        address nFTContract,
+        address indexed nFTContract,
         address seller,
-        uint256 tokenId,
+        uint256 indexed tokenId,
         uint256 listingPrice,
         bool isSellForEnabled,
         uint256 sellFor,
@@ -53,17 +53,25 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     event BidOnAuction(
         bytes32 bidId,
-        bytes32 listingId,
+        bytes32 indexed listingId,
         address tokenAddress,
         address bidder,
         uint256 tokenId,
         uint256 bidPrice,
         uint256 timestamp
     );
+    event DAOReleaseList(
+        bytes32 indexed listingId,
+        address tokenAddress,
+        uint256 tokenId,
+        address seller,
+        address bidder,
+        uint256 timestamp
+    );
 
     event FulfillBid(
         bytes32 bidId,
-        bytes32 listingId,
+        bytes32 indexed listingId,
         address tokenAddress,
         address bidder,
         uint256 tokenId,
@@ -77,7 +85,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
 
     event DisputeAuction(
         bytes32 bidId,
-        bytes32 listingId,
+        bytes32 indexed listingId,
         address tokenAddress,
         address bidder,
         uint256 tokenId,
@@ -89,7 +97,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     );
 
     event BuyNow(
-        bytes32 listId,
+        bytes32 indexed listId,
         address nFTContract,
         address buyer,
         uint256 tokenId,
@@ -102,8 +110,8 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 netPrice,
         uint256 timestamp
     );
-    event UserReservesFree(address user, uint256 lastReserves, uint256 newReserves, uint256 timestamp);
-    event ApproveDeal(bytes32 listId, address approver, uint256 timestamp);
+    event UserReservesRelease(address user, uint256 lastReserves, uint256 newReserves, uint256 timestamp);
+    event ApproveDeal(bytes32 indexed listId, address approver, uint256 timestamp);
 
     /******************************************* constructor goes here ********************************************************* */
 
@@ -173,7 +181,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
     ) public whenNotPaused isNotZero(listingPrice) returns (bytes32 listId) {
         listingCounter++;
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), block.timestamp, listingCounter));
-
+        listings.push(listId);
         require(_isTokenApproved(nFTContract, tokenId), 'Marketplace is not allowed to transfer your token');
 
         // transfer token to contract
@@ -252,6 +260,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         uint256 releaseTime = StartFiFinanceLib._calcSum(block.timestamp, duration);
         listingCounter++;
         listId = keccak256(abi.encodePacked(nFTContract, tokenId, _msgSender(), releaseTime, listingCounter));
+        listings.push(listId);
         if (isSellForEnabled) {
             require(sellFor >= minimumBid, 'Zero price is not allowed');
         } else {
@@ -379,9 +388,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 ) >= insurancAmount,
                 'Not enough reserves'
             );
-            bytes32[] storage listings = userBids[_msgSender()];
-            listings.push(listingId);
-            userBids[_msgSender()] = listings;
+
             // update user reserves
             // reserve Zero couldn't be at any case
             require(_updateUserReserves(_msgSender(), insurancAmount, true) > 0, 'Reserve Zero is not allowed');
@@ -452,7 +459,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
                 _feeBase
             );
         }
-
+        listingBids[listingId][_msgSender()].isStakeReserved = false;
         listingBids[listingId][_msgSender()].isPurchased = true;
         _finalizeListing(listingId, winnerBidder, ListingStatus.Sold);
         // transfer price
@@ -756,7 +763,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
             "Marketplace: couldn't deduct the fine for the admin wallet"
         );
         require(_deduct(winnerBidder, seller, remaining), "Marketplace: couldn't deduct the fine for the admin wallet");
-
+        listingBids[listingId][winnerBidder].isStakeReserved = false;
         _updateUserReserves(winnerBidder, insurancAmount, false);
         // finish listing
         _finalizeListing(listingId, address(0), ListingStatus.Canceled);
@@ -781,56 +788,68 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         );
     }
 
+    /**internal function called to release the bidder on hold token */
+
+    function _releaseListingReserves(bytes32 listingId, address bidder) private returns (uint256 curentReserves) {
+        uint256 lastReserves = userReserves[bidder];
+        _updateUserReserves(bidder, _tokenListings[listingId].insurancAmount, false);
+        listingBids[listingId][bidder].isStakeReserved = false;
+        curentReserves = userReserves[bidder];
+        emit UserReservesRelease(bidder, lastReserves, curentReserves, block.timestamp);
+    }
+
     /**
-    ** users need to stake STFI to list or bid in the marketplace , these tokens needs to set free if the auction is no longer active and user can use these stakes to bid , list or even to withdraw tokens thus, function to free tokens reserved to items of market 
- *  in order to keep track of the on hold stakes.  
- * we store user on-hold stakes in a map `userReserves` 
- * to get user on-hold reserves call  getUserReserved on marketplace
- * to get the number of stakes that not on hold, call  userReserves on marketplace , this function subtract the user stakes in staking contract from the on-hold stakes on marketplace
-*This function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
-   - Only users can free their own reserves 
+    ** users need to stake STFI to bid in the marketplace , these tokens needs to set release if the auction is no longer active and user can use these stakes to bid  thus, function to release tokens reserved to listing of market 
+ *  in order to let user batch release many lisiting , they can call `releaseBatchReserves`
+ * called by user/ third actors only when s/he wants rather than force the check & updates with every transaction which might be very costly .
+   -  
    ** 
-    * @dev called by user through dapps when his/her wants to free his reserved tokens which are no longer in active auction .
-    *  @notice this function is greedy, called by user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
-  
-    * @return curentReserves user reserves after freeing the unused reservd
-    * emit : UserReservesFree
+    * @dev called by user through dapps when his/her wants to release his reserved tokens which are no longer in active auction .
+    *  @notice called by user or on behalf of the user only when s/he wants rather than force the check & updates with every transaction which might be very costly .
+     * @param listingId listing idbehalf
+     * @param bidder bidder address
+    * @return curentReserves user reserves after releaseing the unused reservd
+    * emit : UserReservesRelease
      */
+    function releaseListingReserves(bytes32 listingId, address bidder) public returns (uint256 curentReserves) {
+        require(
+            listingBids[listingId][bidder].nFTContract != address(0),
+            'Bidder is not participating in this auction'
+        );
+        require(listingBids[listingId][bidder].isStakeReserved, 'Already released');
+        require(_tokenListings[listingId].releaseTime < block.timestamp, 'Can not release stakes for running auction');
+        require(
+            bidToListing[listingId].bidder != bidder,
+            'Winner bidder can  only  release stakes by fulfilling the auction'
+        );
+        return _releaseListingReserves(listingId, bidder);
+    }
 
-    function freeReserves() external returns (uint256 curentReserves) {
-        // TODo: Check allternative for gas consumptions
-        // iterate over the listng key map
-        // if it's sold, canceled,  free if he is participating on this listing
-        uint256 lastReserves = userReserves[_msgSender()];
-        bytes32[] memory currentUserBids = userBids[_msgSender()];
-        delete userBids[_msgSender()];
-        bytes32[] storage newUserBids = userBids[_msgSender()];
+    /**
+    @dev if the deal exceeded the cap and the KYC 
+     emit DAOReleaseList
+     */
+    function daoReleaseRejectedDeal(bytes32 listingId) external onlyDAO {
+        address winnerBidder = bidToListing[listingId].bidder;
+        address seller = _tokenListings[listingId].seller;
+        address _NFTContract = _tokenListings[listingId].nFTContract;
+        uint256 tokenId = _tokenListings[listingId].tokenId;
+        require(!kycedDeals[listingId], 'StartfiMarketplace: Deal is already get approved');
 
-        // loop
+        require(winnerBidder != address(0), 'Marketplace: Auction has no bids');
+        require(_tokenListings[listingId].releaseTime <= block.timestamp, 'Marketplace: Auction is running');
 
-        // loop
-        for (uint256 index = 0; index < currentUserBids.length; index++) {
-            /**
-             * we want to free stakes bidders do in auctions with the following scenarios
-             * - bidder is not the winner and the auction is ended ( bought, fulfilled , dispute) , free
-             *- auction is finished, is not the winner bidder and winner bidder and auction creator have not fulfilled or disputed , free
-             */
-            if (_tokenListings[currentUserBids[index]].status == ListingStatus.onAuction) {
-                if (
-                    _tokenListings[currentUserBids[index]].releaseTime < block.timestamp &&
-                    bidToListing[currentUserBids[index]].bidder != _msgSender()
-                ) {
-                    // free
-                } else {
-                    newUserBids.push(currentUserBids[index]);
-                    curentReserves += _tokenListings[currentUserBids[index]].insurancAmount;
-                }
-            }
+        require(_tokenListings[listingId].status == ListingStatus.onAuction, 'Marketplace: Item is not on Auction');
+        _finalizeListing(listingId, address(0), ListingStatus.Canceled);
+        _releaseListingReserves(listingId, winnerBidder);
+        require(_safeNFTTransfer(_NFTContract, tokenId, address(this), seller), "NFT token couldn't be transfered");
+        emit DAOReleaseList(listingId, _NFTContract, tokenId, seller, winnerBidder, block.timestamp);
+    }
+
+    function releaseBatchReserves(bytes32[] memory listingIds, address bidder) external {
+        for (uint256 index = 0; index < listingIds.length; index++) {
+            releaseListingReserves(listingIds[index], bidder);
         }
-
-        userBids[_msgSender()] = newUserBids;
-        require(_setUserReserves(_msgSender(), curentReserves), 'set reserve faild');
-        emit UserReservesFree(_msgSender(), lastReserves, curentReserves, block.timestamp);
     }
 
     /**
@@ -844,7 +863,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
         require(
             _tokenListings[listingId].status == ListingStatus.onAuction ||
                 _tokenListings[listingId].status == ListingStatus.OnMarket,
-            'StartFiMarketplace: Invalid ITem'
+            'StartFiMarketplace: Invalid item'
         );
         /**
        we have the following scenario : 
@@ -890,7 +909,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceAdmin, ReentrancyGuard {
    - Only buyers can delist their own items 
    **
      * @dev called by seller through dapps when s/he wants to remove this token from the marketplace
-     * @notice called only when puased , let user to migrate for free if they don't agree on our new terms
+     * @notice called only when puased , let user to migrate for release if they don't agree on our new terms
      * @param listingId listing id
      * @return _NFTContract nft contract address
      * @return tokenId token id
