@@ -40,6 +40,4 @@ contract StartfiCreate2Deployer {
     function computeAddress(bytes32 salt, bytes32 codeHash) public view returns (address) {
         return Create2.computeAddress(salt, codeHash);
     }
-
-   
 }

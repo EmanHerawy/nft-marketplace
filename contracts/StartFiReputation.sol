@@ -14,11 +14,11 @@ contract StartFiReputation is Context, AccessControlEnumerable {
     bytes32 public constant BURNER_ROLE = keccak256('BURNER_ROLE');
     mapping(address => uint256) private userReputation;
 
-    constructor( address _owner) {
-        _setupRole(DEFAULT_ADMIN_ROLE,_owner);
+    constructor(address _owner) {
+        _setupRole(DEFAULT_ADMIN_ROLE, _owner);
 
-        _setupRole(MINTER_ROLE,_owner);
-        _setupRole(BURNER_ROLE,_owner);
+        _setupRole(MINTER_ROLE, _owner);
+        _setupRole(BURNER_ROLE, _owner);
     }
 
     /**
