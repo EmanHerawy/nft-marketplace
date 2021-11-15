@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.7;
+pragma solidity 0.8.4;
 
 import './interface/IStartFiStakes.sol';
 import './interface/IStartFiMarketplace.sol';
@@ -27,8 +27,9 @@ contract StartFiStakes is Ownable, IStartFiStakes {
 
     /******************************************* constructor goes here ********************************************************* */
 
-    constructor(address _stfiToken) {
+    constructor(address _stfiToken, address _owner) {
         stfiToken = _stfiToken;
+        transferOwnership(_owner);
     }
 
     /******************************************* read state functions go here ********************************************************* */

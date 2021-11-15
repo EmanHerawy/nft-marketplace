@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.7;
+pragma solidity 0.8.4;
 import '@openzeppelin/contracts/utils/Counters.sol';
-
-import './ERC721MinterPauser.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 
 import './ERC721Permit.sol';
 import './ERC721Royalty.sol';
@@ -15,16 +15,22 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
  * [ desc ] : NFT contract with Royalty option
  *
  */
-contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Permit, ReentrancyGuard {
+contract StartFiRoyaltyNFT is ReentrancyGuard, ERC721Royalty, ERC721Permit, ERC721Enumerable,ERC721URIStorage {
     using Counters for Counters.Counter;
-    Counters.Counter private _tokenIdTracker;
+ 
+     Counters.Counter private _tokenIdTracker;
 
+ 
     constructor(
         string memory name,
-        string memory symbol,
-        string memory baseTokenURI
-    ) ERC721MinterPauser(name, symbol, baseTokenURI) ERC721Permit(name) {}
+        string memory symbol
+     ) ERC721(name, symbol) ERC721Permit(name) {
+     }
 
+
+   function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
+     return super.tokenURI(tokenId);
+    }
     /// @dev Sets `tokenId` as allowance of `spender` account over `owner` account's StartFiRoyaltyNFT token, given `owner` account's signed approval.
     /// Emits {Approval} event.
     /// Requirements:
@@ -140,11 +146,21 @@ contract StartFiRoyaltyNFT is ERC721Royalty, ERC721MinterPauser, ERC721Permit, R
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721MinterPauser) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721,ERC721Enumerable) returns (bool) {
         return
             interfaceId == supportsRoyalty() || interfaceId == supportsPermit() || super.supportsInterface(interfaceId);
     }
 
+  function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal virtual override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
+  function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721URIStorage) {
+        super._burn( tokenId);
+    }
     // adding nonReentrant guard , https://www.paradigm.xyz/2021/08/the-dangers-of-surprising-code/
     function _safeTransfer(
         address from,

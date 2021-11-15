@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.7;
+pragma solidity 0.8.4;
 import './interface/IERC721Permit.sol';
 import './library/StartFiSignatureLib.sol';
 

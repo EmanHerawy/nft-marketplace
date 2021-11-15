@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-pragma solidity 0.8.7;
+pragma solidity 0.8.4;
 
 import '@openzeppelin/contracts/access/AccessControlEnumerable.sol';
 
@@ -14,11 +14,11 @@ contract StartFiReputation is Context, AccessControlEnumerable {
     bytes32 public constant BURNER_ROLE = keccak256('BURNER_ROLE');
     mapping(address => uint256) private userReputation;
 
-    constructor() {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    constructor( address _owner) {
+        _setupRole(DEFAULT_ADMIN_ROLE,_owner);
 
-        _setupRole(MINTER_ROLE, _msgSender());
-        _setupRole(BURNER_ROLE, _msgSender());
+        _setupRole(MINTER_ROLE,_owner);
+        _setupRole(BURNER_ROLE,_owner);
     }
 
     /**
