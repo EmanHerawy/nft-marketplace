@@ -2,7 +2,8 @@ import chai, { expect } from 'chai'
 import { Contract } from 'ethers'
  // BigNumber.from
 // import { bigNumberify, hexlify, keccak256, defaultAbiCoder, toUtf8Bytes } from 'ethers/utils'
-import { solidity, MockProvider, createFixtureLoader,deployContract } from 'ethereum-waffle'
+ import { waffle } from 'hardhat'
+const { solidity, deployContract, createFixtureLoader, provider } = waffle
 import { tokenFixture } from './shared/fixtures'
 import StartFiTokenDistribution from '../artifacts/contracts/StartFiTokenDistribution.sol/StartFiTokenDistribution.json'
 import { expandTo18Decimals } from './shared/utilities'
@@ -30,7 +31,7 @@ const  tokenOwners =["0xAA4e7Ab6dccc1b673036B6FF78fe8af3402801c6",
   const teamAccount =tokenOwners[6];
   const advisorAccount =tokenOwners[7];
 describe('StartFi Token Distribution V 2', () => {
-  const provider = new MockProvider()
+  
   const [wallet, other] = provider.getWallets()
   const loadFixture = createFixtureLoader( [wallet])
 

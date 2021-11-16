@@ -3,7 +3,8 @@ import { Contract, constants, utils,BigNumber, Wallet } from 'ethers'
 const { MaxUint256 } = constants;
 // BigNumber.from
 // import { bigNumberify, hexlify, keccak256, defaultAbiCoder, toUtf8Bytes } from 'ethers/utils'
-import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
+ import { waffle } from 'hardhat'
+const { solidity, deployContract, createFixtureLoader, provider } = waffle
 import { ecsign } from 'ethereumjs-util'
  const {
  
@@ -14,7 +15,7 @@ import { ecsign } from 'ethereumjs-util'
   solidityPack
 } = utils
 
-import { expandTo18Decimals,  getApprovalNftDigest, getNFTTransferFromDigest } from './shared/utilities'
+import {   getApprovalNftDigest, getNFTTransferFromDigest } from './shared/utilities'
 
 import ER721 from '../artifacts/contracts/StartFiRoyaltyNFT.sol/StartFiRoyaltyNFT.json'
 const calcFees=(price:number,share:number,base:number):number=>{
@@ -34,12 +35,12 @@ const separator = 10 // 2.5
 const itemPrice=100;
 const muliplyer=10**18;
 describe('StartFiToken', () => {
-  const provider = new MockProvider()
+  
   const [wallet, other] = provider.getWallets()
 let walletNftBalance=0
   let token: Contract
   before(async () => {
-    token = await deployContract(wallet, ER721, [name, symbol, baseUri])
+    token = await deployContract(wallet, ER721, [name, symbol])
   })
 
   it('name, symbol,  DOMAIN_SEPARATOR, PERMIT_TYPEHASH', async () => {

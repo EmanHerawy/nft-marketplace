@@ -2,8 +2,8 @@ import chai, { expect } from 'chai'
 import { Contract, constants, utils,BigNumber } from 'ethers'
 const { MaxUint256 } = constants;
 // BigNumber.from
-// import { bigNumberify, hexlify, keccak256, defaultAbiCoder, toUtf8Bytes } from 'ethers/utils'
-import { solidity, MockProvider, deployContract } from 'ethereum-waffle'
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 import { ecsign } from 'ethereumjs-util'
  const {
  
@@ -26,7 +26,7 @@ const TEST_AMOUNT = expandTo18Decimals(10)
 // chainId on testing is 0
 const chainId:any=0;
 describe('StartFiToken', () => {
-  const provider = new MockProvider()
+  
   const [wallet, other] = provider.getWallets()
 
   let token: Contract

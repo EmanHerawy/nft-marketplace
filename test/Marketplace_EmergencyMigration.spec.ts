@@ -1,10 +1,8 @@
 import chai, { expect } from 'chai'
-import { Contract, constants, utils,BigNumber } from 'ethers'
-import { ecsign } from 'ethereumjs-util'
-
-const { MaxUint256 } = constants
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
+import { Contract  } from 'ethers'
+ 
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
@@ -53,7 +51,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
   describe('StartFi marketPlace: let the users to migrate safely with no lose', () => {
    
 
-    const provider = new MockProvider()
+    
     const [wallet, user1,user2,user3,user4,admin] = provider.getWallets()
     const loadFixture = createFixtureLoader([wallet])
 

@@ -196,10 +196,12 @@ matic: {
   },
   gasReporter: {
     currency: 'USD',
-    gasPrice: 100,
-    enabled: process.env.REPORT_GAS ? true : false,
-    // coinmarketcap: process.env.COINMARKETCAP_API_KEY,
-    maxMethodDiff: 10,
+    enabled: true,
+     
+    // coinmarketcap: "YourKEYHERE",
+    // outputFile: "./output.js",
+    showTimeSpent: true,
+    showMethodSig:true
   },
   etherscan: {
     // Your API key for Etherscan

@@ -3,8 +3,8 @@ import { Contract, constants, utils,BigNumber } from 'ethers'
 import { ecsign } from 'ethereumjs-util'
 
 const { MaxUint256 } = constants
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 import {  getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
@@ -71,7 +71,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
 
 }
 describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and buyNow, now bid after purchase', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -271,7 +271,7 @@ it('Should not bid on item after auction is bought', async () => {
 
 })
 describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -485,7 +485,7 @@ it('Should  fulfill auction after allowing token to pay', async () => {
 })
 })
 describe('malicious auction creator:  marketPlace:Actions create bid only, receive bid, winner bidder fulfills and auction creator tries to dispute ', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -703,7 +703,7 @@ it('Should not dispute item not on auction', async () => {
  })
 })
 describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious bidder did not pay the price via fulfill function , auction creator can dispute and take the insurance as well as the nft back', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -946,7 +946,7 @@ it('Should not dispute item not on auction', async () => {
   })
 
 describe('StartFi marketPlace : create auction and buy WithPermit', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   let token: Contract
@@ -1023,7 +1023,7 @@ describe('StartFi marketPlace : create auction and buy WithPermit', () => {
 
 })
 describe('StartFi marketPlace : create auction and bid and fulfill WithPermit', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   let token: Contract
@@ -1124,7 +1124,7 @@ describe('StartFi marketPlace : create auction and bid and fulfill WithPermit', 
 })
 
 describe('StartFi marketPlace Auction: big deals that exceed cap', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -1215,7 +1215,7 @@ forSalePrice=price1
 
   })
 describe('StartFi marketPlace Auction bid and fulfill: big deals that exceed cap', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

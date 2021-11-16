@@ -2,10 +2,9 @@ import chai, { expect } from 'chai'
 import { Contract, constants, utils } from 'ethers'
 const { MaxUint256 } = constants
 
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
-import { expandTo18Decimals, getApprovalDigest } from './shared/utilities'
-
+ import { waffle } from 'hardhat'
+const { solidity,   createFixtureLoader, provider } =waffle
+ 
 import { tokenFixture } from './shared/fixtures'
 
 chai.use(solidity)
@@ -16,7 +15,7 @@ describe('Staking STFI', () => {
    let marketPlace: Contract
   let reputation: Contract
   let stakes: Contract
-  const provider = new MockProvider()
+  
   const [wallet, other] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

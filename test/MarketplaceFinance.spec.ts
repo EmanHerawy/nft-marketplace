@@ -1,7 +1,7 @@
-import chai, { expect } from 'chai'
-import { Contract, constants, utils } from 'ethers'
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
+import chai  from 'chai'
+import { Contract  } from 'ethers'
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 
 import { tokenFixture } from './shared/fixtures'
 
@@ -14,7 +14,7 @@ let reputation: Contract
 let stakes: Contract
 /**@dev change the visibility to public in order for passing all the tests  */
 describe('StartFi Marketplace Finance', () => {
-  const provider = new MockProvider()
+  
   const [wallet, other] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

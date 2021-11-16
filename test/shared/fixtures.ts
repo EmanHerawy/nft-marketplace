@@ -1,8 +1,8 @@
 import { Contract, Wallet, providers } from 'ethers'
-import { deployContract, MockProvider } from 'ethereum-waffle'
 
-import { expandTo18Decimals } from './utilities'
-
+  import { waffle } from 'hardhat'
+const {   deployContract,  provider } =waffle
+ 
 import ERC20 from '../../artifacts/contracts/StartFiToken.sol/StartFiToken.json'
 import StartFiRoyaltyNFT from '../../artifacts/contracts/StartFiRoyaltyNFT.sol/StartFiRoyaltyNFT.json'
 import StartFiMarketPlace from '../../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
@@ -23,11 +23,11 @@ const overrides = {
 let baseUri = 'http://ipfs.io'
 const name = 'StartFiToken'
 const symbol = 'STFI'
-export async function tokenFixture([wallet]: Wallet[], _: MockProvider): Promise<ContractsFixture> {
+export async function tokenFixture([wallet]: Wallet[], _: any): Promise<ContractsFixture> {
   const token = await deployContract(wallet, ERC20, [name, symbol, wallet.address])
-  const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol, baseUri])
-  const stakes = await deployContract(wallet, StartFiStakes, [token.address])
-  const reputation = await deployContract(wallet, StartFiReputation)
+  const NFT = await deployContract(wallet, StartFiRoyaltyNFT, [name, symbol])
+  const stakes = await deployContract(wallet, StartFiStakes, [token.address,wallet.address])
+  const reputation = await deployContract(wallet, StartFiReputation,[ wallet.address])
 
   const marketPlace = await deployContract(wallet, StartFiMarketPlace, [
     'StartFi Market',

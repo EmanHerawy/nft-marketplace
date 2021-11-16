@@ -1,7 +1,8 @@
 import chai, { expect } from 'chai'
 import { Contract } from 'ethers'
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
 
 import { tokenFixture } from './shared/fixtures'
 
@@ -38,7 +39,6 @@ const newReputationAddress = '0x2E81345F9082619d900c0204D0913E904648c6E4'
 const twoDays = 2 * 24 * 60 * 60
 
 describe('MarketPlace admin pause contract and start updating contract', () => {
-  const provider = new MockProvider()
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

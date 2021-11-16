@@ -1,14 +1,12 @@
 import chai, { expect } from 'chai'
 import { Contract, BigNumber } from 'ethers'
 
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
-import { expandTo18Decimals } from './shared/utilities'
-import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
+ import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
-import { hexlify } from 'ethers/lib/utils'
-/**
+ /**
  * scenarios
  *  we might have some celebrities or big names who come to our platform though agreement, those users might need different terms and conditions and to enforce the agreement via smart contract we store them the contract and apply them in their deals  .
  *
@@ -44,7 +42,7 @@ const calcFees = (price: number, share: number, base: number): number => {
 
 }
 describe('StartFi marketPlace Sprciall offers : special Offers with fixed prices', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   const offers = [{
@@ -157,7 +155,7 @@ describe('StartFi marketPlace Sprciall offers : special Offers with fixed prices
 
 })
 describe('StartFi marketPlace : special Offers with fixed prices issuer deList with special terms', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   const offers = [{
@@ -308,7 +306,7 @@ describe('StartFi marketPlace : special Offers with fixed prices issuer deList w
 
 })
 describe('StartFi marketPlace : special Offers with Auction bid and buy', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   const offers = [{
@@ -441,7 +439,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
 
 })
 describe('StartFi marketPlace : special Offers with Auction bid only', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   const offers = [{
@@ -594,7 +592,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
 
 })
 describe('StartFi marketPlace : special Offers with Auction then delist', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   const offers = [{

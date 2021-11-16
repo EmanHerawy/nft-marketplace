@@ -1,16 +1,12 @@
 import chai, { expect } from 'chai'
-import { Contract, constants, utils, BigNumber } from 'ethers'
-import { ecsign } from 'ethereumjs-util'
-
-const { MaxUint256 } = constants
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
-import { getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
-import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
+import { Contract  } from 'ethers'
+ 
+  import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
+ import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
-import { hexlify } from 'ethers/lib/utils'
-/**
+ /**
  * scenarios
  for instance, there are four auctions ongoing and each of the auctions is
 for bidding a different NFT item. Based on the existing implementation a bidder can deposit only
@@ -60,7 +56,7 @@ const calcFees = (price: number, share: number, base: number): number => {
   return price * (share / _base)
 }
 describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and buyNow, now bid after purchase', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

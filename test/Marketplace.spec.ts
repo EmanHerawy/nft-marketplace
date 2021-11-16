@@ -3,8 +3,8 @@ import { Contract, constants, utils,BigNumber } from 'ethers'
 import { ecsign } from 'ethereumjs-util'
 
 const { MaxUint256 } = constants
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 import {  getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
 import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
@@ -71,7 +71,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
 
 }
 describe('StartFi marketPlace', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -217,7 +217,7 @@ it('non owner can not delist ', async () => {
 
 
 describe('StartFi marketPlace : WithPermit', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
@@ -297,7 +297,7 @@ describe('StartFi marketPlace : WithPermit', () => {
 
 })
 describe('StartFi marketPlace: big deals that exceed cap', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1,user2,user3,issuer,admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

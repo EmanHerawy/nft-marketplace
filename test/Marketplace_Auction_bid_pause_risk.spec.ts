@@ -1,16 +1,11 @@
 import chai, { expect } from 'chai'
-import { Contract, constants, utils, BigNumber } from 'ethers'
-import { ecsign } from 'ethereumjs-util'
-
-const { MaxUint256 } = constants
-import { solidity, MockProvider, deployContract, createFixtureLoader } from 'ethereum-waffle'
-
-import { getApprovalDigest, getApprovalNftDigest } from './shared/utilities'
-import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
+import { Contract} from 'ethers'
+  import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
+ import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/StartFiMarketPlace.json'
 
 import { tokenFixture } from './shared/fixtures'
-import { hexlify } from 'ethers/lib/utils'
-/**
+ /**
  * scenarios
  If we have an auction with a winning bidder , the contract for any reason is paused , then the auction is unpaused but after the fulfilling period is passed , a malicious auction creator can call dispute function  and take the bidder's stakes . 
  */
@@ -32,7 +27,7 @@ let minimumBid = 10
 let duration = 60 * 60 * 15 // 15 hours
 let isForSale = false
 describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and buyNow, now bid after purchase', () => {
-  const provider = new MockProvider()
+  
   const [wallet, user1, user2, user3, issuer, admin] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 

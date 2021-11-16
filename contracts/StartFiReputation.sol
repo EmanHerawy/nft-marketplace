@@ -13,7 +13,7 @@ contract StartFiReputation is Context, AccessControlEnumerable {
     bytes32 public constant MINTER_ROLE = keccak256('MINTER_ROLE');
     bytes32 public constant BURNER_ROLE = keccak256('BURNER_ROLE');
     mapping(address => uint256) private userReputation;
-
+    event CurrentReputation (address owner,uint256 amount);
     constructor(address _owner) {
         _setupRole(DEFAULT_ADMIN_ROLE, _owner);
 
@@ -73,6 +73,8 @@ contract StartFiReputation is Context, AccessControlEnumerable {
 
     function _setReputation(address to, uint256 amount) internal {
         userReputation[to] = amount;
+        emit CurrentReputation(to,amount);
+
     }
 
     function getUserReputation(address user) external view returns (uint256 balance) {

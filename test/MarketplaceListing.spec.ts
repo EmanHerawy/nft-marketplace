@@ -1,11 +1,7 @@
 import chai, { expect } from 'chai'
 import { Contract, constants, utils } from 'ethers'
-const { MaxUint256 } = constants
-// BigNumber.from
-// import { bigNumberify, hexlify, keccak256, defaultAbiCoder, toUtf8Bytes } from 'ethers/utils'
-import { solidity, MockProvider, createFixtureLoader } from 'ethereum-waffle'
-
-import { expandTo18Decimals } from './shared/utilities'
+ import { waffle } from 'hardhat'
+const { solidity,  deployContract, createFixtureLoader, provider } =waffle
 
 import { tokenFixture } from './shared/fixtures'
 
@@ -18,7 +14,7 @@ let reputation: Contract
 let stakes: Contract
 /**@dev change the visibility to public in order for passing all the tests  */
 describe('StartFi Marketplace Lisitng', () => {
-  const provider = new MockProvider()
+  
   const [wallet, other] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
   const tokenId = 0
