@@ -95,7 +95,7 @@ describe('StartFi marketPlace Sprciall offers : special Offers with fixed prices
 
 
       offers[0]._feeBase)).to.be.revertedWith(
-        'StartFiMarketPlaceAdmin: caller is not the owner'
+        'caller is not the owner'
       )
   })
   it('admin can  add special offer ', async () => {
@@ -114,7 +114,7 @@ describe('StartFi marketPlace Sprciall offers : special Offers with fixed prices
       offers[0]._fee, // 2.5% fees
 
 
-      offers[0]._feeBase)).to.revertedWith('StartFiMarketPlaceSpecialOffer: Already exisit')
+      offers[0]._feeBase)).to.revertedWith('Already exisit')
   })
 
 
@@ -209,7 +209,7 @@ describe('StartFi marketPlace : special Offers with fixed prices issuer deList w
       offers[0]._fee, // 2.5% fees
 
       offers[0]._feeBase)).to.be.revertedWith(
-        'StartFiMarketPlaceAdmin: caller is not the owner'
+        'caller is not the owner'
       )
   })
   it('admin can  add special offer ', async () => {
@@ -238,7 +238,7 @@ describe('StartFi marketPlace : special Offers with fixed prices issuer deList w
       
 
       
-      offers[0]._feeBase)).to.revertedWith('StartFiMarketPlaceSpecialOffer: Already exisit')
+      offers[0]._feeBase)).to.revertedWith('Already exisit')
   })
  
 
@@ -364,7 +364,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
 
       
       offers[0]._feeBase)).to.be.revertedWith(
-        'StartFiMarketPlaceAdmin: caller is not the owner'
+        'caller is not the owner'
       )
   })
   it('admin can  add special offer ', async () => {
@@ -393,7 +393,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
       
 
       
-      offers[0]._feeBase)).to.revertedWith('StartFiMarketPlaceSpecialOffer: Already exisit')
+      offers[0]._feeBase)).to.revertedWith('Already exisit')
   })
 
 
@@ -496,7 +496,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
 
       
       offers[0]._feeBase)).to.be.revertedWith(
-        'StartFiMarketPlaceAdmin: caller is not the owner'
+        'caller is not the owner'
       )
   })
   it('admin can  add special offer ', async () => {
@@ -525,7 +525,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
       
 
       
-      offers[0]._feeBase)).to.revertedWith('StartFiMarketPlaceSpecialOffer: Already exisit')
+      offers[0]._feeBase)).to.revertedWith('Already exisit')
   })
 
 
@@ -648,7 +648,7 @@ describe('StartFi marketPlace : special Offers with Auction then delist', () => 
 
       
       offers[0]._feeBase)).to.be.revertedWith(
-        'StartFiMarketPlaceAdmin: caller is not the owner'
+        'caller is not the owner'
       )
   })
   it('admin can  add special offer ', async () => {
@@ -677,7 +677,7 @@ describe('StartFi marketPlace : special Offers with Auction then delist', () => 
       
 
       
-      offers[0]._feeBase)).to.revertedWith('StartFiMarketPlaceSpecialOffer: Already exisit')
+      offers[0]._feeBase)).to.revertedWith('Already exisit')
   })
 
 

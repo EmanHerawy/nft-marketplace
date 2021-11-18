@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.4;
+import './StartFiMarketPlaceCap.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
@@ -8,7 +9,7 @@ pragma solidity 0.8.4;
  * We might have some celebrities or big names who come to our platform though agreement, those users might need different terms and conditions and to enforce the agreement via smart contract we store them the contract and apply them in their deals
  * @title StartFi Marketplace Special Offer
  */
-contract StartFiMarketPlaceSpecialOffer {
+contract StartFiMarketPlaceSpecialOffer is StartFiMarketPlaceCap {
     /******************************************* decalrations go here ********************************************************* */
 
     mapping(address => conditions) internal offerTerms;
@@ -26,23 +27,24 @@ contract StartFiMarketPlaceSpecialOffer {
     /******************************************* read functions go here ********************************************************* */
 
     /******************************************* state functions go here ********************************************************* */
+
     /**
-     * @dev add new special offer.
-     * called by child contracts
+     * @dev only called by `owner` to change the name and `whenPaused`
+     *@param wallet marketplace reputation contract
+     *@param _fee marketplace reputation contract
+
+     *@param feeBase marketplace reputation contract
      *
-     *
-     * Requirements:
-     *
-     * -  must  be new offer.
      */
-    function _addOffer(
+    function addOffer(
         address wallet,
         uint256 _fee, // 2.5% fees
         uint256 feeBase
-    ) internal {
-        require(offerTerms[wallet].fee == 0, 'StartFiMarketPlaceSpecialOffer: Already exisit');
+    ) external onlyOwner whenNotPaused {
+        require(offerTerms[wallet].fee == 0, 'Already exisit');
 
         offerTerms[wallet] = conditions(_fee, feeBase);
+        emit NewOffer(_msgSender(), wallet, _fee, feeBase);
     }
 
     function getOffer(address wallet)
@@ -50,11 +52,11 @@ contract StartFiMarketPlaceSpecialOffer {
         view
         returns (
             uint256 _fee, // 2.5% fees
-            uint256 _feeBase
+            uint256 _base
         )
     {
         _fee = offerTerms[wallet].fee;
 
-        _feeBase = offerTerms[wallet].feeBase;
+        _base = offerTerms[wallet].feeBase;
     }
 }

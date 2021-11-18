@@ -374,7 +374,7 @@ price1=500000;
   })
   it('Should approve deal', async () => {
     // TODO: add event here
-    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1)
+    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1,true)
     expect(transactionRecipe.from).equal(admin.address)
   })
   it('user can buy  an item that exceeded the cap on marketplace after it is approved', async () => {

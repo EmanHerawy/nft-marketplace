@@ -1,42 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.4;
-pragma abicoder v2;
 
 import '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol';
-import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
+import './StartFiMarketPlaceAdmin.sol';
 
 /**
  * @author Eman Herawy, StartFi Team
  *@title  MarketPlace Base
  * [ desc ] : contract to handle the main functions for any marketplace
  */
-contract MarketPlaceBase is ERC721Holder {
+contract MarketPlaceBase is ERC721Holder, StartFiMarketPlaceAdmin {
     /******************************************* decalrations go here ********************************************************* */
 
     string private _marketPlaceName;
-    bytes4 constant PREMIT_INTERFACE = 0x2a55205a;
 
     /******************************************* constructor goes here ********************************************************* */
 
-    constructor(string memory _name) {
+    function _MarketplaceBase_init_unchained(string memory _name) internal {
         _marketPlaceName = _name;
     }
 
     /******************************************* read state functions go here ********************************************************* */
-    /**
-     *
-     * @dev  interal function to check if any gevin contract has supportsInterface See {IERC165-supportsInterface}.
-     * @param _NFTContract NFT contract address
-     * @return true if this NFT contract support royalty, false if not
-     */
-    function _supportPermit(address _NFTContract) internal view returns (bool) {
-        try IERC721(_NFTContract).supportsInterface(PREMIT_INTERFACE) returns (bool isPermitSupported) {
-            return isPermitSupported;
-        } catch {
-            return false;
-        }
-    }
 
     /**
      * @return market place name
@@ -45,68 +30,15 @@ contract MarketPlaceBase is ERC721Holder {
         return _marketPlaceName;
     }
 
-    // /**
-    //  *@param _NFTContract NFT contract address
-    //  *@param tokenId token id
-    //  * @return the owner of the gevin token id and address
-    //  */
-    // function tokenOwner(address _NFTContract, uint256 tokenId) internal view returns (address) {
-    //     return IERC721(_NFTContract).ownerOf(tokenId);
-    // }
-
-    /**
-
-     * @dev check if this contract has approved to transfer this erc721 token
-     *@param _NFTContract NFT contract address
-     *@param tokenId token id
-     * @return true if this contract is apporved , false if not
-     */
-    function _isTokenApproved(address _NFTContract, uint256 tokenId) internal view returns (bool) {
-        try IERC721(_NFTContract).getApproved(tokenId) returns (address tokenOperator) {
-            return tokenOperator == address(this);
-        } catch {
-            return false;
-        }
-    }
-
-    // /**
-    //  *@dev See {IERC721-isApprovedForAll}.
-    //  *@dev check if this contract has approved to all of this owner's erc721 tokens
-    //  *@param _NFTContract NFT contract address
-    //  *@param owner token owner
-    //  *@return true if this contract is apporved , false if not
-    //  */
-    // function _isAllTokenApproved(address _NFTContract, address owner) internal view returns (bool) {
-    //     return IERC721(_NFTContract).isApprovedForAll(owner, address(this));
-    // }
-
     /******************************************* state functions go here ********************************************************* */
 
     /**
-     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.
+     * @dev only called by `owner` to change the name and `whenPaused`
+     *@param _name marketplace new name
      *
-     * See {setApprovalForAll}
      */
-    function _changeMarketPlaceName(string memory _name) internal {
+    function changeMarketPlaceName(string memory _name) external onlyOwner whenPaused {
         _marketPlaceName = _name;
-    }
-
-    /**
-     * @dev  Safely transfers `tokenId` token from `from` to `to`. by calling the base erc721 contract
-     *@param _NFTContract NFT contract address
-     *@param tokenId token id
-     *@param from sender
-     *@param to recipient
-     * @return true if it's done
-     * See {safeTransferFrom}
-     */
-    function _safeNFTTransfer(
-        address _NFTContract,
-        uint256 tokenId,
-        address from,
-        address to
-    ) internal returns (bool) {
-        IERC721(_NFTContract).safeTransferFrom(from, to, tokenId);
-        return true;
+        emit ChangeMarketPlaceName(_name);
     }
 }

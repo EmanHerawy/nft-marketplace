@@ -321,7 +321,9 @@ let forSalePrice=10000;
     
     
     it('user 1 can call releaseBatchReserves and reserves should be after freeing reserves =0', async () => {
-      await expect(marketPlace.releaseBatchReserves([listingId3,listingId4,listingId5],user1.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId3,user1.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId4,user1.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId5,user1.address)).to.emit(marketPlace, 'UserReservesRelease')
 
    
       const expectedReserves= BigNumber.from(0)
@@ -339,14 +341,18 @@ let forSalePrice=10000;
     })
     it('user 3 reserves should be after freeing reserves =10', async () => {
      
-      await expect(marketPlace.releaseBatchReserves([listingId3,listingId2,listingId5],user3.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId3,user3.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves( listingId2 ,user3.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves( listingId5,user3.address)).to.emit(marketPlace, 'UserReservesRelease')
       const expectedReserves= BigNumber.from(10)
       expect(await marketPlace.getUserReserved(user3.address)).to.eq(expectedReserves)
        // check balance 
     })
     it('user 4 reserves should be after freeing reserves =0', async () => {
      
-      await expect(marketPlace.releaseBatchReserves([listingId3,listingId4,listingId2],user4.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId2,user4.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId3,user4.address)).to.emit(marketPlace, 'UserReservesRelease')
+      await expect(marketPlace.releaseListingReserves(listingId4,user4.address)).to.emit(marketPlace, 'UserReservesRelease')
       const expectedReserves= BigNumber.from(0)
       expect(await marketPlace.getUserReserved(user4.address)).to.eq(expectedReserves)
        // check balance 

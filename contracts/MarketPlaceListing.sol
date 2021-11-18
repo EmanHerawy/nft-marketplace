@@ -11,7 +11,6 @@ pragma abicoder v2;
 contract MarketPlaceListing {
     // all fees are in perentage
 
-    uint256 public fulfillDuration = 3 days;
     // store every listed item here
     bytes32[] public listings;
 
@@ -32,7 +31,7 @@ contract MarketPlaceListing {
         // only if bed and sell for enabled
         uint256 releaseTime;
         uint256 disputeTime; // only in auction
-        uint256 insurancAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
+        uint256 insuranceAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
         uint256 sellFor;
         ListingStatus status;
     }
@@ -63,7 +62,7 @@ contract MarketPlaceListing {
       * @return isSellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
       * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
-      * @return insurancAmount  amount of token locked as qualify for any bidder wants bid 
+      * @return insuranceAmount  amount of token locked as qualify for any bidder wants bid 
       * @return sellFor if sell for enabled for auction, this should be more than zero
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
      */
@@ -81,7 +80,7 @@ contract MarketPlaceListing {
             bool isSellForEnabled,
             uint256 releaseTime,
             uint256 disputeTime,
-            uint256 insurancAmount,
+            uint256 insuranceAmount,
             uint256 sellFor,
             uint256 status
         )
@@ -96,7 +95,7 @@ contract MarketPlaceListing {
         isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
         disputeTime = _tokenListings[listingId].disputeTime;
-        insurancAmount = _tokenListings[listingId].insurancAmount;
+        insuranceAmount = _tokenListings[listingId].insuranceAmount;
         sellFor = _tokenListings[listingId].sellFor;
         status = uint256(_tokenListings[listingId].status);
     }
@@ -117,7 +116,7 @@ contract MarketPlaceListing {
       * @return isSellForEnabled true if auction enable direct selling
       * @return releaseTime  when auction ends
       * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
-      * @return insurancAmount  amount of token locked as qualify for any bidder wants bid 
+      * @return insuranceAmount  amount of token locked as qualify for any bidder wants bid 
       * @return sellFor if sell for enabled for auction, this should be more than zero
       * @return status in number {Sold,OnMarket, onAuction,Canceled}
      */
@@ -136,7 +135,7 @@ contract MarketPlaceListing {
             bool isSellForEnabled,
             uint256 releaseTime,
             uint256 disputeTime,
-            uint256 insurancAmount,
+            uint256 insuranceAmount,
             uint256 sellFor,
             uint256 status
         )
@@ -152,100 +151,8 @@ contract MarketPlaceListing {
         isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
         releaseTime = _tokenListings[listingId].releaseTime;
         disputeTime = _tokenListings[listingId].disputeTime;
-        insurancAmount = _tokenListings[listingId].insurancAmount;
+        insuranceAmount = _tokenListings[listingId].insuranceAmount;
         sellFor = _tokenListings[listingId].sellFor;
         status = uint256(_tokenListings[listingId].status);
-    }
-
-    // list
-
-    /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev  add new item for sale in marketplace
-     * @param listId listing id
-     * @param tokenAddress nft contract address
-     * @param seller seller address
-     * @param tokenId token id
-     * @param listingPrice min price
-
-     * @return true if it's done
-     */
-    function _listOnMarketPlace(
-        bytes32 listId,
-        address tokenAddress,
-        address seller,
-        uint256 tokenId,
-        uint256 listingPrice
-    ) internal returns (bool) {
-        _tokenListings[listId] = Listing(
-            tokenAddress,
-            tokenId,
-            listingPrice,
-            0,
-            seller,
-            address(0),
-            false,
-            false,
-            block.timestamp,
-            0,
-            0,
-            0,
-            ListingStatus.OnMarket
-        );
-        return true;
-    }
-
-    /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev  add new auction
-     * @param listId listing id
-     * @param tokenAddress nft contract address
-     * @param seller seller address
-     * @param tokenId token id
-     * @param listingPrice min price
-     * @param isSellForEnabled true if auction enable direct selling
-     * @param sellFor  price  to sell with if isSellForEnabled=true
-     * @param releaseTime  when auction ends
-     * @param insurancAmount  amount of token locked as qualify for any bidder wants bid
-     * @return true if it's done
-     */
-    function _creatAuction(
-        bytes32 listId,
-        address tokenAddress,
-        address seller,
-        uint256 tokenId,
-        uint256 listingPrice,
-        bool isSellForEnabled,
-        uint256 sellFor,
-        uint256 releaseTime,
-        uint256 insurancAmount
-    ) internal returns (bool) {
-        _tokenListings[listId] = Listing(
-            tokenAddress,
-            tokenId,
-            listingPrice,
-            0,
-            seller,
-            address(0),
-            true,
-            isSellForEnabled,
-            releaseTime,
-            releaseTime + fulfillDuration,
-            insurancAmount,
-            sellFor,
-            ListingStatus.onAuction
-        );
-        return true;
-    }
-
-    function _finalizeListing(
-        bytes32 listId,
-        address buyer,
-        ListingStatus status
-    ) internal {
-        _tokenListings[listId].status = status;
-        if (buyer != address(0)) {
-            _tokenListings[listId].buyer = buyer;
-        }
     }
 }

@@ -1,31 +1,32 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.4;
-pragma abicoder v2;
 import './interface/IStartFiReputation.sol';
 
 import './interface/IStartFiStakes.sol';
 import './library/StartFiFinanceLib.sol';
+import './MarketPlaceBase.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
  *desc   contract to handle all financial work for the marketplace
  * @title StartFi Marketplace Finance
  */
-contract StartFiMarketPlaceFinance {
+contract StartFiMarketPlaceFinance is MarketPlaceBase {
     /******************************************* decalrations go here ********************************************************* */
-    address internal reputationContract;
+    address private reputationContract;
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees
     uint256 internal _feeBase = 10; // 25/10=2.5
-    mapping(address => uint256) internal userReserves;
     address public stakeContract;
     uint256 public listqualifyPercentage = 10;
     uint256 public listqualifyPercentageBase = 10;
+    mapping(address => uint256) internal userReserves;
+
+    event UserReservesRelease(address user, uint256 lastReserves, uint256 newReserves, uint256 timestamp);
 
     /******************************************* constructor goes here ********************************************************* */
 
-    constructor(address _paymentContract, address _reputationContract) {
+    function _MarketplaceFinance_init_unchained(address _paymentContract, address _reputationContract) internal {
         _paymentToken = _paymentContract;
         reputationContract = _reputationContract;
     }
@@ -43,13 +44,28 @@ contract StartFiMarketPlaceFinance {
     }
 
     /**
+     * @dev called by the dapp to get the user stakes on hold
+     *@param user  : participant address
+     * @return the value of user reserves
+     */
+    function getUserReserved(address user) external view returns (uint256) {
+        return userReserves[user];
+    }
+
+    /**
      * @dev this function calls StartFiStakes contract to get the total staked tokens for 'user' an substract the current reserves to get the total number of free tokens
      * @param staker : participant address
      * @return allowed number of tokens that this contract can transfer from the owner account
      */
     function getStakeAllowance(
         address staker /*,uint256 prevAmount*/
-    ) public view returns (uint256) {
+    ) external view returns (uint256) {
+        return _getStakeAllowance(staker);
+    }
+
+    function _getStakeAllowance(
+        address staker /*,uint256 prevAmount*/
+    ) internal view returns (uint256) {
         // user can bid multi time, we want to make sure we don't calc the old bid as sperated bid
         uint256 userActualReserved = userReserves[staker]; //.sub(prevAmount);
         return IStartFiStakes(stakeContract).getReserves(staker) - userActualReserved;
@@ -90,78 +106,70 @@ contract StartFiMarketPlaceFinance {
     }
 
     /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev called to set user reserves
-     * @param user : participant address
-     * @param newReservedValue : value to be sored as user reserve
-     */
-    function _setUserReserves(address user, uint256 newReservedValue) internal returns (bool) {
-        userReserves[user] = newReservedValue;
-        return true;
-    }
-
-    /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev called to increase or decrease user reserves
-     * @param user : participant address
-     * @param newReserves : value to be added or substracted
-     * @param isAddition : true if we are adding the new value
-     */
-    function _updateUserReserves(
-        address user,
-        uint256 newReserves,
-        bool isAddition
-    ) internal returns (uint256 _userReserves) {
-        _userReserves = isAddition ? userReserves[user] + newReserves : userReserves[user] - newReserves;
-        userReserves[user] = _userReserves;
-        return _userReserves;
-    }
-
-    /**
-     *   * @notice  all conditions and checks are made prior to this function
+     *  @notice only called by `owner` to change the name and `whenPaused`
      * @dev  the formula is (fees * 1000)/base
      * @param numerator  the new fees value to be stored
      * @param donomirator  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
      */
-    function _changeFees(uint256 numerator, uint256 donomirator) internal returns (uint256 percentage) {
+    function changeFees(uint256 numerator, uint256 donomirator)
+        external
+        onlyOwner
+        whenPaused
+        returns (uint256 percentage)
+    {
         percentage = StartFiFinanceLib._calcShare(numerator, donomirator);
         require(percentage <= 4 ether && percentage >= 1 ether, 'Percentage should be from 1-4 %');
 
         _feeFraction = numerator;
         _feeBase = donomirator;
+        emit ChangeFees(numerator, donomirator);
     }
 
     /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev for later on upgrade , if we have
-     * @param _token : startfi new utility contract
+     * @dev only called by `owner` to change the name and `whenPaused`
+     *@param _token token address
+     *
      */
-    function _changeUtilityToken(address _token) internal {
+    function changeUtilityToken(address _token) external notZeroAddress(_token) onlyOwner whenPaused {
         _paymentToken = _token;
+        emit ChangeUtilityToken(_token);
     }
 
     /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev for later on upgrade , if we have
-     * @param _reputationContract : startfi new reputation contract
+     * @dev only called by `owner` to change the name and `whenPaused`
+     *@param _reputationContract marketplace reputation contract
+     *
      */
-    function _changeReputationContract(address _reputationContract) internal {
+    function changeReputationContract(address _reputationContract)
+        external
+        notZeroAddress(_reputationContract)
+        onlyOwner
+        whenPaused
+    {
         reputationContract = _reputationContract;
+        emit ChangeReputationContract(_reputationContract);
     }
 
     /**
-     * @notice  all conditions and checks are made prior to this function
+     * @notice only called by `owner` to change the name and `whenPaused`
      * @dev  the formula is (fees * 1000)/base
      * @param numerator  the new fees value to be stored
      * @param donomirator  the new basefees value to be stored
      * @return percentage the value of the state variable `_feeFraction`
+     *
      */
-    function _changeListInsuranceAmount(uint256 numerator, uint256 donomirator) internal returns (uint256 percentage) {
+    function changeListInsuranceAmount(uint256 numerator, uint256 donomirator)
+        external
+        onlyOwner
+        whenPaused
+        returns (uint256 percentage)
+    {
         percentage = StartFiFinanceLib._calcShare(numerator, donomirator);
         require(percentage <= 4 ether && percentage >= 1 ether, 'Percentage should be from 1-4 %');
 
         listqualifyPercentage = numerator;
         listqualifyPercentageBase = donomirator;
+        emit ChangeListInsuranceAmount(numerator, donomirator);
     }
 }

@@ -97,30 +97,4 @@ contract MarketPlaceBid {
     }
 
     /******************************************* change state functions go here ********************************************************* */
-
-    /**
-     * @notice  all conditions and checks are made prior to this function
-     * @dev  add new bid , update the latest bidder to be his bid
-     * @param bidId bid id
-     * @param listingId listing id
-     * @param tokenAddress nft contract address
-     * @param bidder bidder address
-     * @param tokenId token id
-     * @param bidPrice price
-     * @return true if it's done
-     */
-    function _bid(
-        bytes32 bidId,
-        bytes32 listingId,
-        address tokenAddress,
-        address bidder,
-        uint256 tokenId,
-        uint256 bidPrice
-    ) internal returns (bool) {
-        // where bid winner is the last bidder updated
-        bidToListing[listingId] = WinningBid(bidId, bidder);
-        // set isStakeReserved as true by default as the contract doesn't call this fucntion unless required checks have been done and met
-        listingBids[listingId][bidder] = Bid(bidId, tokenAddress, tokenId, bidPrice, false, true);
-        return true;
-    }
 }

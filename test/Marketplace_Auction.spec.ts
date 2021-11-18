@@ -1197,7 +1197,7 @@ forSalePrice=price1
   })
   it('Should approve deal', async () => {
     // TODO: add event here
-    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1)
+    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1,true)
     expect(transactionRecipe.from).equal(admin.address)
   })
   it('user can buy  an item that exceeded the cap on marketplace after it is approved', async () => {
@@ -1318,7 +1318,7 @@ forSalePrice=price1
  
     await provider.send('evm_increaseTime', [listingDetails.releaseTime.toNumber()]); 
     await provider.send('evm_mine',[]);
-    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1)
+    const transactionRecipe = await marketPlace.connect(admin).approveDeal(listingId1,true)
     expect(transactionRecipe.from).equal(admin.address)
   })
   it('Should  fulfill approved auction  even after allowing token to pay', async () => {
