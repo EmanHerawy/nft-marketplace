@@ -100,59 +100,59 @@ contract MarketPlaceListing {
         status = uint256(_tokenListings[listingId].status);
     }
 
-    /**
-    * 
-      * @dev   called by dapp or any contract to get info about a gevin listing    
-      * @param index index in listing array      
+    ///**
+    // * 
+    //   * @dev   called by dapp or any contract to get info about a gevin listing    
+    //   * @param index index in listing array      
 
-      * @return listingId in that index 
-      * @return tokenAddress  nft contract address
-      * @return tokenId NFT token Id 
-      * @return listingPrice initial price or minimum price that the seller can accept
-      * @return endPrice purchase price
-      * @return seller  nft seller address
-      * @return buyer  nft buyer address
-      * @return iseBdEnabeled true if auction enabled  
-      * @return isSellForEnabled true if auction enable direct selling
-      * @return releaseTime  when auction ends
-      * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
-      * @return insuranceAmount  amount of token locked as qualify for any bidder wants bid 
-      * @return sellFor if sell for enabled for auction, this should be more than zero
-      * @return status in number {Sold,OnMarket, onAuction,Canceled}
-     */
-    function getListingDetailsByIndex(uint256 index)
-        external
-        view
-        returns (
-            bytes32 listingId,
-            address tokenAddress,
-            uint256 tokenId,
-            uint256 listingPrice,
-            uint256 endPrice,
-            address seller,
-            address buyer,
-            bool iseBdEnabeled,
-            bool isSellForEnabled,
-            uint256 releaseTime,
-            uint256 disputeTime,
-            uint256 insuranceAmount,
-            uint256 sellFor,
-            uint256 status
-        )
-    {
-        listingId = listings[index];
-        tokenAddress = _tokenListings[listingId].nFTContract;
-        tokenId = _tokenListings[listingId].tokenId;
-        listingPrice = _tokenListings[listingId].listingPrice;
-        endPrice = _tokenListings[listingId].endPrice;
-        seller = _tokenListings[listingId].seller;
-        buyer = _tokenListings[listingId].buyer;
-        iseBdEnabeled = _tokenListings[listingId].iseBdEnabeled;
-        isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
-        releaseTime = _tokenListings[listingId].releaseTime;
-        disputeTime = _tokenListings[listingId].disputeTime;
-        insuranceAmount = _tokenListings[listingId].insuranceAmount;
-        sellFor = _tokenListings[listingId].sellFor;
-        status = uint256(_tokenListings[listingId].status);
-    }
+    //   * @return listingId in that index 
+    //   * @return tokenAddress  nft contract address
+    //   * @return tokenId NFT token Id 
+    //   * @return listingPrice initial price or minimum price that the seller can accept
+    //   * @return endPrice purchase price
+    //   * @return seller  nft seller address
+    //   * @return buyer  nft buyer address
+    //   * @return iseBdEnabeled true if auction enabled  
+    //   * @return isSellForEnabled true if auction enable direct selling
+    //   * @return releaseTime  when auction ends
+    //   * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
+    //   * @return insuranceAmount  amount of token locked as qualify for any bidder wants bid 
+    //   * @return sellFor if sell for enabled for auction, this should be more than zero
+    //   * @return status in number {Sold,OnMarket, onAuction,Canceled}
+    //  */
+    // function getListingDetailsByIndex(uint256 index)
+    //     external
+    //     view
+    //     returns (
+    //         bytes32 listingId,
+    //         address tokenAddress,
+    //         uint256 tokenId,
+    //         uint256 listingPrice,
+    //         uint256 endPrice,
+    //         address seller,
+    //         address buyer,
+    //         bool iseBdEnabeled,
+    //         bool isSellForEnabled,
+    //         uint256 releaseTime,
+    //         uint256 disputeTime,
+    //         uint256 insuranceAmount,
+    //         uint256 sellFor,
+    //         uint256 status
+    //     )
+    // {
+    //     listingId = listings[index];
+    //     tokenAddress = _tokenListings[listingId].nFTContract;
+    //     tokenId = _tokenListings[listingId].tokenId;
+    //     listingPrice = _tokenListings[listingId].listingPrice;
+    //     endPrice = _tokenListings[listingId].endPrice;
+    //     seller = _tokenListings[listingId].seller;
+    //     buyer = _tokenListings[listingId].buyer;
+    //     iseBdEnabeled = _tokenListings[listingId].iseBdEnabeled;
+    //     isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
+    //     releaseTime = _tokenListings[listingId].releaseTime;
+    //     disputeTime = _tokenListings[listingId].disputeTime;
+    //     insuranceAmount = _tokenListings[listingId].insuranceAmount;
+    //     sellFor = _tokenListings[listingId].sellFor;
+    //     status = uint256(_tokenListings[listingId].status);
+    // }
 }

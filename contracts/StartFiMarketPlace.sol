@@ -661,11 +661,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         emit UserReservesRelease(bidder, lastReserves, curentReserves, block.timestamp);
     }
 
-    // function releaseBatchReserves(bytes32[] memory listingIds, address bidder) external {
-    //     for (uint256 index = 0; index < listingIds.length; index++) {
-    //         releaseListingReserves(listingIds[index], bidder);
-    //     }
-    // }
+    function releaseBatchReserves(bytes32[] memory listingIds, address bidder) external {
+        for (uint256 index = 0; index < listingIds.length; index++) {
+            releaseListingReserves(listingIds[index], bidder);
+        }
+    }
 
     /**
     *STartfi is regulated entity in Estonia and regulation compliance is forced in our smart contract, KYC is need first and any purchase transaction with price exceed the cap can't be proceed unless this deal is approved by Startfi by calling this function
