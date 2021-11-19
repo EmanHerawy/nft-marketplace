@@ -641,7 +641,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
     * @return curentReserves user reserves after releaseing the unused reservd
     * emit : UserReservesRelease
      */
-    function releaseListingReserves(bytes32 listingId, address bidder) public returns (uint256 curentReserves) {
+    function releaseListingReserves(bytes32 listingId, address bidder) external returns (uint256 curentReserves) {
         require(
             listingBids[listingId][bidder].nFTContract != address(0),
             'Bidder is not participating in this auction'
@@ -652,18 +652,22 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
             bidToListing[listingId].bidder != bidder,
             'Winner bidder can  only  release stakes by fulfilling the auction'
         );
+        _releaseListingReserves(listingId, bidder);
+    }
+
+    function _releaseListingReserves(bytes32 listingId, address bidder) private {
         uint256 lastReserves = userReserves[bidder];
         uint256 insuranceAmount = _tokenListings[listingId].insuranceAmount;
         userReserves[bidder] -= insuranceAmount;
 
         listingBids[listingId][bidder].isStakeReserved = false;
-        curentReserves = userReserves[bidder];
+        uint256 curentReserves = userReserves[bidder];
         emit UserReservesRelease(bidder, lastReserves, curentReserves, block.timestamp);
     }
 
     function releaseBatchReserves(bytes32[] memory listingIds, address bidder) external {
         for (uint256 index = 0; index < listingIds.length; index++) {
-            releaseListingReserves(listingIds[index], bidder);
+            _releaseListingReserves(listingIds[index], bidder);
         }
     }
 
@@ -700,7 +704,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
             address seller = _tokenListings[listingId].seller;
             kycedDeals[listingId] = false;
             _tokenListings[listingId].status = ListingStatus.Canceled;
-            releaseListingReserves(listingId, seller);
+            _releaseListingReserves(listingId, seller);
             IERC721(_tokenListings[listingId].nFTContract).safeTransferFrom(
                 address(this),
                 seller,
