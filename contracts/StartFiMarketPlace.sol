@@ -176,8 +176,31 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         address token,
         uint256 tokenId,
         uint256 listingPrice
-    ) external {
-        _listOnMarketplace(token, tokenId, listingPrice);
+    ) public whenNotPaused isNotZero(listingPrice) {
+        listingCounter++;
+        bytes32 listId = keccak256(abi.encodePacked(token, tokenId, _msgSender(), block.timestamp, listingCounter));
+        listings.push(listId);
+        require(
+            IERC721(token).getApproved(tokenId) == address(this) ||
+                IERC721(token).isApprovedForAll(_msgSender(), address(this)),
+            'Marketplace is not allowed to transfer your token'
+        );
+
+        _tokenListings[listId] = Listing(
+            token,
+            _msgSender(),
+            address(0),
+            tokenId,
+            listingPrice,
+            block.timestamp,
+            0,
+            0,
+            0,
+            ListingType.FixedPrice,
+            ListingStatus.OnMarket
+        );
+        emit ListOnMarketplace(listId, token, _msgSender(), tokenId, listingPrice, block.timestamp);
+        IERC721(token).safeTransferFrom(_msgSender(), address(this), tokenId);
     }
 
     // list
@@ -206,7 +229,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         bytes32 s
     ) external {
         require(_permitNFT(token, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
-        _listOnMarketplace(token, tokenId, listingPrice);
+        listOnMarketplace(token, tokenId, listingPrice);
     }
 
     // create auction
@@ -330,37 +353,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         listId = createAuction(token, tokenId, minimumBid, insuranceAmount, isSellForEnabled, listingPrice, duration);
     }
 
-    function _listOnMarketplace(
-        address token,
-        uint256 tokenId,
-        uint256 listingPrice
-    ) private whenNotPaused isNotZero(listingPrice) {
-        listingCounter++;
-        bytes32 listId = keccak256(abi.encodePacked(token, tokenId, _msgSender(), block.timestamp, listingCounter));
-        listings.push(listId);
-        require(
-            IERC721(token).getApproved(tokenId) == address(this) ||
-                IERC721(token).isApprovedForAll(_msgSender(), address(this)),
-            'Marketplace is not allowed to transfer your token'
-        );
-
-        _tokenListings[listId] = Listing(
-            token,
-            _msgSender(),
-            address(0),
-            tokenId,
-            listingPrice,
-            block.timestamp,
-            0,
-            0,
-            0,
-            ListingType.FixedPrice,
-            ListingStatus.OnMarket
-        );
-        emit ListOnMarketplace(listId, token, _msgSender(), tokenId, listingPrice, block.timestamp);
-        IERC721(token).safeTransferFrom(_msgSender(), address(this), tokenId);
-    }
-
     /**
     ** Users who interested in a certain auction, can bid on it by calling this   function.Bidder don't pay / transfer SFTI on bidding. Only when win the auction [`the auction is ended and this bidder is the last one to bid`], bidder pays by calling [`fulfillBid`] OR [`buyNowWithPermit`]
     - user MUST have enough stakes used as insurance; grantee and punishment mechanism for malicious bidder. If the bidder don't pay in the  
@@ -448,8 +440,84 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
      * @param listingId listing id
  
      */
-    function fulfillBid(bytes32 listingId) external {
-        _fulfillBid(listingId);
+    function fulfillBid(bytes32 listingId) public whenNotPaused {
+        require(
+            _tokenListings[listingId].releaseTime < block.timestamp &&
+                _tokenListings[listingId].listingType != ListingType.FixedPrice,
+            'Auction is not ended or no longer on auction'
+        );
+        address winnerBidder = bidToListing[listingId].bidder;
+        address seller = _tokenListings[listingId].seller;
+        address _token = _tokenListings[listingId].token;
+        uint256 tokenId = _tokenListings[listingId].tokenId;
+        uint256 bidPrice = listingBids[listingId][winnerBidder].bidPrice;
+        uint256 insuranceAmount = _tokenListings[listingId].insuranceAmount;
+
+        require(winnerBidder == _msgSender(), 'Caller is not the winner');
+        // if it's new, the price will be 0
+        if (bidPrice > _stfiCap) {
+            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
+        }
+        //check that contract is allowed to transfer tokens
+        require(
+            IERC20(_paymentToken).allowance(winnerBidder, address(this)) >= bidPrice,
+            'Marketplace is not allowed to withdraw the required amount of tokens'
+        );
+        StartFiFinanceLib.ShareInput memory _input;
+        _input.tokenId = tokenId;
+        _input.token = _token;
+        _input.price = bidPrice;
+        (_input.fee, _input.feeBase) = _getFees(seller);
+
+        StartFiFinanceLib.ShareOutput memory _output = StartFiFinanceLib._getListingFinancialInfo(_input);
+
+        listingBids[listingId][winnerBidder].isStakeReserved = false;
+        listingBids[listingId][winnerBidder].isPurchased = true;
+        _tokenListings[listingId].status = ListingStatus.Sold;
+        _tokenListings[listingId].buyer = winnerBidder;
+
+        // update user reserves
+        // reserve nigative couldn't be at any case
+
+        userReserves[winnerBidder] -= insuranceAmount;
+
+        //   TODO: add reputation points to both seller and buyer
+        // _addreputationPoints(seller, winnerBidder, bidPrice);
+
+        // if bid time is less than 15 min, increase by 15 min
+        // retuen bid id
+        emit FulfillBid(
+            bidToListing[listingId].bidId,
+            listingId,
+            _token,
+            winnerBidder,
+            tokenId,
+            bidPrice,
+            _output.issuer,
+            _output.royaltyAmount,
+            _output.fees,
+            _output.netPrice,
+            block.timestamp
+        );
+
+        require(
+            IERC20(_paymentToken).transferFrom(_msgSender(), _adminWallet, _output.fees),
+            "Couldn't transfer token as fees"
+        );
+        // if the issuer is the seller , no need to send two 2 transfer transaction , let's do it 1 to reduce gas
+        if (_output.issuer == seller) {
+            _output.netPrice += _output.royaltyAmount;
+        } else if (_output.issuer != address(0) && _output.royaltyAmount != 0) {
+            require(
+                IERC20(_paymentToken).transferFrom(_msgSender(), _output.issuer, _output.royaltyAmount),
+                "Couldn't transfer token to issuer"
+            );
+        }
+        require(
+            IERC20(_paymentToken).transferFrom(_msgSender(), seller, _output.netPrice),
+            "Couldn't transfer token to seller"
+        );
+        IERC721(_token).safeTransferFrom(address(this), _msgSender(), tokenId);
     }
 
     /**
@@ -484,7 +552,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
             s
         );
 
-        _fulfillBid(listingId);
+        fulfillBid(listingId);
     }
 
     // delist
@@ -537,8 +605,73 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
      * @param listingId listing id
      * emit : BuyNow
      */
-    function buyNow(bytes32 listingId) external {
-        _buyNow(listingId);
+    function buyNow(bytes32 listingId) public whenNotPaused {
+        ListingStatus status = _tokenListings[listingId].status;
+        ListingType _type = _tokenListings[listingId].listingType;
+        uint256 price = _tokenListings[listingId].listingPrice;
+        uint256 tokenId = _tokenListings[listingId].tokenId;
+        address seller = _tokenListings[listingId].seller;
+        address _token = _tokenListings[listingId].token;
+        require(status == ListingStatus.OnMarket && _type != ListingType.Auction, 'Item is not for sale');
+
+        if (_type == ListingType.AuctionForSale) {
+            require(_tokenListings[listingId].releaseTime > block.timestamp, 'Item is not for sale');
+        }
+        if (price > _usdCap) {
+            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
+        }
+
+        // check that contract is allowed to transfer tokens
+        require(
+            IERC20(_paymentToken).allowance(_msgSender(), address(this)) >= price,
+            'Marketplace is not allowed to withdraw the required amount of tokens'
+        );
+        StartFiFinanceLib.ShareInput memory _input;
+        _input.tokenId = tokenId;
+        _input.token = _token;
+        _input.price = price;
+        (_input.fee, _input.feeBase) = _getFees(seller);
+
+        StartFiFinanceLib.ShareOutput memory _output = StartFiFinanceLib._getListingFinancialInfo(_input);
+
+        // finish listing
+        _tokenListings[listingId].status = ListingStatus.Sold;
+        _tokenListings[listingId].buyer = _msgSender();
+        // _addreputationPoints(seller, _msgSender(), price);
+        emit BuyNow(
+            listingId,
+            _token,
+            _msgSender(),
+            seller,
+            tokenId,
+            price,
+            _output.issuer,
+            _output.royaltyAmount,
+            _output.fees,
+            _output.netPrice,
+            block.timestamp
+        );
+        require(
+            IERC20(_paymentToken).transferFrom(_msgSender(), _adminWallet, _output.fees),
+            "Couldn't transfer token as fees"
+        );
+        // if the issuer is the seller , no need to send two 2 transfer transaction , let's do it 1 to reduce gas
+        if (_output.issuer == seller) {
+            _output.netPrice += _output.royaltyAmount;
+        } else if (_output.issuer != address(0) && _output.royaltyAmount != 0) {
+            require(
+                IERC20(_paymentToken).transferFrom(_msgSender(), _output.issuer, _output.royaltyAmount),
+                "Couldn't transfer token to issuer"
+            );
+        }
+
+        // token value could be zero ater taking the roylty share ??? need to ask?
+        require(
+            IERC20(_paymentToken).transferFrom(_msgSender(), seller, _output.netPrice),
+            "Couldn't transfer token to seller"
+        );
+        // trnasfer token
+        IERC721(_token).safeTransferFrom(address(this), _msgSender(), tokenId);
     }
 
     // //
@@ -566,7 +699,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
     ) external {
         IERC20(_paymentToken).permit(_msgSender(), address(this), price, deadline, v, r, s);
 
-        _buyNow(listingId);
+        buyNow(listingId);
     }
 
     /**
@@ -770,157 +903,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
             feeBase = _feeBase;
         }
     }
-
-    function _buyNow(bytes32 listingId) private whenNotPaused {
-        ListingStatus status = _tokenListings[listingId].status;
-        ListingType _type = _tokenListings[listingId].listingType;
-        uint256 price = _tokenListings[listingId].listingPrice;
-        uint256 tokenId = _tokenListings[listingId].tokenId;
-        address seller = _tokenListings[listingId].seller;
-        address _token = _tokenListings[listingId].token;
-        require(status == ListingStatus.OnMarket && _type != ListingType.Auction, 'Item is not for sale');
-
-        if (_type == ListingType.AuctionForSale) {
-            require(_tokenListings[listingId].releaseTime > block.timestamp, 'Item is not for sale');
-        }
-        if (price > _usdCap) {
-            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
-        }
-
-        // check that contract is allowed to transfer tokens
-        require(
-            IERC20(_paymentToken).allowance(_msgSender(), address(this)) >= price,
-            'Marketplace is not allowed to withdraw the required amount of tokens'
-        );
-        StartFiFinanceLib.ShareInput memory _input;
-        _input.tokenId = tokenId;
-        _input.token = _token;
-        _input.price = price;
-        (_input.fee, _input.feeBase) = _getFees(seller);
-
-        StartFiFinanceLib.ShareOutput memory _output = StartFiFinanceLib._getListingFinancialInfo(_input);
-
-        // finish listing
-        _tokenListings[listingId].status = ListingStatus.Sold;
-        _tokenListings[listingId].buyer = _msgSender();
-        // _addreputationPoints(seller, _msgSender(), price);
-        emit BuyNow(
-            listingId,
-            _token,
-            _msgSender(),
-            seller,
-            tokenId,
-            price,
-            _output.issuer,
-            _output.royaltyAmount,
-            _output.fees,
-            _output.netPrice,
-            block.timestamp
-        );
-        require(
-            IERC20(_paymentToken).transferFrom(_msgSender(), _adminWallet, _output.fees),
-            "Couldn't transfer token as fees"
-        );
-        // if the issuer is the seller , no need to send two 2 transfer transaction , let's do it 1 to reduce gas
-        if (_output.issuer == seller) {
-            _output.netPrice += _output.royaltyAmount;
-        } else if (_output.issuer != address(0) && _output.royaltyAmount != 0) {
-            require(
-                IERC20(_paymentToken).transferFrom(_msgSender(), _output.issuer, _output.royaltyAmount),
-                "Couldn't transfer token to issuer"
-            );
-        }
-
-        // token value could be zero ater taking the roylty share ??? need to ask?
-        require(
-            IERC20(_paymentToken).transferFrom(_msgSender(), seller, _output.netPrice),
-            "Couldn't transfer token to seller"
-        );
-        // trnasfer token
-        IERC721(_token).safeTransferFrom(address(this), _msgSender(), tokenId);
-    }
-
-    function _fulfillBid(bytes32 listingId) private whenNotPaused {
-        require(
-            _tokenListings[listingId].releaseTime < block.timestamp &&
-                _tokenListings[listingId].listingType != ListingType.FixedPrice,
-            'Auction is not ended or no longer on auction'
-        );
-        address winnerBidder = bidToListing[listingId].bidder;
-        address seller = _tokenListings[listingId].seller;
-        address _token = _tokenListings[listingId].token;
-        uint256 tokenId = _tokenListings[listingId].tokenId;
-        uint256 bidPrice = listingBids[listingId][winnerBidder].bidPrice;
-        uint256 insuranceAmount = _tokenListings[listingId].insuranceAmount;
-
-        require(winnerBidder == _msgSender(), 'Caller is not the winner');
-        // if it's new, the price will be 0
-        if (bidPrice > _stfiCap) {
-            require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
-        }
-        //check that contract is allowed to transfer tokens
-        require(
-            IERC20(_paymentToken).allowance(winnerBidder, address(this)) >= bidPrice,
-            'Marketplace is not allowed to withdraw the required amount of tokens'
-        );
-        StartFiFinanceLib.ShareInput memory _input;
-        _input.tokenId = tokenId;
-        _input.token = _token;
-        _input.price = bidPrice;
-        (_input.fee, _input.feeBase) = _getFees(seller);
-
-        StartFiFinanceLib.ShareOutput memory _output = StartFiFinanceLib._getListingFinancialInfo(_input);
-
-        listingBids[listingId][winnerBidder].isStakeReserved = false;
-        listingBids[listingId][winnerBidder].isPurchased = true;
-        _tokenListings[listingId].status = ListingStatus.Sold;
-        _tokenListings[listingId].buyer = winnerBidder;
-
-        // update user reserves
-        // reserve nigative couldn't be at any case
-
-        userReserves[winnerBidder] -= insuranceAmount;
-
-        //   TODO: add reputation points to both seller and buyer
-        // _addreputationPoints(seller, winnerBidder, bidPrice);
-
-        // if bid time is less than 15 min, increase by 15 min
-        // retuen bid id
-        emit FulfillBid(
-            bidToListing[listingId].bidId,
-            listingId,
-            _token,
-            winnerBidder,
-            tokenId,
-            bidPrice,
-            _output.issuer,
-            _output.royaltyAmount,
-            _output.fees,
-            _output.netPrice,
-            block.timestamp
-        );
-
-        require(
-            IERC20(_paymentToken).transferFrom(_msgSender(), _adminWallet, _output.fees),
-            "Couldn't transfer token as fees"
-        );
-        // if the issuer is the seller , no need to send two 2 transfer transaction , let's do it 1 to reduce gas
-        if (_output.issuer == seller) {
-            _output.netPrice += _output.royaltyAmount;
-        } else if (_output.issuer != address(0) && _output.royaltyAmount != 0) {
-            require(
-                IERC20(_paymentToken).transferFrom(_msgSender(), _output.issuer, _output.royaltyAmount),
-                "Couldn't transfer token to issuer"
-            );
-        }
-        require(
-            IERC20(_paymentToken).transferFrom(_msgSender(), seller, _output.netPrice),
-            "Couldn't transfer token to seller"
-        );
-        IERC721(_token).safeTransferFrom(address(this), _msgSender(), tokenId);
-    }
-
-    // bytes4 constant PREMIT_INTERFACE = 0x2a55205a;
 
     // erc721
     /**
