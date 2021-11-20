@@ -161,7 +161,7 @@ matic: {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200
+            runs: 300
           }
         }
       },
@@ -199,7 +199,7 @@ matic: {
     enabled: true,
      
     coinmarketcap: "9e9077a0-349d-45e1-bbeb-f68f3d1a57b5",
-    // outputFile: "./output.js",
+    outputFile: "./output.js",
     showTimeSpent: true,
     showMethodSig:true
   },

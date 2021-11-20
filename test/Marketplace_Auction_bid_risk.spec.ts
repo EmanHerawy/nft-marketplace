@@ -74,6 +74,9 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       stakes.address,
       
       admin.address,
+       10000,
+         50000,
+         5
     ])
 
  

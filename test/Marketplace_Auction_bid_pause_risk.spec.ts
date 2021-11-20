@@ -43,7 +43,10 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
       'StartFi Market',
       token.address,
       stakes.address,
-       admin.address,
+      admin.address,
+          10000,
+         50000,
+         5
     ])
 
     // add to minter role

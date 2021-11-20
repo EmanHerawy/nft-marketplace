@@ -89,6 +89,9 @@ describe('StartFi marketPlace', () => {
     token.address,
     stakes.address,
     admin.address,
+ 10000,
+         50000,
+         5
   ])
 
   // add to minter role
@@ -313,6 +316,9 @@ describe('StartFi marketPlace: big deals that exceed cap', () => {
     token.address,
     stakes.address,
      admin.address,
+ 10000,
+         50000,
+         5
   ])
 price1=500000;
   // add to minter role

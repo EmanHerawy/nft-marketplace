@@ -100,6 +100,9 @@ let forSalePrice=10000;
       stakes.address,
        
       admin.address,
+ 10000,
+         50000,
+         5
     ])
   
     // add to minter role

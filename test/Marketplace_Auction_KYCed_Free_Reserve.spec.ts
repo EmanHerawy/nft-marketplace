@@ -79,6 +79,9 @@ const auction2Insurance = 110
     token.address,
     stakes.address,
      admin.address,
+      10000,
+         50000,
+         5
   ])
 price1=500000;
 forSalePrice=price1

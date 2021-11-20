@@ -70,6 +70,9 @@ const calcFees=(price:number,share:number,base:number):number=>{
       stakes.address,
        
       admin.address,
+ 10000,
+         50000,
+         5
     ])
   
     // add to minter role
