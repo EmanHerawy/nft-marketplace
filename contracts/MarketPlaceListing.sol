@@ -20,25 +20,27 @@ contract MarketPlaceListing {
     // using EnumerableSet for EnumerableSet.UintSet;
     // using EnumerableSet for EnumerableSet.AddressSet;
     struct Listing {
-        address nFTContract;
-        uint256 tokenId;
-        uint256 listingPrice;
-        uint256 endPrice;
+        address token;
         address seller;
         address buyer;
-        bool iseBdEnabeled;
-        bool isSellForEnabled;
+        uint256 tokenId;
+        uint256 listingPrice;
         // only if bed and sell for enabled
         uint256 releaseTime;
         uint256 disputeTime; // only in auction
         uint256 insuranceAmount; // if it is not auction, this represents the inusrance seller has to put, if auction , this represents the insurance bidder has to put
-        uint256 sellFor;
+        uint256 minimumBid;
+        ListingType listingType;
         ListingStatus status;
+    }
+    enum ListingType {
+        Auction,
+        FixedPrice,
+        AuctionForSale
     }
     enum ListingStatus {
         Sold,
         OnMarket,
-        onAuction,
         Canceled
     }
     // listing key  to lisitng details
@@ -47,58 +49,58 @@ contract MarketPlaceListing {
     // track the Listinger total amount of Listings
     // mapping (address=>uint256) private userTotalListings;
     /******************************************* read state functions go here ********************************************************* */
-    /**
-    * 
-      * @dev   called by dapp or any contract to get info about a gevin listing    
-      * @param listingId listing id      
+    // /**
+    // *
+    //   * @dev   called by dapp or any contract to get info about a gevin listing
+    //   * @param listingId listing id
 
-      * @return tokenAddress  nft contract address
-      * @return tokenId NFT token Id 
-      * @return listingPrice initial price or minimum price that the seller can accept
-      * @return endPrice purchase price
-      * @return seller  nft seller address
-      * @return buyer  nft buyer address
-      * @return iseBdEnabeled true if auction enabled  
-      * @return isSellForEnabled true if auction enable direct selling
-      * @return releaseTime  when auction ends
-      * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner' 
-      * @return insuranceAmount  amount of token locked as qualify for any bidder wants bid 
-      * @return sellFor if sell for enabled for auction, this should be more than zero
-      * @return status in number {Sold,OnMarket, onAuction,Canceled}
-     */
-    function getListingDetails(bytes32 listingId)
-        external
-        view
-        returns (
-            address tokenAddress,
-            uint256 tokenId,
-            uint256 listingPrice,
-            uint256 endPrice,
-            address seller,
-            address buyer,
-            bool iseBdEnabeled,
-            bool isSellForEnabled,
-            uint256 releaseTime,
-            uint256 disputeTime,
-            uint256 insuranceAmount,
-            uint256 sellFor,
-            uint256 status
-        )
-    {
-        tokenAddress = _tokenListings[listingId].nFTContract;
-        tokenId = _tokenListings[listingId].tokenId;
-        listingPrice = _tokenListings[listingId].listingPrice;
-        endPrice = _tokenListings[listingId].endPrice;
-        seller = _tokenListings[listingId].seller;
-        buyer = _tokenListings[listingId].buyer;
-        iseBdEnabeled = _tokenListings[listingId].iseBdEnabeled;
-        isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
-        releaseTime = _tokenListings[listingId].releaseTime;
-        disputeTime = _tokenListings[listingId].disputeTime;
-        insuranceAmount = _tokenListings[listingId].insuranceAmount;
-        sellFor = _tokenListings[listingId].sellFor;
-        status = uint256(_tokenListings[listingId].status);
-    }
+    //   * @return tokenAddress  nft contract address
+    //   * @return tokenId NFT token Id
+    //   * @return listingPrice initial price or minimum price that the seller can accept
+    //   * @return endPrice purchase price
+    //   * @return seller  nft seller address
+    //   * @return buyer  nft buyer address
+    //   * @return iseBdEnabeled true if auction enabled
+    //   * @return isSellForEnabled true if auction enable direct selling
+    //   * @return releaseTime  when auction ends
+    //   * @return disputeTime  when auction creator can dispute and take the insurance from the bad actor 'bidWinner'
+    //   * @return insuranceAmount  amount of token locked as qualify for any bidder wants bid
+    //   * @return sellFor if sell for enabled for auction, this should be more than zero
+    //   * @return status in number {Sold,OnMarket, onAuction,Canceled}
+    //  */
+    // function getListingDetails(bytes32 listingId)
+    //     external
+    //     view
+    //     returns (
+    //         address tokenAddress,
+    //         uint256 tokenId,
+    //         uint256 listingPrice,
+    //         uint256 endPrice,
+    //         address seller,
+    //         address buyer,
+    //         bool iseBdEnabeled,
+    //         bool isSellForEnabled,
+    //         uint256 releaseTime,
+    //         uint256 disputeTime,
+    //         uint256 insuranceAmount,
+    //         uint256 sellFor,
+    //         uint256 status
+    //     )
+    // {
+    //     tokenAddress = _tokenListings[listingId].token;
+    //     tokenId = _tokenListings[listingId].tokenId;
+    //     listingPrice = _tokenListings[listingId].listingPrice;
+    //     endPrice = _tokenListings[listingId].endPrice;
+    //     seller = _tokenListings[listingId].seller;
+    //     buyer = _tokenListings[listingId].buyer;
+    //     iseBdEnabeled = _tokenListings[listingId].iseBdEnabeled;
+    //     isSellForEnabled = _tokenListings[listingId].isSellForEnabled;
+    //     releaseTime = _tokenListings[listingId].releaseTime;
+    //     disputeTime = _tokenListings[listingId].disputeTime;
+    //     insuranceAmount = _tokenListings[listingId].insuranceAmount;
+    //     sellFor = _tokenListings[listingId].sellFor;
+    //     status = uint256(_tokenListings[listingId].status);
+    // }
 
     ///**
     // *
@@ -141,7 +143,7 @@ contract MarketPlaceListing {
     //     )
     // {
     //     listingId = listings[index];
-    //     tokenAddress = _tokenListings[listingId].nFTContract;
+    //     tokenAddress = _tokenListings[listingId].token;
     //     tokenId = _tokenListings[listingId].tokenId;
     //     listingPrice = _tokenListings[listingId].listingPrice;
     //     endPrice = _tokenListings[listingId].endPrice;

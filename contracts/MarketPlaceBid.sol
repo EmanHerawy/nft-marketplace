@@ -14,8 +14,6 @@ contract MarketPlaceBid {
     // using EnumerableSet for EnumerableSet.AddressSet;
     struct Bid {
         bytes32 bidId;
-        address nFTContract;
-        uint256 tokenId;
         uint256 bidPrice;
         bool isPurchased;
         bool isStakeReserved; // ture till the bidder free
@@ -36,8 +34,7 @@ contract MarketPlaceBid {
      * @param listingId listing id
      * @return bidId bid id
      * @return bidder bidder address
-     * @return nFTContract  nft contract address
-     * @return tokenId nft token id
+ 
      * @return bidPrice bid price
      * @return isPurchased true if purchased
      * @return isStakeReserved true if the reserve is free
@@ -48,8 +45,6 @@ contract MarketPlaceBid {
         returns (
             bytes32 bidId,
             address bidder,
-            address nFTContract,
-            uint256 tokenId,
             uint256 bidPrice,
             bool isPurchased,
             bool isStakeReserved
@@ -57,8 +52,6 @@ contract MarketPlaceBid {
     {
         bidId = bidToListing[listingId].bidId;
         bidder = bidToListing[listingId].bidder;
-        nFTContract = listingBids[listingId][bidder].nFTContract;
-        tokenId = listingBids[listingId][bidder].tokenId;
         bidPrice = listingBids[listingId][bidder].bidPrice;
         isPurchased = listingBids[listingId][bidder].isPurchased;
         isStakeReserved = listingBids[listingId][bidder].isStakeReserved;
@@ -70,8 +63,6 @@ contract MarketPlaceBid {
      * @param listingId listing id
      * @param bidder bidder address
      * @return bidId bid id
-     * @return nFTContract  nft contract address
-     * @return tokenId nft token id
      * @return bidPrice bid price
      * @return isPurchased true if purchased
      * @return isStakeReserved true if the reserve is free
@@ -81,16 +72,12 @@ contract MarketPlaceBid {
         view
         returns (
             bytes32 bidId,
-            address nFTContract,
-            uint256 tokenId,
             uint256 bidPrice,
             bool isPurchased,
             bool isStakeReserved
         )
     {
         bidId = listingBids[listingId][bidder].bidId;
-        nFTContract = listingBids[listingId][bidder].nFTContract;
-        tokenId = listingBids[listingId][bidder].tokenId;
         bidPrice = listingBids[listingId][bidder].bidPrice;
         isPurchased = listingBids[listingId][bidder].isPurchased;
         isStakeReserved = listingBids[listingId][bidder].isStakeReserved;

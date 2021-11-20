@@ -12,9 +12,9 @@ import './StartFiMarketPlaceFinance.sol';
 contract StartFiMarketPlaceCap is StartFiMarketPlaceFinance {
     /******************************************* decalrations go here ********************************************************* */
 
-    uint256 public usdCap;
-    uint256 public stfiCap;
-    uint256 public stfiUsdt; // how many STFI per 1 usd?
+    uint256 internal _usdCap;
+    uint256 internal _stfiCap;
+    uint256 internal _stfiUsdt; // how many STFI per 1 usd?
     mapping(bytes32 => bool) internal kycedDeals;
     event HandelKyc(bytes32 indexed listId, address approver, bool status, uint256 timestamp);
 
@@ -25,14 +25,25 @@ contract StartFiMarketPlaceCap is StartFiMarketPlaceFinance {
     }
 
     /******************************************* state functions go here ********************************************************* */
+    function usdCap() external view returns (uint256) {
+        return _usdCap;
+    }
+
+    function stfiCap() external view returns (uint256) {
+        return _stfiCap;
+    }
+
+    function stfiUsdt() external view returns (uint256) {
+        return _stfiUsdt;
+    }
 
     /**
      *  @dev only called by `owner` to update the cap
-     * @param _usdCap  the new fees value to be stored
+     * @param usdCap_  the new fees value to be stored
      */
-    function setUsdCap(uint256 _usdCap) external onlyOwner whenPaused {
-        require(_usdCap > 0, 'StartFiMarketplaceCap: cap must be more than zero');
-        usdCap = _usdCap;
+    function setUsdCap(uint256 usdCap_) external onlyOwner whenPaused {
+        require(usdCap_ > 0, 'StartFiMarketplaceCap: cap must be more than zero');
+        _usdCap = usdCap_;
     }
 
     /**
@@ -42,7 +53,7 @@ contract StartFiMarketPlaceCap is StartFiMarketPlaceFinance {
     function setPrice(uint256 _stfiPrice) external {
         require(hasRole(PRICE_FEEDER_ROLE, _msgSender()), 'StartFiMarketPlace: UnAuthorized');
         // set
-        stfiUsdt = _stfiPrice;
-        stfiCap = _stfiPrice * usdCap;
+        _stfiUsdt = _stfiPrice;
+        _stfiCap = _stfiPrice * _usdCap;
     }
 }

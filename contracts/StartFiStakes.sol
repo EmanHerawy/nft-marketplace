@@ -3,7 +3,7 @@
 pragma solidity 0.8.4;
 
 import './interface/IStartFiStakes.sol';
-import './interface/IStartFiMarketplace.sol';
+import './interface/IStartFiMarketPlace.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
@@ -60,7 +60,7 @@ contract StartFiStakes is Ownable, IStartFiStakes {
     // withdraw
     function withdraw(uint256 amount) external {
         // TODO:check marketplace user reserves
-        uint256 reserves = IStartFiMarketplace(marketplace).getUserReserved(_msgSender());
+        uint256 reserves = IStartFiMarketPlace(marketplace).getUserReserved(_msgSender());
         uint256 allowance = stakerReserved[_msgSender()] - reserves;
         require(allowance >= amount, 'Invalid amount');
         _safeTokenTransfer(_msgSender(), amount);
