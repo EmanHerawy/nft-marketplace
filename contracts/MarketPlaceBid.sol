@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.4;
-pragma abicoder v2;
 
 /**
  
@@ -9,9 +8,6 @@ pragma abicoder v2;
  * [ desc ] : contract handles all the bid related functions for marketplace
  */
 contract MarketPlaceBid {
-    // using Address for address;
-    // using EnumerableSet for EnumerableSet.UintSet;
-    // using EnumerableSet for EnumerableSet.AddressSet;
     struct Bid {
         bytes32 bidId;
         uint256 bidPrice;

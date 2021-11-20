@@ -13,11 +13,11 @@ import './MarketPlaceBase.sol';
 contract StartFiMarketPlaceFinance is MarketPlaceBase {
     /******************************************* decalrations go here ********************************************************* */
     address internal _paymentToken;
-    uint256 internal _feeFraction = 25; // 2.5% fees
-    uint256 internal _feeBase = 10; // 25/10=2.5
+    uint256 internal _feeFraction; // 2.5% fees
+    uint256 internal _feeBase; // 25/10=2.5
     address public stakeContract;
-    uint256 public listqualifyPercentage = 10;
-    uint256 public listqualifyPercentageBase = 10;
+    uint256 public listqualifyPercentage;
+    uint256 public listqualifyPercentageBase;
     mapping(address => uint256) internal userReserves;
 
     event UserReservesRelease(address user, uint256 lastReserves, uint256 newReserves, uint256 timestamp);

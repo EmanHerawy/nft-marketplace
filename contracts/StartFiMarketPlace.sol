@@ -103,49 +103,54 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         string memory _marketPlaceName,
         address _paymentContract,
         address _stakeContract,
-        address adminWallet
+        address adminWallet,
+        uint256 usdCap_,
+        uint256 stfiCap_,
+        uint256 stfiUsdt_
     ) {
         _MarketplaceBase_init_unchained(_marketPlaceName);
         _MarketplaceAdmin_init_unchained(adminWallet);
         _MarketplaceFinance_init_unchained(_paymentContract);
         stakeContract = _stakeContract;
         // to be removed
-        _usdCap = 10000;
-        _stfiCap = 50000;
-        _stfiUsdt = 5;
+        _usdCap = usdCap_;
+        _stfiCap = stfiCap_;
+        _stfiUsdt = stfiUsdt_;
+        fulfillDuration = 3 days;
+
+        unpauseTimestamp = block.timestamp;
+        _feeFraction = 25; // 2.5% fees
+        _feeBase = 10; // 25/10=2.5
+        stakeContract;
+        listqualifyPercentage = 10;
+        listqualifyPercentageBase = 10;
     }
 
     // function initialize (
-    //     string memory _marketPlaceName,
-    //     address _paymentContract,
-    //     address _stakeContract,
-    //     address _reputationContract,
-    //     address adminWallet
-    // ) public /*onlyOwner*/ virtual initializer {
-    //     _Marketplace_init_unchained(
-    //         _marketPlaceName,
-    //         _paymentContract,
-    //         _stakeContract,
-    //         _reputationContract,
-    //         adminWallet
-    //     );
-    // }
+    //   string memory _marketPlaceName,
+    //         address _paymentContract,
+    //         address _stakeContract,
+    //         address adminWallet,
+    //           uint256 usdCap_,
+    //         uint256 stfiCap_,
+    //         uint256 stfiUsdt_
+    //     ) {
+    //         _MarketplaceBase_init_unchained(_marketPlaceName);
+    //         _MarketplaceAdmin_init_unchained(adminWallet);
+    //         _MarketplaceFinance_init_unchained(_paymentContract);
+    //         stakeContract = _stakeContract;
+    //         // to be removed
+    //         _usdCap = usdCap_;
+    //         _stfiCap = stfiCap_;
+    //         _stfiUsdt = stfiUsdt_;
+    //  fulfillDuration = 3 days;
 
-    // function _Marketplace_init_unchained(
-    //     string memory _marketPlaceName,
-    //     address _paymentContract,
-    //     address _stakeContract,
-    //     address _reputationContract,
-    //     address adminWallet
-    // ) private {
-    //     _MarketplaceBase_init_unchained(_marketPlaceName);
-    //     _MarketplaceAdmin_init_unchained(adminWallet);
-    //     _MarketplaceFinance_init_unchained(_paymentContract, _reputationContract);
-    //     stakeContract = _stakeContract;
-    //     // to be removed
-    //     _usdCap = 10000;
-    //     stfiCap = 50000;
-    //     stfiUsdt = 5;
+    //  unpauseTimestamp = block.timestamp;
+    //  _feeFraction = 25; // 2.5% fees
+    //  _feeBase = 10; // 25/10=2.5
+    //  stakeContract;
+    //  listqualifyPercentage = 10;
+    //  listqualifyPercentageBase = 10;
     // }
 
     /******************************************* modifiers go here ********************************************************* */
