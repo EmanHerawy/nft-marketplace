@@ -76,24 +76,6 @@ describe('MarketPlace admin pause contract and start updating contract', () => {
     await expect(marketPlace.unpause()).to.revertedWith('Pausable: not paused')
   })
 
-  it('Admin should change reputation contract ', async () => {
-    await marketPlace.pause()
-    await expect(marketPlace.changeReputationContract(newReputationAddress))
-      .to.emit(marketPlace, 'ChangeReputationContract')
-      .withArgs(newReputationAddress)
-  })
-
-  it('Admin should change reputation contract:revert not the owner ', async () => {
-    await expect(marketPlace.connect(user1).changeReputationContract(newReputationAddress)).to.revertedWith(
-      'caller is not the owner'
-    )
-  })
-
-  it('Admin should change reputation contract:revert not paused ', async () => {
-    await marketPlace.unpause()
-    await expect(marketPlace.changeReputationContract(newReputationAddress)).to.revertedWith('Pausable: not paused')
-  })
-
   it('Admin should change utility contract ', async () => {
     await marketPlace.pause()
     await expect(marketPlace.changeUtilityToken(newTokenAddress))

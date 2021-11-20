@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 pragma solidity 0.8.4;
-import './interface/IStartFiReputation.sol';
 
 import './interface/IStartFiStakes.sol';
 import './library/StartFiFinanceLib.sol';
@@ -13,7 +12,6 @@ import './MarketPlaceBase.sol';
  */
 contract StartFiMarketPlaceFinance is MarketPlaceBase {
     /******************************************* decalrations go here ********************************************************* */
-    address private reputationContract;
     address internal _paymentToken;
     uint256 internal _feeFraction = 25; // 2.5% fees
     uint256 internal _feeBase = 10; // 25/10=2.5
@@ -26,9 +24,8 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
 
     /******************************************* constructor goes here ********************************************************* */
 
-    function _MarketplaceFinance_init_unchained(address _paymentContract, address _reputationContract) internal {
+    function _MarketplaceFinance_init_unchained(address _paymentContract) internal {
         _paymentToken = _paymentContract;
-        reputationContract = _reputationContract;
     }
 
     /******************************************* modifiers go here ********************************************************* */
@@ -89,23 +86,6 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
     }
 
     /**
-     * @notice  all conditions and checks are made prior to this function. math of point calcualtion is not done yet
-     * @dev this function calls StartFiReputation contract to mint reputation points for both seller and buyer
-     * @param seller : seller address
-     * @param buyer : buyer address
-     * @param amount : price
-     */
-    function _addreputationPoints(
-        address seller,
-        address buyer,
-        uint256 amount
-    ) internal returns (bool) {
-        // calc how much pint for both of them ??
-        // logic and math is defind in the contract
-        return IStartFiReputation(reputationContract).calcAndMintintReputation(buyer, seller, amount);
-    }
-
-    /**
      *  @notice only called by `owner` to change the name and `whenPaused`
      * @dev  the formula is (fees * 1000)/base
      * @param numerator  the new fees value to be stored
@@ -134,21 +114,6 @@ contract StartFiMarketPlaceFinance is MarketPlaceBase {
     function changeUtilityToken(address _token) external notZeroAddress(_token) onlyOwner whenPaused {
         _paymentToken = _token;
         emit ChangeUtilityToken(_token);
-    }
-
-    /**
-     * @dev only called by `owner` to change the name and `whenPaused`
-     *@param _reputationContract marketplace reputation contract
-     *
-     */
-    function changeReputationContract(address _reputationContract)
-        external
-        notZeroAddress(_reputationContract)
-        onlyOwner
-        whenPaused
-    {
-        reputationContract = _reputationContract;
-        emit ChangeReputationContract(_reputationContract);
     }
 
     /**

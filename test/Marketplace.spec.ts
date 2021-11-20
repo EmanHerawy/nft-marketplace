@@ -88,12 +88,10 @@ describe('StartFi marketPlace', () => {
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
     admin.address,
   ])
 
   // add to minter role
-  await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
 
   await stakes.setMarketplace(marketPlace.address)
     // the 3 user need to get balance
@@ -142,7 +140,7 @@ describe('StartFi marketPlace', () => {
   })
   // it('user can not buy with price lower than the list price', async () => {
   //   await expect(marketPlace.connect(user1).buyNow(listingId1, wrongPrice)).to.revertedWith(
-  //  'StartfiMarketplce: Invalid price or Token is not for sale'
+  //  'StartfiMarketplce: Invalid price or Item is not for sale'
   //   )
   // })
   it('user can not buy without allowing marketplace to transfer tokens', async () => {
@@ -314,13 +312,11 @@ describe('StartFi marketPlace: big deals that exceed cap', () => {
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
-    admin.address,
+     admin.address,
   ])
 price1=500000;
   // add to minter role
-  await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
-
+ 
   await stakes.setMarketplace(marketPlace.address)
     // the 3 user need to get balance
 

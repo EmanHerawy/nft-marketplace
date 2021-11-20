@@ -64,7 +64,7 @@ describe('StartFi marketPlace Sprciall offers : special Offers with fixed prices
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
 
@@ -179,7 +179,7 @@ describe('StartFi marketPlace : special Offers with fixed prices issuer deList w
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
 
@@ -330,7 +330,7 @@ describe('StartFi marketPlace : special Offers with Auction bid and buy', () => 
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
 
@@ -462,7 +462,7 @@ describe('StartFi marketPlace : special Offers with Auction bid only', () => {
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
 
@@ -614,7 +614,7 @@ describe('StartFi marketPlace : special Offers with Auction then delist', () => 
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
 

@@ -88,7 +88,7 @@ describe('StartFi marketPlace:Actions create  bid and for sale as well , bid and
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+    
     admin.address,
   ])
 
@@ -288,7 +288,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+    
     admin.address,
   ])
 
@@ -401,7 +401,7 @@ describe('StartFi marketPlace:Actions create  bid only, bid and fulfill', () => 
   })
   it('user can not buy auction which is not for sale', async () => {
     await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
-   'Token is not for sale'
+   'Item is not for sale'
     )
   })
 
@@ -502,7 +502,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+    
     admin.address,
   ])
 
@@ -615,7 +615,7 @@ describe('malicious auction creator:  marketPlace:Actions create bid only, recei
   })
   it('user can not buy auction which is not for sale', async () => {
     await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
-   'Token is not for sale'
+   'Item is not for sale'
     )
   })
 
@@ -720,7 +720,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+    
     admin.address,
   ])
 
@@ -833,7 +833,7 @@ describe('malicious bidder: marketPlace:Actions create bid only , bid  malicious
   })
   it('user can not buy auction which is not for sale', async () => {
     await expect(marketPlace.connect(user1).buyNow(listingId1)).to.revertedWith(
-   'Token is not for sale'
+   'Item is not for sale'
     )
   })
   it('Should not fulfill auction before auction end', async () => {
@@ -1141,7 +1141,7 @@ describe('StartFi marketPlace Auction: big deals that exceed cap', () => {
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+    
     admin.address,
   ])
 price1=500000;
@@ -1232,7 +1232,7 @@ describe('StartFi marketPlace Auction bid and fulfill: big deals that exceed cap
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+    
     admin.address,
   ])
 price1=500000;

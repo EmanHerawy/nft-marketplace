@@ -98,7 +98,7 @@ let forSalePrice=10000;
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
   

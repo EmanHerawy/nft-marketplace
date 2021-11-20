@@ -68,7 +68,7 @@ const calcFees=(price:number,share:number,base:number):number=>{
       'StartFi Market',
       token.address,
       stakes.address,
-      reputation.address,
+       
       admin.address,
     ])
   

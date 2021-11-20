@@ -33,14 +33,13 @@ export async function tokenFixture([wallet]: Wallet[], _: any): Promise<Contract
     'StartFi Market',
     token.address,
     stakes.address,
-    reputation.address,
+     
     wallet.address,
   ])
 
   // add to minter role
   await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', NFT.address)
-  await reputation.grantRole('0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6', marketPlace.address)
-  // mint 10 tokens / 5 without royalty and 5 with royalty
+   // mint 10 tokens / 5 without royalty and 5 with royalty
   for (let index = 0; index < 5; index++) {
     await NFT.mintWithRoyalty(wallet.address, baseUri, 25, 10)
 

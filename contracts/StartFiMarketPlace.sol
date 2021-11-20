@@ -20,16 +20,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
     /******************************************* decalrations go here ********************************************************* */
     //
     uint256 public listingCounter;
-    // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , itme delisted ,  item  disputed , user release reserved ,
+    // events when auction created auction bid auction cancled auction fullfiled item listed , item purchesed , item delisted ,  item  disputed , user release reserved ,
     ///
-    event ListOnMarketplace(
-        bytes32 listId,
-        address indexed token,
-        address seller,
-        uint256 indexed tokenId,
-        uint256 listingPrice,
-        uint256 timestamp
-    );
+
     event DeListOffMarketplace(bytes32 listId, address token, address owner, uint256 tokenId, uint256 timestamp);
     event MigrateEmergency(
         bytes32 listId,
@@ -41,6 +34,14 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         uint256 timestamp
     );
 
+    event ListOnMarketplace(
+        bytes32 listId,
+        address indexed token,
+        address seller,
+        uint256 indexed tokenId,
+        uint256 listingPrice,
+        uint256 timestamp
+    );
     event CreateAuction(
         bytes32 listId,
         address indexed token,
@@ -53,15 +54,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         uint256 timestamp
     );
 
-    event BidOnAuction(
-        bytes32 bidId,
-        bytes32 indexed listingId,
-        address tokenAddress,
-        address bidder,
-        uint256 tokenId,
-        uint256 bidPrice,
-        uint256 timestamp
-    );
+    event BidOnAuction(bytes32 bidId, bytes32 indexed listingId, address bidder, uint256 bidPrice, uint256 timestamp);
 
     event FulfillBid(
         bytes32 bidId,
@@ -110,12 +103,11 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         string memory _marketPlaceName,
         address _paymentContract,
         address _stakeContract,
-        address _reputationContract,
         address adminWallet
     ) {
         _MarketplaceBase_init_unchained(_marketPlaceName);
         _MarketplaceAdmin_init_unchained(adminWallet);
-        _MarketplaceFinance_init_unchained(_paymentContract, _reputationContract);
+        _MarketplaceFinance_init_unchained(_paymentContract);
         stakeContract = _stakeContract;
         // to be removed
         _usdCap = 10000;
@@ -167,7 +159,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
 
     /******************************************* state functions go here ********************************************************* */
 
-    // list
+    // // list
     /**
      * @dev  called by dapps to list new item
      * @param token nft contract address
@@ -246,20 +238,22 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         uint256 listingPrice,
         uint256 duration
     ) public whenNotPaused isNotZero(minimumBid) returns (bytes32 listId) {
-        require(duration > 12 hours, 'Auction should be live for more than 12 hours');
-        require(insuranceAmount >= _stfiUsdt, 'Invalid Auction qualify Amount');
         ListingType _type;
-        uint256 releaseTime = block.timestamp + duration;
-        listingCounter++;
-        listId = keccak256(abi.encodePacked(token, tokenId, _msgSender(), releaseTime, listingCounter));
-        listings.push(listId);
+
         if (isSellForEnabled) {
-            require(listingPrice >= 0, 'Zero price is not allowed');
+            require(listingPrice >= minimumBid, 'Zero price is not allowed');
             _type = ListingType.AuctionForSale;
         } else {
             listingPrice = 0;
             _type = ListingType.Auction;
         }
+        require(duration > 12 hours, 'Auction should be live for more than 12 hours');
+        require(insuranceAmount >= _stfiUsdt, 'Invalid Auction qualify Amount');
+        uint256 releaseTime = block.timestamp + duration;
+        listingCounter++;
+        listId = keccak256(abi.encodePacked(token, tokenId, _msgSender(), releaseTime, listingCounter));
+        listings.push(listId);
+
         // check that sender is qualified
         require(
             IERC721(token).getApproved(tokenId) == address(this) ||
@@ -322,10 +316,10 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
     function createAuctionWithPermit(
         address token,
         uint256 tokenId,
-        uint256 listingPrice,
+        uint256 minimumBid,
         uint256 insuranceAmount,
         bool isSellForEnabled,
-        uint256 minimumBid,
+        uint256 listingPrice,
         uint256 duration,
         uint256 deadline,
         uint8 v,
@@ -333,7 +327,38 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         bytes32 s
     ) external returns (bytes32 listId) {
         require(_permitNFT(token, _msgSender(), tokenId, deadline, v, r, s), 'invalid signature');
-        listId = createAuction(token, tokenId, listingPrice, insuranceAmount, isSellForEnabled, minimumBid, duration);
+        listId = createAuction(token, tokenId, minimumBid, insuranceAmount, isSellForEnabled, listingPrice, duration);
+    }
+
+    function _listOnMarketplace(
+        address token,
+        uint256 tokenId,
+        uint256 listingPrice
+    ) private whenNotPaused isNotZero(listingPrice) {
+        listingCounter++;
+        bytes32 listId = keccak256(abi.encodePacked(token, tokenId, _msgSender(), block.timestamp, listingCounter));
+        listings.push(listId);
+        require(
+            IERC721(token).getApproved(tokenId) == address(this) ||
+                IERC721(token).isApprovedForAll(_msgSender(), address(this)),
+            'Marketplace is not allowed to transfer your token'
+        );
+
+        _tokenListings[listId] = Listing(
+            token,
+            _msgSender(),
+            address(0),
+            tokenId,
+            listingPrice,
+            block.timestamp,
+            0,
+            0,
+            0,
+            ListingType.FixedPrice,
+            ListingStatus.OnMarket
+        );
+        emit ListOnMarketplace(listId, token, _msgSender(), tokenId, listingPrice, block.timestamp);
+        IERC721(token).safeTransferFrom(_msgSender(), address(this), tokenId);
     }
 
     /**
@@ -357,13 +382,9 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
                 _tokenListings[listingId].listingType != ListingType.FixedPrice,
             'Auction is ended'
         );
+        // bidder has bid before ?
         address lastbidder = bidToListing[listingId].bidder;
 
-        address tokenAddress = _tokenListings[listingId].token;
-        uint256 tokenId = _tokenListings[listingId].tokenId;
-        uint256 insuranceAmount = _tokenListings[listingId].insuranceAmount;
-        bytes32 bidId = keccak256(abi.encodePacked(listingId, tokenAddress, _msgSender(), tokenId));
-        // bid should be more than than the mini and more than the last bid
         if (lastbidder == address(0)) {
             require(
                 bidPrice >= _tokenListings[listingId].minimumBid,
@@ -372,10 +393,17 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         } else {
             require(bidPrice > listingBids[listingId][lastbidder].bidPrice, 'bid price must be more than the last bid');
         }
-        // if this is the bidder first bid, the price will be 0
-        uint256 prevAmount = listingBids[listingId][_msgSender()].bidPrice;
-        if (prevAmount == 0) {
-            // check that he has reserved
+        bytes32 bidId;
+        if (!listingBids[listingId][_msgSender()].isStakeReserved) {
+            bidId = keccak256(
+                abi.encodePacked(
+                    listingId,
+                    _tokenListings[listingId].token,
+                    _msgSender(),
+                    _tokenListings[listingId].tokenId
+                )
+            );
+            uint256 insuranceAmount = _tokenListings[listingId].insuranceAmount;
             require(
                 _getStakeAllowance(
                     _msgSender() /*, 0*/
@@ -386,14 +414,21 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
             // update user reserves
             // reserve Zero couldn't be at any case
             userReserves[_msgSender()] += insuranceAmount;
+            listingBids[listingId][_msgSender()].isStakeReserved = true;
+        } else {
+            bidId = listingBids[listingId][lastbidder].bidId;
         }
+
+        // bid should be more than than the mini and more than the last bid
+
+        // if this is the bidder first bid, the price will be 0
 
         // bid
         bidToListing[listingId] = WinningBid(bidId, _msgSender());
         // set isStakeReserved as true by default as the contract doesn't call this fucntion unless required checks have been done and met
         listingBids[listingId][_msgSender()] = Bid(bidId, bidPrice, false, true);
 
-        emit BidOnAuction(bidId, listingId, tokenAddress, _msgSender(), tokenId, bidPrice, block.timestamp);
+        emit BidOnAuction(bidId, listingId, _msgSender(), bidPrice, block.timestamp);
 
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
@@ -736,37 +771,6 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         }
     }
 
-    function _listOnMarketplace(
-        address token,
-        uint256 tokenId,
-        uint256 listingPrice
-    ) private whenNotPaused isNotZero(listingPrice) {
-        listingCounter++;
-        bytes32 listId = keccak256(abi.encodePacked(token, tokenId, _msgSender(), block.timestamp, listingCounter));
-        listings.push(listId);
-        require(
-            IERC721(token).getApproved(tokenId) == address(this) ||
-                IERC721(token).isApprovedForAll(_msgSender(), address(this)),
-            'Marketplace is not allowed to transfer your token'
-        );
-
-        _tokenListings[listId] = Listing(
-            token,
-            _msgSender(),
-            address(0),
-            tokenId,
-            listingPrice,
-            block.timestamp,
-            0,
-            0,
-            0,
-            ListingType.FixedPrice,
-            ListingStatus.OnMarket
-        );
-        emit ListOnMarketplace(listId, token, _msgSender(), tokenId, listingPrice, block.timestamp);
-        IERC721(token).safeTransferFrom(_msgSender(), address(this), tokenId);
-    }
-
     function _buyNow(bytes32 listingId) private whenNotPaused {
         ListingStatus status = _tokenListings[listingId].status;
         ListingType _type = _tokenListings[listingId].listingType;
@@ -777,7 +781,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         require(status == ListingStatus.OnMarket && _type != ListingType.Auction, 'Item is not for sale');
 
         if (_type == ListingType.AuctionForSale) {
-            require(_tokenListings[listingId].releaseTime > block.timestamp, 'Token is not for sale');
+            require(_tokenListings[listingId].releaseTime > block.timestamp, 'Item is not for sale');
         }
         if (price > _usdCap) {
             require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
@@ -799,7 +803,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         // finish listing
         _tokenListings[listingId].status = ListingStatus.Sold;
         _tokenListings[listingId].buyer = _msgSender();
-        _addreputationPoints(seller, _msgSender(), price);
+        // _addreputationPoints(seller, _msgSender(), price);
         emit BuyNow(
             listingId,
             _token,
@@ -878,7 +882,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         userReserves[winnerBidder] -= insuranceAmount;
 
         //   TODO: add reputation points to both seller and buyer
-        _addreputationPoints(seller, winnerBidder, bidPrice);
+        // _addreputationPoints(seller, winnerBidder, bidPrice);
 
         // if bid time is less than 15 min, increase by 15 min
         // retuen bid id
