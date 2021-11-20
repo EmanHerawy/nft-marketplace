@@ -5,7 +5,7 @@ pragma solidity 0.8.4;
 import '@openzeppelin/contracts/access/AccessControlEnumerable.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  StartFi Reputation contract
  * desc contract to mamange the reputation for startfi users
  */

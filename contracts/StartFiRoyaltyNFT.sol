@@ -10,7 +10,7 @@ import './ERC721Royalty.sol';
 import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  StartFi Royalty NFT
  * [ desc ] : NFT contract with Royalty option
  *

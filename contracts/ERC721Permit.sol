@@ -5,7 +5,7 @@ import './interface/IERC721Permit.sol';
 import './library/StartFiSignatureLib.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  ERC721 Royalty
  * [ desc ] : erc721 with reoylaty support interface
  */

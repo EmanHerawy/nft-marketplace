@@ -5,7 +5,7 @@ pragma solidity 0.8.4;
 import '@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  Start FiToken.
  * [ desc ] : A StartFi Utility token
  */

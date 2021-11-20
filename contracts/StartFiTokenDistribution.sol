@@ -9,7 +9,7 @@ import '@openzeppelin/contracts/security/ReentrancyGuard.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title StartFiTokenDistribution
  *
  */

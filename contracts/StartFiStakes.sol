@@ -8,7 +8,7 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  StartFi Stakes
  * [ desc ] : contract to hold users stakes
  *@notice : the logic behind this contract is not implemented yet, this is just a basic design for the sake of testing the marketplace cycle

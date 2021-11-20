@@ -6,7 +6,7 @@ import '@openzeppelin/contracts/token/ERC721/utils/ERC721Holder.sol';
 import './StartFiMarketPlaceAdmin.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  MarketPlace Base
  * [ desc ] : contract to handle the main functions for any marketplace
  */

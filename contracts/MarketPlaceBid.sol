@@ -4,7 +4,7 @@ pragma solidity 0.8.4;
 pragma abicoder v2;
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title  MarketPlace Bid
  * [ desc ] : contract handles all the bid related functions for marketplace
  */

@@ -11,7 +11,7 @@ import './library/StartFiFinanceLib.sol';
 import './interface/IERC20.sol';
 
 /**
- * @author Eman Herawy, StartFi Team
+ 
  *@title StartFi MarketPlace
  *desc  marketplace with all functions for item selling by either ceating auction or selling with fixed prices, the contract auto transfer orginal NFT issuer's shares
  *
