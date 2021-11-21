@@ -10,6 +10,7 @@ import StartFiMarketPlace from '../artifacts/contracts/StartFiMarketPlace.sol/St
 
 import { tokenFixture } from './shared/fixtures'
 import { hexlify } from 'ethers/lib/utils'
+import { expandTo18Decimals} from './shared/utilities'
 /**
  * scenarios
  *  we have 3 type of listings , fix price , auction , auction with direct sale.
@@ -42,7 +43,7 @@ import { hexlify } from 'ethers/lib/utils'
  * 
  */
 chai.use(solidity)
-const TEST_AMOUNT = 100000000//expandTo18Decimals(10)
+const TEST_AMOUNT = expandTo18Decimals(10000000)
 let NFT: Contract
 let marketPlace: Contract
 let reputation: Contract
@@ -59,15 +60,17 @@ let marketplaceTokenId1:any;
 let marketplaceTokenId2 =  mintedNFT[1]
 let listingId1:any;
 let listingId2:any;
-let price1=1000;
+let price1=expandTo18Decimals(10);
 let wrongPrice=10;
 let minimumBid=10;
 let zeroPrice=0;
-const calcFees=(price:number,share:number,base:number):number=>{
+const calcFees=(price:BigNumber,share:number,base:number):BigNumber=>{
 
   // round decimal to the nearst value
   const _base = base * 100;
- return price*(share/_base);
+   const share_ =expandTo18Decimals(share) .div( _base);
+  const _price = price.mul(share_); 
+  return _price.div(expandTo18Decimals(1))
 
 }
 describe('StartFi marketPlace', () => {
@@ -89,9 +92,9 @@ describe('StartFi marketPlace', () => {
     token.address,
     stakes.address,
     admin.address,
- 10000,
-         50000,
-         5
+ expandTo18Decimals(10000),
+         expandTo18Decimals(50000),
+        expandTo18Decimals( 5)
   ])
 
   // add to minter role
@@ -155,10 +158,13 @@ describe('StartFi marketPlace', () => {
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
     await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
-    expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
-    const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))
+    expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT.sub(price1))
+    // const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))
+    const platformShare = calcFees(price1, _feeFraction, _feeBase)
+    console.log(platformShare,'platformShare');
+    
     expect(await token.balanceOf(admin.address)).to.eq(platformShare)
-    expect(await token.balanceOf(issuer.address)).to.eq(price1-platformShare)
+    expect(await token.balanceOf(issuer.address)).to.eq(price1.sub(platformShare))
 // check balance 
   })
   it('Can not delist already bought item ', async () => {
@@ -222,7 +228,7 @@ describe('StartFi marketPlace : WithPermit', () => {
   const [wallet, user1,user2,user3,issuer] = provider.getWallets()
   const loadFixture = createFixtureLoader([wallet])
 
-
+  let smallprice = 5000;
   let token: Contract
   before(async () => {
     const fixture = await loadFixture(tokenFixture)
@@ -234,8 +240,8 @@ describe('StartFi marketPlace : WithPermit', () => {
    // the 3 user need to get balance
 
    await token.transfer(user1.address,TEST_AMOUNT );
-   await token.transfer(user2.address,TEST_AMOUNT );
-   await token.transfer(user3.address,TEST_AMOUNT );
+  //  await token.transfer(user2.address,TEST_AMOUNT );
+  //  await token.transfer(user3.address,TEST_AMOUNT );
   })
 
 
@@ -260,7 +266,7 @@ describe('StartFi marketPlace : WithPermit', () => {
       await marketPlace.listOnMarketplaceWithPermit(
         NFT.address,
         marketplaceTokenId2,
-        price1,
+        smallprice,
         deadline,
         v,
         hexlify(r),
@@ -277,7 +283,7 @@ describe('StartFi marketPlace : WithPermit', () => {
     const deadline = MaxUint256
     const digest = await getApprovalDigest(
       token,
-      { owner: user1.address, spender: marketPlace.address, value: BigNumber.from(price1 )},
+      { owner: user1.address, spender: marketPlace.address, value: BigNumber.from(smallprice )},
       nonce,
       deadline,
       BigNumber.from(0),
@@ -287,7 +293,7 @@ describe('StartFi marketPlace : WithPermit', () => {
      await expect(
       await marketPlace.connect(user1).buyNowWithPermit(
        listingId1,
-       price1,
+       smallprice,
         deadline,
         v,
         hexlify(r),
@@ -316,19 +322,18 @@ describe('StartFi marketPlace: big deals that exceed cap', () => {
     token.address,
     stakes.address,
      admin.address,
- 10000,
-         50000,
-         5
+ expandTo18Decimals(10000),
+         expandTo18Decimals(50000),
+        expandTo18Decimals( 5)
   ])
-price1=500000;
-  // add to minter role
- 
+   // add to minter role
+    price1 = expandTo18Decimals(500000);
   await stakes.setMarketplace(marketPlace.address)
     // the 3 user need to get balance
 
     await token.transfer(user1.address,TEST_AMOUNT );
-    await token.transfer(user2.address,TEST_AMOUNT );
-    await token.transfer(user3.address,TEST_AMOUNT );
+    // await token.transfer(user2.address,TEST_AMOUNT );
+    // await token.transfer(user3.address,TEST_AMOUNT );
 
 
     /// issuer mint NFT to test changed balance
@@ -383,10 +388,11 @@ price1=500000;
     await expect(token.connect(user1).approve(marketPlace.address, price1)).to.emit(token, 'Approval')
     await expect(marketPlace.connect(user1).buyNow(listingId1)).to.emit(marketPlace, 'BuyNow')
     expect(await NFT.ownerOf(marketplaceTokenId1)).to.eq( user1.address)
-    expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT -price1)
-    const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))
+    expect(await token.balanceOf(user1.address)).to.eq(TEST_AMOUNT.sub(price1))
+    const platformShare =calcFees(price1,_feeFraction,_feeBase)
+    // const platformShare =Math.round(calcFees(price1,_feeFraction,_feeBase))
     expect(await token.balanceOf(admin.address)).to.eq(platformShare)
-    expect(await token.balanceOf(issuer.address)).to.eq(price1-platformShare)
+    expect(await token.balanceOf(issuer.address)).to.eq(price1.sub(platformShare))
 
 
 
