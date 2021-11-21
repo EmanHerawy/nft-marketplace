@@ -1,6 +1,6 @@
 const { hexlify, formatBytes32String } = require('ethers/lib/utils')
 const contracts = require('../deployments/computedAddreses.json')
-import { expandTo18Decimals} from '../test/shared/utilities'
+const expandTo18Decimals = require('../test/shared/utilities').expandTo18Decimals;
 
 // deploy/00_deploy_my_contract.js
 module.exports = async ({ deployments, getNamedAccounts }) => {
@@ -8,7 +8,7 @@ module.exports = async ({ deployments, getNamedAccounts }) => {
   let StartfiCreate2Deployer = await ethers.getContractFactory('StartfiCreate2Deployer')
   let StartFiStakes = await ethers.getContractFactory('StartFiStakes')
   let StartFiReputation = await ethers.getContractFactory('StartFiReputation')
-  const { get, execute } = deployments
+  const { get, execute,deploy } = deployments
   const { deployer } = await getNamedAccounts()
   const _usdCap = expandTo18Decimals(10000);
   const _stfiCap = expandTo18Decimals(50000);
@@ -25,24 +25,24 @@ module.exports = async ({ deployments, getNamedAccounts }) => {
 
   // 0x19550457F532A47f8B64e1246563e9013DF20260
   // let factoryAddress = "0x19550457F532A47f8B64e1246563e9013DF20260"; // if localhost , deploy first !
-  let factoryAddress = create2Deployer.address //'Tp be added' // if localhost , deploy first !
+  let factoryAddress ="0x432ea282DfBc854352149b8D3cFd246E6A36fb81" //create2Deployer.address //'Tp be added' // if localhost , deploy first !
 
-  // if (network.name == `hardhat` || network.name == `localhost`) {
-  //   const factoryDeployed = await deploy('AnyNFTCreate2Deployer', {
-  //     from: deployer,
-  //     args: [],
-  //     log: true,
-  //   })
-  //   factoryAddress = factoryDeployed.address
+  if (network.name == `hardhat` || network.name == `localhost`) {
+    const factoryDeployed = await deploy('StartfiCreate2Deployer', {
+      from: deployer,
+      args: [],
+      log: true,
+    })
+    factoryAddress = factoryDeployed.address
 
-  //   console.log(factoryAddress, 'factoryAddress')
-  // }
+    console.log(factoryAddress, 'factoryAddress')
+  }
   const constructorTypes = ['string', 'address', 'address', 'address', 'uint256', 'uint256', 'uint256']
   // console.log(StartFiMarketPlace.bytecode,'StartFiMarketPlace.bytecode');
   const constructor = encodeParam(constructorTypes, constructorArgs).slice(2)
   const bytecode = `${StartFiMarketPlace.bytecode}${constructor}`
   // const bytecode = `${optimizedbytecode}${constructor}`
-  const salt = formatBytes32String('Startfi2021')
+  const salt = formatBytes32String('Startfi2021-2')
   // console.log({bytecode});
   // console.log({salt});
   // encodes parameter to pass as contract argument
