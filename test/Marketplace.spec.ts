@@ -60,7 +60,7 @@ let marketplaceTokenId1:any;
 let marketplaceTokenId2 =  mintedNFT[1]
 let listingId1:any;
 let listingId2:any;
-let price1=expandTo18Decimals(10);
+let price1=expandTo18Decimals(35000);
 let wrongPrice=10;
 let minimumBid=10;
 let zeroPrice=0;

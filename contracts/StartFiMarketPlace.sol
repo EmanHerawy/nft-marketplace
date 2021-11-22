@@ -622,7 +622,7 @@ contract StartFiMarketPlace is StartFiMarketPlaceSpecialOffer, MarketPlaceListin
         if (_type == ListingType.AuctionForSale) {
             require(_tokenListings[listingId].releaseTime > block.timestamp, 'Item is not for sale');
         }
-        if (price > _usdCap) {
+        if (price > _stfiCap) {
             require(kycedDeals[listingId], 'StartfiMarketplace: Price exceeded the cap. You need to get approved');
         }
 

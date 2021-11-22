@@ -42,7 +42,7 @@ module.exports = async ({ deployments, getNamedAccounts }) => {
   const constructor = encodeParam(constructorTypes, constructorArgs).slice(2)
   const bytecode = `${StartFiMarketPlace.bytecode}${constructor}`
   // const bytecode = `${optimizedbytecode}${constructor}`
-  const salt = formatBytes32String('Startfi2021-2')
+  const salt = formatBytes32String('Startfi2021')
   // console.log({bytecode});
   // console.log({salt});
   // encodes parameter to pass as contract argument
