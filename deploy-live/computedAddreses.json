@@ -1,0 +1,15 @@
+{
+  "mainnet": {
+    "stfiToken": "0xfd9cd8c0d18cd7e06958f3055e0ec3adbdba0b17",
+    "deployer": "0x2BE72529eEcfa1136Ad3E9F4c34ad4bf0c73BcBB",
+    "staking": "0x0000000000000000000000000000000000000000",
+    "marketplace": "0xdbd20429bd039c7c104da6629bdc68b149ee2923"
+  },
+  "heco": {
+    "stfiToken": "0x735aBE48e8782948a37C7765ECb76b98CdE97B0F",
+    "deployer": "0xFD9cd8c0D18cD7e06958F3055e0Ec3ADbdba0B17",
+
+    "staking": "0x0000000000000000000000000000000000000000",
+    "marketplace": "0xab124ee9b304028b6893732c692e0b4ace4b058d"
+  }
+}
