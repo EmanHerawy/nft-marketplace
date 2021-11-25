@@ -20,7 +20,7 @@ contract StartFiMarketPlaceCap is StartFiMarketPlaceFinance {
 
     /******************************************* read functions go here ********************************************************* */
 
-    function isApprovedDeal(bytes32 listingId) public view returns (bool status) {
+    function isApprovedDeal(bytes32 listingId) external view returns (bool status) {
         status = kycedDeals[listingId];
     }
 
