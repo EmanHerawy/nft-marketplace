@@ -10,9 +10,9 @@ import './library/StartFiFinanceLib.sol';
  * [ desc ] : erc721 with reoylaty support interface
  */
 contract ERC721Royalty is IERC721Royalty {
-    mapping(uint256 => address) internal tokenIdToIssuer;
-    mapping(uint256 => mapping(address => Base)) internal _issuerPercentage;
-
+    mapping(uint256 => address) private tokenIdToIssuer;
+    mapping(uint256 => mapping(address => Base)) private _issuerPercentage;
+    event MintWithRoyalty(uint256 tokenId, uint256 share, uint256 base, address issuer);
     // 3.5 is 35 share and 10 separator
     struct Base {
         uint8 share;
@@ -37,6 +37,11 @@ contract ERC721Royalty is IERC721Royalty {
         require(share > 0 && separator > 0, 'separator and Share values must be more than zero');
         tokenIdToIssuer[_tokenId] = issuer;
         _issuerPercentage[_tokenId][issuer] = Base(share, separator);
+        emit MintWithRoyalty(_tokenId, share, separator, issuer);
+    }
+
+    function getTokenIssuer(uint256 tokenId) external view returns (address issuer) {
+        return tokenIdToIssuer[tokenId];
     }
 
     /**
