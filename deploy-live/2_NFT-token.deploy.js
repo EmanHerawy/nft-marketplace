@@ -7,14 +7,14 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
   const { get } = deployments
   const { deployer } = await getNamedAccounts()
 
-  // let create2Deployer = await get('StartfiCreate2Deployer')
+  let create2Deployer = await get('StartfiCreate2Deployer')
 
   let name = 'StartFiNFT',
     symbol = 'STFI'
 
   const constructorArgs = [name, symbol]
 
- let factoryAddress ="0x2BE72529eEcfa1136Ad3E9F4c34ad4bf0c73BcBB" //create2Deployer.address //'Tp be added' // if localhost , deploy first !
+ let factoryAddress =create2Deployer.address //'Tp be added' // if localhost , deploy first !
 
   const constructorTypes = ['string', 'string']
   const constructor = encodeParam(constructorTypes, constructorArgs).slice(2)
@@ -48,7 +48,7 @@ console.log({bytecode,salt});
   const isDeployed = await isContract(computedAddr)
   if (!isDeployed) {
     const factory = await StartfiCreate2Deployer.attach(factoryAddress)
-    const result = await (await factory.deploy(0, salt, bytecode,{nonce:6})).wait()
+    const result = await (await factory.deploy(0, salt, bytecode)).wait()
     // const addr = result.events[0].args.newAddress.toLowerCase()
     console.log({ result })
     // console.log({ addr })

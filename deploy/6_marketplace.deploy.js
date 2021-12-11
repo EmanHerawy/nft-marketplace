@@ -1,6 +1,6 @@
 const { hexlify, formatBytes32String } = require('ethers/lib/utils')
 const contracts = require('../deployments/computedAddreses.json')
-import { expandTo18Decimals} from '../test/shared/utilities'
+const expandTo18Decimals = require('../test/shared/utilities').expandTo18Decimals;
 
 // deploy/00_deploy_my_contract.js
 module.exports = async ({ deployments, getNamedAccounts }) => {

@@ -6,6 +6,13 @@
     "staking": "0x0000000000000000000000000000000000000000",
     "marketplace": "0xdbd20429bd039c7c104da6629bdc68b149ee2923"
   },
+  "bsc": {
+    "stfiToken": "0x04ae5cb48b8f968ed821972c5480b5b850f55554",
+    "deployer": "0x8C7CAAC760144c9D6103cE05FA895c7c0E7d8c32",
+    "nft": "0xbbc552b2f26f459922fe2cef0e9e2fbafd9fc4c4",
+    "staking": "0x0000000000000000000000000000000000000000",
+    "marketplace": "0x52b2b46497393693e432e8778252edfabfacf8fc"
+  },
   "heco": {
     "stfiToken": "0x735aBE48e8782948a37C7765ECb76b98CdE97B0F",
     "deployer": "0xFD9cd8c0D18cD7e06958F3055e0Ec3ADbdba0B17",
