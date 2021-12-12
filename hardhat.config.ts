@@ -39,8 +39,7 @@ const config: HardhatUserConfig = {
 
       saveDeployments: true,
       chainId: 97,
-      gasPrice: 120 * 1000000000,
-    },
+     },
     bsc: {
       url: 'https://bsc-dataseed1.binance.org',
       accounts: [privateKey],
