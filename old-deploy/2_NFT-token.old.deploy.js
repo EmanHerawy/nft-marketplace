@@ -3,11 +3,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
     let name="StartFiNFTToken",symbol="STFI", base_uri="http://ipfs.io"
-    // await deploy('StartFiRoyaltyNFT', {
-    //   from: deployer,
-    //   args: [name,symbol,base_uri],
-    //   log: true,
-    // });
+    await deploy('StartFiRoyaltyNFT', {
+      from: deployer,
+      args: [name,symbol],
+      log: true,
+    });
   };
   module.exports.tags = [];
 // module.exports = async ({getNamedAccounts, deployments}) => {

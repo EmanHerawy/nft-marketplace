@@ -22,7 +22,7 @@
 12 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:209:5)
 13 verbose pkgid hardhat-project@
 14 verbose cwd /media/emanherawy/a2924234-8318-47b1-8e1c-b4c83bba4734/work/startfi/core-with-hardhat
-15 error Linux 4.15.0-161-generic
+15 error Linux 4.15.0-163-generic
 16 error argv "/usr/bin/node" "/usr/bin/npm" "run" "prettier"
 17 error node v8.10.0
 18 error npm  v3.5.2

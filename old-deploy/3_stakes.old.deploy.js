@@ -6,7 +6,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
     await deploy('StartFiStakes', {
       from: deployer,
-      args: [stfi_token.address],
+      args: [stfi_token.address,deployer],
       log: true,
     });
   };
