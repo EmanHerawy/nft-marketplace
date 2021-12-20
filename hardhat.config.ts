@@ -74,7 +74,7 @@ const config: HardhatUserConfig = {
       chainId: 256,
     },
     matic_test: {
-      url: 'https://rpc-mumbai.matic.today',
+      url: 'https://matic-mumbai.chainstacklabs.com/',
       accounts: [privateKey],
       saveDeployments: true,
       chainId: 80001,
